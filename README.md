@@ -42,3 +42,10 @@ Untranslatable characters are set to '?'. No transliteration is currently suppor
 
     npm install --dev iconv-lite
     vows
+
+## TODO
+
+*   Support streaming character conversion, something like util.pipe(req, iconv.fromEncodingStream('latin1')).
+*   Add more encodings.
+*   Add transliteration (best fit char).
+*   Add tests and correct support of variable-byte encodings (currently work is delegated to node).
