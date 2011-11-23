@@ -48,4 +48,8 @@ vows.describe("Generic UTF8-UCS2 tests").addBatch({
         assert.strictEqual(iconv.fromEncoding(10, "utf8"), "10");
         assert.strictEqual(iconv.fromEncoding(undefined, "utf8"), "");
     },
+    "Aliases encode and decode work the same as toEncoding and fromEncoding": function() {
+        assert.strictEqual(iconv.toEncoding(testString, "latin1").toString("binary"), iconv.encode(testString, "latin1").toString("binary"));
+        assert.strictEqual(iconv.fromEncoding(testStringLatin1, "latin1"), iconv.decode(testStringLatin1, "latin1"));
+    },
 }).export(module)
