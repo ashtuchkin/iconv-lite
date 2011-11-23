@@ -113,12 +113,74 @@ module.exports = iconv = {
                 },
             };
         },
+
+        // Codepage double-byte encodings.
+        table: function(options) {
+            if (!options.table) {
+                throw new Error("Encoding '" + options.type +"' has incorect 'table' option");
+            }
+            var table = options.table, key,
+                revCharsTable = {};
+            for (key in table) {
+                revCharsTable[table[key]] = parseInt(key);
+            }
+            return {
+                toEncoding: function(str) {
+                    str = ensureString(str);
+                    var len = 0, strLen = str.length;
+                    for (var i = 0; i < strLen; i++) {
+                        if (!!(str.charCodeAt(i) >> 8)) {
+                            len += 2;
+                        } else {
+                            len ++;
+                        }
+                    }
+                    var newBuf = new Buffer(len);
+                    for (var i = 0, j = 0; i < strLen; i++) {
+                        var unicode = str.charCodeAt(i);
+                        if (!!(unicode >> 7)) {
+                            var gbkcode = revCharsTable[unicode] || 0xA1F0;//not found in table ,replace it
+                            newBuf[j++] = gbkcode >> 8;//high byte;
+                            newBuf[j++] = gbkcode & 0xFF;//low byte
+                        } else {//ascii
+                            newBuf[j++] = unicode;
+                        }
+                    }
+                    return newBuf;
+                },
+                fromEncoding: function(buf) {
+                    buf = ensureBuffer(buf);
+                    var idx = 0, len = 0,
+                        newBuf = new Buffer(len*2),unicode,gbkcode;
+                    for (var i = 0, _len = buf.length; i < _len; i++, len++) {
+                        if (!!(buf[i] & 0x80)) {//the high bit is 1, so this byte is gbkcode's high byte.skip next byte
+                            i++;
+                        }
+                    }
+                    var newBuf = new Buffer(len*2);
+                    for (var i = 0, j = 0, _len = buf.length; i < _len; i++, j++) {
+                        var temp = buf[i], gbkcode, unicode;
+                        if (temp & 0x80) {
+                            gbkcode = (temp << 8) + buf[++i];
+                            unicode = table[gbkcode] || iconv.defaultCharUnicode.charCodeAt(0);//not found in table, replace with defaultCharUnicode
+                        }else {
+                            unicode = temp;
+                        }
+                        newBuf[j*2] = unicode & 0xFF;//low byte
+                        newBuf[j*2+1] = unicode >> 8;//high byte
+                    }
+                    return newBuf.toString('ucs2');
+                }
+            }
+        },
     },
 }
 
 // Load other encodings from files in /encodings dir.
-var encodingsDir = __dirname+"/encodings/";
-require('fs').readdirSync(encodingsDir).forEach(function(file) {
+var encodingsDir = __dirname+"/encodings/",
+    fs = require('fs');
+fs.readdirSync(encodingsDir).forEach(function(file) {
+    if(fs.statSync(encodingsDir + file).isDirectory()) return;
     var encodings = require(encodingsDir + file)
     for (var key in encodings)
         iconv.encodings[key] = encodings[key]
