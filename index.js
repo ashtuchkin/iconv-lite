@@ -179,6 +179,10 @@ module.exports = iconv = {
     },
 }
 
+// Add aliases to convert functions
+iconv.encode = iconv.toEncoding;
+iconv.decode = iconv.fromEncoding;
+
 // Load other encodings from files in /encodings dir.
 var encodingsDir = __dirname+"/encodings/",
     fs = require('fs');

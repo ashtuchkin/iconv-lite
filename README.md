@@ -6,19 +6,23 @@ iconv-lite - native javascript conversion between character encodings.
     var iconv = require('iconv-lite');
     
     // Convert from an encoded buffer to string.
-    str = icon.fromEncoding(buf, 'win-1251');
+    str = iconv.fromEncoding(buf, 'win-1251');
+    // Or
+    str = iconv.decode(buf, 'win-1251');
     
     // Convert from string to an encoded buffer.
     buf = iconv.toEncoding("Sample input string", 'win-1251');
-
+    // Or
+    buf = iconv.encode("Sample input string", 'win-1251');
 
 ## Supported encodings
 
 Currently only a small part of encodings supported:
 
 *   All node.js native encodings: 'utf8', 'ucs2', 'ascii', 'binary', 'base64'.
-*   'latin1'
+*   Base encodings: 'latin1'
 *   Cyrillic encodings: 'windows-1251', 'koi8-r', 'iso 8859-5'.
+*   Simplified chinese: 'gbk', 'gb2313'.
 
 Other encodings are easy to add, see the source. Please, participate.
 

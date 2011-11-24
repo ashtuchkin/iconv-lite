@@ -22,7 +22,7 @@ vows.describe("GBK tests").addBatch({
         assert.strictEqual(iconv.fromEncoding(testStringGBKBuffer, "GB2312"), testString);
     },
     "GBK file read decoded,compare with iconv result": function() {
-        var contentBuffer = fs.readFileSync("gbkFile.txt");
+        var contentBuffer = fs.readFileSync(__dirname+"/gbkFile.txt");
         var str = iconv.fromEncoding(contentBuffer, "GBK");
         var iconvc = new (require('iconv').Iconv)('GBK','utf8');
         assert.strictEqual(iconvc.convert(contentBuffer).toString(), str);
