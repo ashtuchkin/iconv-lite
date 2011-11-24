@@ -142,7 +142,7 @@ module.exports = iconv = {
                     for (var i = 0, j = 0; i < strLen; i++) {
                         var unicode = str.charCodeAt(i);
                         if (!!(unicode >> 7)) {
-                            var gbkcode = revCharsTable[unicode] || iconv.defaultCharUnicode.charCodeAt(0);//not found in table ,replace it
+                            var gbkcode = revCharsTable[unicode] || revCharsTable[iconv.defaultCharUnicode.charCodeAt(0)];//not found in table ,replace it
                             newBuf[j++] = gbkcode >> 8;//high byte;
                             newBuf[j++] = gbkcode & 0xFF;//low byte
                         } else {//ascii
