@@ -116,14 +116,17 @@ module.exports = iconv = {
 
         // Codepage double-byte encodings.
         table: function(options) {
-            if (!options.table) {
+            var table = options.table, key, revCharsTable = options.revCharsTable;
+            if (!table) {
                 throw new Error("Encoding '" + options.type +"' has incorect 'table' option");
             }
-            var table = options.table, key,
-                revCharsTable = {};
-            for (key in table) {
-                revCharsTable[table[key]] = parseInt(key);
+            if(!revCharsTable) {
+                revCharsTable = options.revCharsTable = {};
+                for (key in table) {
+                    revCharsTable[table[key]] = parseInt(key);
+                }
             }
+            
             return {
                 toEncoding: function(str) {
                     str = ensureString(str);
