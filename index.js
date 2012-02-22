@@ -12,8 +12,8 @@ module.exports = iconv = {
     
     // Get correct codec for given encoding.
     getCodec: function(encoding) {
-        enc = encoding || "utf8";
-        codecOptions = undefined;
+        var enc = encoding || "utf8";
+        var codecOptions = undefined;
         while (1) {
             if (getType(enc) === "String")
                 enc = enc.replace(/[- ]/g, "").toLowerCase();
@@ -46,7 +46,7 @@ module.exports = iconv = {
                 },
                 fromEncoding: function(buf) {
                     return ensureBuffer(buf).toString(options.originalEncoding);
-                },
+                }
             };
         },
         utf8: "internal",
@@ -110,7 +110,7 @@ module.exports = iconv = {
                         newBuf[idx2+1] = charsBuf[idx1+1];
                     }
                     return newBuf.toString('ucs2');
-                },
+                }
             };
         },
 
@@ -175,9 +175,9 @@ module.exports = iconv = {
                     return newBuf.toString('ucs2');
                 }
             }
-        },
-    },
-}
+        }
+    }
+};
 
 // Add aliases to convert functions
 iconv.encode = iconv.toEncoding;
