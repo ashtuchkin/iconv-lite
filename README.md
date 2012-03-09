@@ -17,12 +17,14 @@ iconv-lite - native javascript conversion between character encodings.
 
 ## Supported encodings
 
-Currently only a small part of encodings supported:
+Currently the following encodings supported:
 
-*   All node.js native encodings: 'utf8', 'ucs2', 'ascii', 'binary', 'base64'.
+*   All node.js native encodings: 'utf8', 'ucs2', 'ascii', 'binary', 'base64'
 *   Base encodings: 'latin1'
-*   Cyrillic encodings: 'windows-1251', 'koi8-r', 'iso 8859-5'.
-*   Simplified chinese: 'gbk', 'gb2313'.
+*   Western encoding: 'windows-1252'
+*   Cyrillic encodings: 'windows-1251', 'koi8-r', 'iso-8859-5'
+*   Simplified chinese: 'gbk', 'gb2313'
+*   Greek encodings: 'windows-1253', 'iso-8859-7'/'greek', 'cp737', 'cp28597'
 
 Other encodings are easy to add, see the source. Please, participate.
 
