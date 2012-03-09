@@ -9,6 +9,7 @@ module.exports = {
     "win-1253": "windows1253",
     "win1253": "windows1253",
     "cp1253": "windows1253",
+    "cp-1253": "windows1253",
     1253: "windows1253",
 
     "iso88597": {
@@ -16,7 +17,10 @@ module.exports = {
         chars: "\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\u2018\u2019\xa3\u20ac\u20af\xa6\xa7\xa8\xa9\u037a\xab\xac\xad\ufffd\u2015\xb0\xb1\xb2\xb3\u0384\u0385\u0386\xb7\u0388\u0389\u038a\xbb\u038c\xbd\u038e\u038f\u0390\u0391\u0392\u0393\u0394\u0395\u0396\u0397\u0398\u0399\u039a\u039b\u039c\u039d\u039e\u039f\u03a0\u03a1\ufffd\u03a3\u03a4\u03a5\u03a6\u03a7\u03a8\u03a9\u03aa\u03ab\u03ac\u03ad\u03ae\u03af\u03b0\u03b1\u03b2\u03b3\u03b4\u03b5\u03b6\u03b7\u03b8\u03b9\u03ba\u03bb\u03bc\u03bd\u03be\u03bf\u03c0\u03c1\u03c2\u03c3\u03c4\u03c5\u03c6\u03c7\u03c8\u03c9\u03ca\u03cb\u03cc\u03cd\u03ce\ufffd"
     },
     "iso-8859-7": "iso88597",
+    "greek": "iso88597",
+    "greek8": "iso88597",
     "cp28597": "iso88597",
+    "cp-28597": "iso88597",
     28597: "iso88597",
 
     "cp737": {
