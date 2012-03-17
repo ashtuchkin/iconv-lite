@@ -1,5 +1,5 @@
 // Module exports
-module.exports = iconv = {
+var iconv = module.exports = {
     toEncoding: function(str, encoding) {
         return iconv.getCodec(encoding).toEncoding(str);
     },
