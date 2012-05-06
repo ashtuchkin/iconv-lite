@@ -12,10 +12,10 @@
         "Mike D Pilsbury (https://github.com/pekim)"
     ],
     
-    "homepage": "http://github.com/ashtuchkin/node-iconv/",
+    "homepage": "https://github.com/ashtuchkin/iconv-lite",
     "repository": {
         "type": "git",
-        "url": "git://github.com/ashtuchkin/node-iconv.git"
+        "url": "git://github.com/ashtuchkin/iconv-lite.git"
     },
     "engines": {
         "node": ">=0.4.0"
