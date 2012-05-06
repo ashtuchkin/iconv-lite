@@ -1,14 +1,15 @@
 {
     "name": "iconv-lite",
     "description": "Convert character encodings in pure javascript.",
-    "version": "0.1.2",
+    "version": "0.1.3",
     
     "keywords": ["iconv", "convert", "charset"],
     "author": "Alexander Shtuchkin <ashtuchkin@gmail.com>",
     "contributors": [
         "jenkinv (https://github.com/jenkinv)",
         "Adamansky Anton (https://github.com/adamansky)",
-        "George Stagas (https://github.com/stagas)"
+        "George Stagas (https://github.com/stagas)",
+        "Mike D Pilsbury (https://github.com/pekim)"
     ],
     
     "homepage": "http://github.com/ashtuchkin/node-iconv/",

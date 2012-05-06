@@ -25,6 +25,7 @@ Currently the following encodings supported:
 *   Cyrillic encodings: 'windows-1251', 'koi8-r', 'iso-8859-5'
 *   Simplified chinese: 'gbk', 'gb2313'
 *   Greek encodings: 'windows-1253', 'iso-8859-7'/'greek', 'cp737', 'cp28597'
+*   Turkish encodings: 'windows1254', 'iso-8859-9'/'turkish'
 
 Other encodings are easy to add, see the source. Please, participate.
 
