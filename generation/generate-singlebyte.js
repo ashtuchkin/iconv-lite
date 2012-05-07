@@ -79,6 +79,14 @@ var encodings = {
     "874": "iso885911",
     "celtic": "iso885914",
     "celtic8": "iso885914",
+
+    "cp20866": "koi8r",
+    "20866": "koi8r",
+    "ibm878": "koi8r",
+    "cp21866": "koi8u",
+    "21866": "koi8u",
+    "ibm1168": "koi8u",
+    
 };
 
 // Add all encodings from encodingFamilies.
