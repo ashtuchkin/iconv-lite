@@ -3,9 +3,10 @@ iconv-lite - pure javascript character encoding conversion
 
 ## Features
 
+*   Pure javascript. Doesn't need native code compilation.
 *   Easy API.
-*   Works on Windows and in sandboxed environments like [Cloud9](http://c9.io) (doesn't need native code compilation).
-*   Faster than iconv (see below for performance comparison).
+*   Works on Windows and in sandboxed environments like [Cloud9](http://c9.io).
+*   Encoding is faster than node-iconv, decoding slightly slower (see below for performance comparison).
 
 ## Usage
 
@@ -33,12 +34,12 @@ Not supported yet: Big5, EUC family, Shift_JIS.
 
 ## Encoding/decoding speed
 
-Comparison with iconv module (1000 times 256kb, on Core i5/2.5 GHz).
+Comparison with node-iconv module (1000 times 256kb, on Core i5/2.5 GHz, Node v0.6.17).
 
     operation             iconv       iconv-lite (this module)
     ----------------------------------------------------------
-    encode('win1251')     19.57 mb/s  49.04 mb/s
-    decode('win1251')     16.39 mb/s  24.11 mb/s
+    encode('win1251')     ~30 Mb/s    ~45 Mb/s
+    decode('win1251')     ~33 Mb/s    ~27 Mb/s
 
 
 ## Notes
@@ -49,6 +50,9 @@ Untranslatable characters are set to � or ?. No transliteration is currently s
 
     npm install --dev iconv-lite
     vows
+    
+    # To view performance:
+    node test/performance.js
 
 ## TODO
 
