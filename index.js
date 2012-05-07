@@ -65,12 +65,7 @@ var iconv = module.exports = {
                 options.chars = asciiString + options.chars;
             
             if (!options.charsBuf) {
-                options.charsBuf = new Buffer(256*2);
-                for (var i = 0; i < options.chars.length; i++) {
-                    var code = options.chars.charCodeAt(i);
-                    options.charsBuf[i*2+0] = code & 0xFF;
-                    options.charsBuf[i*2+1] = code >>> 8;
-                }
+                options.charsBuf = new Buffer(options.chars, 'ucs2');
             }
             
             if (!options.revCharsBuf) {
@@ -96,7 +91,7 @@ var iconv = module.exports = {
                 fromEncoding: function(buf) {
                     buf = ensureBuffer(buf);
                     
-                    // As string are immutable in JS, we use ucs2 buffer to speed up computations.
+                    // Strings are immutable in JS -> we use ucs2 buffer to speed up computations.
                     var charsBuf = options.charsBuf;
                     var newBuf = new Buffer(buf.length*2);
                     var idx1 = 0, idx2 = 0;
