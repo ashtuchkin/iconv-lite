@@ -11,13 +11,13 @@ var encodings = [{
     strings: {
         empty: "",
         ascii: ascii,
-        greek: "€‚ƒ„…†‡ˆ‰Š‹Œ‘’“”•–—˜™š›œŸ¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõö÷øùúûüışÿ",
+        turkish: "€‚ƒ„…†‡ˆ‰Š‹Œ‘’“”•–—˜™š›œŸ¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõö÷øùúûüışÿ",
         untranslatable: "\x81\x8d\x8e\x8f\x90\x9d\x9e"
     },
     encodedStrings: {
         empty: new Buffer(''),
         ascii: new Buffer(ascii, 'binary'),
-        greek: new Buffer(
+        turkish: new Buffer(
             '\x80\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c' +
             '\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9f' +
             '\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xae\xaf' +
@@ -34,16 +34,14 @@ var encodings = [{
     strings: {
         empty: "",
         ascii: ascii,
-        greek: "¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõö÷øùúûüışÿ",
-        untranslatable:
-            '\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f' +
-            '\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f'
+        turkish: "\xa0¡¢£¤¥¦§¨©ª«¬\xad®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõö÷øùúûüışÿ",
+        untranslatable: ''
     },
     encodedStrings: {
         empty: new Buffer(''),
         ascii: new Buffer(ascii, 'binary'),
-        greek: new Buffer(
-            '\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xae\xaf' +
+        turkish: new Buffer(
+            '\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf' +
             '\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf' +
             '\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf' +
             '\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf' +
@@ -56,7 +54,7 @@ var encodings = [{
 var testsBatch = {};
 encodings.forEach(function(encoding) {
     var enc = encoding.variations[0];
-    var key = "greek";
+    var key = "turkish";
     var tests = {
         "Convert to empty buffer": function() {
             assert.strictEqual(iconv.toEncoding("", enc).toString('binary'), new Buffer('').toString('binary'));

@@ -54,10 +54,6 @@ var iconv = module.exports = {
         binary: "internal",
         ascii: "internal",
         base64: "internal",
-        latin1: {
-            type: "internal",
-            originalEncoding: "binary"
-        },
         
         // Codepage single-byte encodings.
         singlebyte: function(options) {

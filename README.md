@@ -1,49 +1,49 @@
-iconv-lite - native javascript conversion between character encodings.
+iconv-lite - pure javascript character encoding conversion
 ======================================================================
+
+## Features
+
+*   Easy API.
+*   Works on Windows and in sandboxed environments like [Cloud9](http://c9.io) (doesn't need native code compilation).
+*   Faster than iconv (see below for performance comparison).
 
 ## Usage
 
     var iconv = require('iconv-lite');
     
     // Convert from an encoded buffer to string.
-    str = iconv.fromEncoding(buf, 'win-1251');
-    // Or
-    str = iconv.decode(buf, 'win-1251');
+    str = iconv.decode(buf, 'win1251');
     
     // Convert from string to an encoded buffer.
-    buf = iconv.toEncoding("Sample input string", 'win-1251');
-    // Or
-    buf = iconv.encode("Sample input string", 'win-1251');
+    buf = iconv.encode("Sample input string", 'win1251');
 
 ## Supported encodings
 
-Currently the following encodings supported:
-
 *   All node.js native encodings: 'utf8', 'ucs2', 'ascii', 'binary', 'base64'
-*   Base encodings: 'latin1'
-*   Western encoding: 'windows-1252'
-*   Cyrillic encodings: 'windows-1251', 'koi8-r', 'iso-8859-5'
-*   Simplified chinese: 'gbk', 'gb2313'
-*   Greek encodings: 'windows-1253', 'iso-8859-7'/'greek', 'cp737', 'cp28597'
-*   Turkish encodings: 'windows1254', 'iso-8859-9'/'turkish'
+*   All widespread single byte encodings: Windows 125x family, ISO-8859 family, 
+    IBM/DOS codepages, Macintosh family, KOI8 family. 
+    Aliases like 'latin1', 'us-ascii' also supported.
+*   Multibyte encodings: 'gbk', 'gb2313'.
 
-Other encodings are easy to add, see the source. Please, participate.
+Others are easy to add, see the source. Please, participate.
+Most encodings are generated from node-iconv. Thank you Ben Noordhuis and iconv authors!
+
+Not supported yet: Big5, EUC family, Shift_JIS.
 
 
 ## Encoding/decoding speed
 
 Comparison with iconv module (1000 times 256kb, on Core i5/2.5 GHz).
 
-    Operation\module            iconv       iconv-lite (this)
-    toEncoding('win1251')       19.57 mb/s  49.04 mb/s
-    fromEncoding('win1251')     16.39 mb/s  24.11 mb/s
+    operation             iconv       iconv-lite (this module)
+    ----------------------------------------------------------
+    encode('win1251')     19.57 mb/s  49.04 mb/s
+    decode('win1251')     16.39 mb/s  24.11 mb/s
 
 
 ## Notes
 
-This module is JavaScript-only, thus can be used in a sandboxed environment like [Cloud9](http://c9.io).
-
-Untranslatable characters are set to '?'. No transliteration is currently supported, pull requests are welcome.
+Untranslatable characters are set to � or ?. No transliteration is currently supported, pull requests are welcome.
 
 ## Testing
 
