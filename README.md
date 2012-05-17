@@ -1,6 +1,8 @@
 iconv-lite - pure javascript character encoding conversion
 ======================================================================
 
+[![Build Status](https://secure.travis-ci.org/ashtuchkin/iconv-lite.png)](http://travis-ci.org/ashtuchkin/iconv-lite)
+
 ## Features
 
 *   Pure javascript. Doesn't need native code compilation.
