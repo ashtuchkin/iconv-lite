@@ -1,7 +1,7 @@
 iconv-lite - pure javascript character encoding conversion
 ======================================================================
 
-[![Build Status](https://secure.travis-ci.org/ashtuchkin/iconv-lite.png)](http://travis-ci.org/ashtuchkin/iconv-lite)
+[![Build Status](https://secure.travis-ci.org/ashtuchkin/iconv-lite.png?branch=master)](http://travis-ci.org/ashtuchkin/iconv-lite)
 
 ## Features
 
