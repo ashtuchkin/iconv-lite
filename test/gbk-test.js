@@ -27,4 +27,12 @@ vows.describe("GBK tests").addBatch({
         var iconvc = new (require('iconv').Iconv)('GBK','utf8');
         assert.strictEqual(iconvc.convert(contentBuffer).toString(), str);
     },
+    "GBK correctly decodes and encodes characters · and ×": function() {
+        // https://github.com/ashtuchkin/iconv-lite/issues/13
+        // Reference: http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP936.TXT
+        var chars = "·×";
+        var gbkChars = new Buffer([0xA1, 0xA4, 0xA1, 0xC1]);
+        assert.strictEqual(iconv.toEncoding(chars, "GBK").toString('binary'), gbkChars.toString('binary'));
+        assert.strictEqual(iconv.fromEncoding(gbkChars, "GBK"), chars)
+    },
 }).export(module)

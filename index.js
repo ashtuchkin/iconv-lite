@@ -121,21 +121,21 @@ var iconv = module.exports = {
             return {
                 toEncoding: function(str) {
                     str = ensureString(str);
-                    var len = 0, strLen = str.length;
-                    for (var i = 0; i < strLen; i++) {
-                        if (!!(str.charCodeAt(i) >> 8)) {
-                            len += 2;
-                        } else {
-                            len ++;
-                        }
-                    }
-                    var newBuf = new Buffer(len);
+                    var strLen = str.length;
+                    var bufLen = strLen;
+                    for (var i = 0; i < strLen; i++)
+                        if (str.charCodeAt(i) >> 7)
+                            bufLen++;
+
+                    var newBuf = new Buffer(bufLen), gbkcode, unicode, 
+                        defaultChar = revCharsTable[iconv.defaultCharUnicode.charCodeAt(0)];
+
                     for (var i = 0, j = 0; i < strLen; i++) {
-                        var unicode = str.charCodeAt(i);
-                        if (!!(unicode >> 7)) {
-                            var gbkcode = revCharsTable[unicode] || revCharsTable[iconv.defaultCharUnicode.charCodeAt(0)];//not found in table ,replace it
-                            newBuf[j++] = gbkcode >> 8;//high byte;
-                            newBuf[j++] = gbkcode & 0xFF;//low byte
+                        unicode = str.charCodeAt(i);
+                        if (unicode >> 7) {
+                            gbkcode = revCharsTable[unicode] || defaultChar;
+                            newBuf[j++] = gbkcode >> 8; //high byte;
+                            newBuf[j++] = gbkcode & 0xFF; //low byte
                         } else {//ascii
                             newBuf[j++] = unicode;
                         }
@@ -144,24 +144,25 @@ var iconv = module.exports = {
                 },
                 fromEncoding: function(buf) {
                     buf = ensureBuffer(buf);
-                    var idx = 0, len = 0,
-                        newBuf = new Buffer(len*2),unicode,gbkcode;
-                    for (var i = 0, _len = buf.length; i < _len; i++, len++) {
-                        if (!!(buf[i] & 0x80)) {//the high bit is 1, so this byte is gbkcode's high byte.skip next byte
+                    var bufLen = buf.length, strLen = 0;
+                    for (var i = 0; i < bufLen; i++) {
+                        strLen++;
+                        if (buf[i] & 0x80) //the high bit is 1, so this byte is gbkcode's high byte.skip next byte
                             i++;
-                        }
                     }
-                    var newBuf = new Buffer(len*2);
-                    for (var i = 0, j = 0, _len = buf.length; i < _len; i++, j++) {
-                        var temp = buf[i], gbkcode, unicode;
-                        if (temp & 0x80) {
-                            gbkcode = (temp << 8) + buf[++i];
-                            unicode = table[gbkcode] || iconv.defaultCharUnicode.charCodeAt(0);//not found in table, replace with defaultCharUnicode
-                        }else {
-                            unicode = temp;
+                    var newBuf = new Buffer(strLen*2), unicode, gbkcode,
+                        defaultChar = iconv.defaultCharUnicode.charCodeAt(0);
+                    
+                    for (var i = 0, j = 0; i < bufLen; i++, j+=2) {
+                        gbkcode = buf[i];
+                        if (gbkcode & 0x80) {
+                            gbkcode = (gbkcode << 8) + buf[++i];
+                            unicode = table[gbkcode] || defaultChar;
+                        } else {
+                            unicode = gbkcode;
                         }
-                        newBuf[j*2] = unicode & 0xFF;//low byte
-                        newBuf[j*2+1] = unicode >> 8;//high byte
+                        newBuf[j] = unicode & 0xFF; //low byte
+                        newBuf[j+1] = unicode >> 8; //high byte
                     }
                     return newBuf.toString('ucs2');
                 }
