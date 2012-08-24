@@ -36,12 +36,13 @@ Not supported yet: Big5, EUC family, Shift_JIS.
 
 ## Encoding/decoding speed
 
-Comparison with node-iconv module (1000 times 256kb, on Core i5/2.5 GHz, Node v0.6.17).
+Comparison with node-iconv module (1000x256kb, on Ubuntu 12.04, Core i5/2.5 GHz, Node v0.8.7). 
+Note: your results may vary, so please always check on your hardware.
 
-    operation             iconv       iconv-lite (this module)
+    operation             iconv@1.1.3   iconv-lite@0.2.3 
     ----------------------------------------------------------
-    encode('win1251')     ~30 Mb/s    ~45 Mb/s
-    decode('win1251')     ~33 Mb/s    ~27 Mb/s
+    encode('win1251')     ~36 Mb/s      ~50 Mb/s
+    decode('win1251')     ~38 Mb/s      ~29 Mb/s
 
 
 ## Notes
