@@ -58,13 +58,13 @@ var iconv = module.exports = {
         // Codepage single-byte encodings.
         singlebyte: function(options) {
             // Prepare chars if needed
-            if (!options.chars || (options.chars.length !== 128 && options.chars.length !== 256))
-                throw new Error("Encoding '"+options.type+"' has incorrect 'chars' (must be of len 128 or 256)");
-            
-            if (options.chars.length === 128)
-                options.chars = asciiString + options.chars;
-            
             if (!options.charsBuf) {
+                if (!options.chars || (options.chars.length !== 128 && options.chars.length !== 256))
+                    throw new Error("Encoding '"+options.type+"' has incorrect 'chars' (must be of len 128 or 256)");
+                
+                if (options.chars.length === 128)
+                    options.chars = asciiString + options.chars;
+
                 options.charsBuf = new Buffer(options.chars, 'ucs2');
             }
             
@@ -76,33 +76,14 @@ var iconv = module.exports = {
                 for (var i = 0; i < options.chars.length; i++)
                     options.revCharsBuf[options.chars.charCodeAt(i)] = i;
             }
-            
+
             return {
-                toEncoding: function(str) {
-                    str = ensureString(str);
-                    
-                    var buf = new Buffer(str.length);
-                    var revCharsBuf = options.revCharsBuf;
-                    for (var i = 0; i < str.length; i++)
-                        buf[i] = revCharsBuf[str.charCodeAt(i)];
-                    
-                    return buf;
-                },
-                fromEncoding: function(buf) {
-                    buf = ensureBuffer(buf);
-                    
-                    // Strings are immutable in JS -> we use ucs2 buffer to speed up computations.
-                    var charsBuf = options.charsBuf;
-                    var newBuf = new Buffer(buf.length*2);
-                    var idx1 = 0, idx2 = 0;
-                    for (var i = 0, _len = buf.length; i < _len; i++) {
-                        idx1 = buf[i]*2; idx2 = i*2;
-                        newBuf[idx2] = charsBuf[idx1];
-                        newBuf[idx2+1] = charsBuf[idx1+1];
-                    }
-                    return newBuf.toString('ucs2');
-                }
-            };
+                // Seems that V8 is not optimizing functions if they are created again and again.
+                // TODO: Make same optimization for other encodings.
+                toEncoding: toSingleByteEncoding,
+                fromEncoding: fromSingleByteEncoding,
+                options: options,
+            }
         },
 
         // Codepage double-byte encodings.
@@ -170,6 +151,32 @@ var iconv = module.exports = {
         }
     }
 };
+
+function toSingleByteEncoding(str) {
+    str = ensureString(str);
+    
+    var buf = new Buffer(str.length);
+    var revCharsBuf = this.options.revCharsBuf;
+    for (var i = 0; i < str.length; i++)
+        buf[i] = revCharsBuf[str.charCodeAt(i)];
+    
+    return buf;
+}
+
+function fromSingleByteEncoding(buf) {
+    buf = ensureBuffer(buf);
+    
+    // Strings are immutable in JS -> we use ucs2 buffer to speed up computations.
+    var charsBuf = this.options.charsBuf;
+    var newBuf = new Buffer(buf.length*2);
+    var idx1 = 0, idx2 = 0;
+    for (var i = 0, _len = buf.length; i < _len; i++) {
+        idx1 = buf[i]*2; idx2 = i*2;
+        newBuf[idx2] = charsBuf[idx1];
+        newBuf[idx2+1] = charsBuf[idx1+1];
+    }
+    return newBuf.toString('ucs2');
+}
 
 // Add aliases to convert functions
 iconv.encode = iconv.toEncoding;
