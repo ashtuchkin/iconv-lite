@@ -75,8 +75,6 @@ var iconv = module.exports = {
             }
 
             return {
-                // Seems that V8 is not optimizing functions if they are created again and again.
-                // TODO: Make same optimization for other encodings.
                 toEncoding: toSingleByteEncoding,
                 fromEncoding: fromSingleByteEncoding,
                 options: options,
@@ -89,10 +87,14 @@ var iconv = module.exports = {
                 throw new Error("Encoding '" + options.type + "' has incorect 'table' option");
             }
             if (!options.revCharsTable) {
-                options.revCharsTable = {};
+                var revCharsTable = options.revCharsTable = {};
+                for (var i = 0; i <= 0xFFFF; i++) {
+                    revCharsTable[i] = 0;
+                }
+
                 var table = options.table;
                 for (var key in table) {
-                    options.revCharsTable[table[key]] = parseInt(key, 10);
+                    revCharsTable[table[key]] = +key;
                 }
             }
             
@@ -116,14 +118,8 @@ function fromInternalEncoding(buf) {
 function toTableEncoding(str) {
     str = ensureString(str);
     var strLen = str.length;
-    var bufLen = strLen;
-    for (var i = 0; i < strLen; i++) {
-        if (str.charCodeAt(i) >> 7) {
-            bufLen++;
-        }
-    }
     var revCharsTable = this.options.revCharsTable;
-    var newBuf = new Buffer(bufLen), gbkcode, unicode,
+    var newBuf = new Buffer(strLen*2), gbkcode, unicode,
         defaultChar = revCharsTable[iconv.defaultCharUnicode.charCodeAt(0)];
 
     for (var i = 0, j = 0; i < strLen; i++) {
@@ -136,19 +132,14 @@ function toTableEncoding(str) {
             newBuf[j++] = unicode;
         }
     }
-    return newBuf;
+    return newBuf.slice(0, j);
 }
 
 function fromTableEncoding(buf) {
     buf = ensureBuffer(buf);
-    var bufLen = buf.length, strLen = 0;
-    for (var i = 0; i < bufLen; i++) {
-        strLen++;
-        if (buf[i] & 0x80) //the high bit is 1, so this byte is gbkcode's high byte.skip next byte
-            i++;
-    }
+    var bufLen = buf.length;
     var table = this.options.table;
-    var newBuf = new Buffer(strLen*2), unicode, gbkcode,
+    var newBuf = new Buffer(bufLen*2), unicode, gbkcode,
         defaultChar = iconv.defaultCharUnicode.charCodeAt(0);
 
     for (var i = 0, j = 0; i < bufLen; i++, j+=2) {
@@ -162,7 +153,7 @@ function fromTableEncoding(buf) {
         newBuf[j] = unicode & 0xFF; //low byte
         newBuf[j+1] = unicode >> 8; //high byte
     }
-    return newBuf.toString('ucs2');
+    return newBuf.slice(0, j).toString('ucs2');
 }
 
 function toSingleByteEncoding(str) {

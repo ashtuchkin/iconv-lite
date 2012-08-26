@@ -3,12 +3,12 @@ var iconv = require('iconv');
 var iconv_lite = require("../index");
 
 var encoding = process.argv[2] || "windows-1251";
-var convertTimes = 1000;
+var convertTimes = 10000;
 
 var encodingStrings = {
     'windows-1251': 'This is a test string 32 chars..',
-    'gbk': '这是中文字符测试。。！@￥%',
-    'utf8': '这是中文字符测试。。！@￥%This is a test string 32 chars..',
+    'gbk':          '这是中文字符测试。。！@￥%12',
+    'utf8': '这是中文字符测试。。！@￥%12This is a test string 48 chars..',
 };
 // Test encoding.
 var str = encodingStrings[encoding];
@@ -28,7 +28,7 @@ for (var i = 0; i < convertTimes; i++) {
     var b = converter.convert(str);
 }
 var duration = Date.now() - start;
-var mbs = convertTimes*str.length/duration/1024;
+var mbs = convertTimes*b.length/duration/1024;
 
 console.log("iconv: "+duration+"ms, "+mbs.toFixed(2)+" Mb/s.");
 
@@ -37,7 +37,7 @@ for (var i = 0; i < convertTimes; i++) {
     var b = iconv_lite.encode(str, encoding);
 }
 var duration = Date.now() - start;
-var mbs = convertTimes*str.length/duration/1024;
+var mbs = convertTimes*b.length/duration/1024;
 
 console.log("iconv-lite: "+duration+"ms, "+mbs.toFixed(2)+" Mb/s.");
 
