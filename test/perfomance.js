@@ -2,14 +2,24 @@
 var iconv = require('iconv');
 var iconv_lite = require("../index");
 
-var encoding = "windows-1251";
+var encoding = process.argv[2] || "windows-1251";
 var convertTimes = 1000;
 
+var encodingStrings = {
+    'windows-1251': 'This is a test string 32 chars..',
+    'gbk': '这是中文字符测试。。！@￥%',
+    'utf8': '这是中文字符测试。。！@￥%This is a test string 32 chars..',
+};
 // Test encoding.
-var str = "This is a test string 32 chars..";
-for (var i = 0; i < 13; i++)
+var str = encodingStrings[encoding];
+if (!str) {
+    throw new Error('Don\'t support ' + encoding + ' performance test.');
+}
+for (var i = 0; i < 13; i++) {
     str = str + str;
+}
 
+console.log('\n' + encoding + ' charset performance test:');
 console.log("\nEncoding "+str.length+" chars "+convertTimes+" times:");
 
 var start = Date.now();
