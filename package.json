@@ -25,6 +25,6 @@
     },
     "devDependencies": {
         "vows": "",
-        "iconv": "1.1"
+        "iconv": ">=1.1"
     }
 }
