@@ -43,7 +43,7 @@ module.exports = {
   "28605": "iso885915",
   "28606": "iso885916",
   "ascii8bit": "ascii",
-  "us-ascii": "ascii",
+  "usascii": "ascii",
   "latin1": "iso88591",
   "latin2": "iso88592",
   "latin3": "iso88593",

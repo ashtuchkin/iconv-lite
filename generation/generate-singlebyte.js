@@ -49,7 +49,7 @@ var encodingFamilies = [
 var encodings = {
     // Aliases.
     "ascii8bit": "ascii",
-    "us-ascii": "ascii",
+    "usascii": "ascii",
 
     "latin1": "iso88591",
     "latin2": "iso88592",
