@@ -186,15 +186,15 @@ function fromSingleByteEncoding(buf) {
 iconv.encode = iconv.toEncoding;
 iconv.decode = iconv.fromEncoding;
 
-// Load other encodings from files in /encodings dir.
-var encodingsDir = __dirname+"/encodings/",
-    fs = require('fs');
-fs.readdirSync(encodingsDir).forEach(function(file) {
-    if(fs.statSync(encodingsDir + file).isDirectory()) return;
-    var encodings = require(encodingsDir + file)
+// Load other encodings manually from files in /encodings dir.
+function applyEncodings(encodings) {
     for (var key in encodings)
         iconv.encodings[key] = encodings[key]
-});
+}
+
+applyEncodings(require('./encodings/singlebyte'));
+applyEncodings(require('./encodings/gbk'));
+
 
 // Utilities
 var asciiString = '\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f'+
