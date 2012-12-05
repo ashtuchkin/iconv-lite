@@ -12,6 +12,7 @@
         "Mike D Pilsbury (https://github.com/pekim)"
     ],
     
+    "main": "index.js",
     "homepage": "https://github.com/ashtuchkin/iconv-lite",
     "repository": {
         "type": "git",
