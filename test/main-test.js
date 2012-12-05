@@ -1,6 +1,6 @@
 var vows = require('vows'),
     assert = require('assert'),
-    iconv = require(__dirname+'/../');
+    iconv = require('../');
 
 var testString = "Hello123!";
 var testStringLatin1 = "Hello123!£Å÷×çþÿ¿®";

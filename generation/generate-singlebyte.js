@@ -99,7 +99,7 @@ encodingFamilies.forEach(function(family){
         var encodingName = encodingIconvName.replace(/[-_]/g, "").toLowerCase();
 
         encodings[encodingName] = {
-            type: "singlebyte",
+            type: "_singlebyte",
             chars: generateCharsString(encodingIconvName)
         };
 
@@ -111,8 +111,8 @@ encodingFamilies.forEach(function(family){
 });
 
 // Write encodings.
-fs.writeFileSync("encodings/singlebyte.js", 
-    "module.exports = " + JSON.stringify(encodings, undefined, "  ") + ";");
+fs.writeFileSync("encodings/singlebyte-index.js", 
+    "\"use strict\";\n\nmodule.exports = " + JSON.stringify(encodings, undefined, "  ") + ";");
 
 
 function generateCharsString(encoding) {

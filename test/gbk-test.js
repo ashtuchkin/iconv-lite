@@ -1,7 +1,7 @@
 var vows    = require('vows'),
     fs      = require('fs'),
     assert  = require('assert'),
-    iconv   = require(__dirname+'/../');
+    iconv   = require('../');
 
 var testString = "中国abc",//unicode contains GBK-code and ascii
     testStringGBKBuffer = new Buffer([0xd6,0xd0,0xb9,0xfa,0x61,0x62,0x63]);
