@@ -1,6 +1,6 @@
 var vows = require('vows'),
     assert = require('assert'),
-    iconv = require(__dirname+'/../');
+    iconv = require('../');
 
 var baseStrings = {
     empty: "",

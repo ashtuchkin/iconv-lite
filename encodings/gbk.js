@@ -1,9 +1,10 @@
-var gbkTable = require('./table/gbk.js');
+"use strict";
+
 module.exports = {
 	'windows936': 'gbk',
 	'gb2312': 'gbk',
 	'gbk': {
-		type: 'table',
-		table: gbkTable
-	}
+		type: '_table',
+		table: require('./table/gbk.js')
+	},
 }
