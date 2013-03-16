@@ -26,12 +26,12 @@ iconv-lite - pure javascript character encoding conversion
 *   All widespread single byte encodings: Windows 125x family, ISO-8859 family, 
     IBM/DOS codepages, Macintosh family, KOI8 family. 
     Aliases like 'latin1', 'us-ascii' also supported.
-*   Multibyte encodings: 'gbk', 'gb2313'.
+*   Multibyte encodings: 'gbk', 'gb2313', 'Big5', 'cp950'.
 
 Others are easy to add, see the source. Please, participate.
 Most encodings are generated from node-iconv. Thank you Ben Noordhuis and iconv authors!
 
-Not supported yet: Big5, EUC family, Shift_JIS.
+Not supported yet: EUC family, Shift_JIS.
 
 
 ## Encoding/decoding speed
