@@ -51,8 +51,10 @@ Untranslatable characters are set to � or ?. No transliteration is currently s
 
 ## Testing
 
-    npm install --dev iconv-lite
-    vows
+    git clone git@github.com:ashtuchkin/iconv-lite.git
+    cd iconv-lite
+    npm install
+    npm test
     
     # To view performance:
     node test/performance.js
