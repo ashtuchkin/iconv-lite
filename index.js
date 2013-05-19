@@ -9,9 +9,17 @@ var iconv = module.exports = {
     
     defaultCharUnicode: '�',
     defaultCharSingleByte: '?',
+
+    encodingsLoaded: false,
     
     // Get correct codec for given encoding.
     getCodec: function(encoding) {
+        if (!iconv.encodingsLoaded) {
+            applyEncodings(require('./encodings/singlebyte'));
+            applyEncodings(require('./encodings/gbk'));
+            applyEncodings(require('./encodings/big5'));
+            iconv.encodingsLoaded = true;
+        }
         var enc = encoding || "utf8";
         var codecOptions = undefined;
         while (1) {
@@ -192,9 +200,6 @@ function applyEncodings(encodings) {
         iconv.encodings[key] = encodings[key]
 }
 
-applyEncodings(require('./encodings/singlebyte'));
-applyEncodings(require('./encodings/gbk'));
-applyEncodings(require('./encodings/big5'));
 
 
 // Utilities
