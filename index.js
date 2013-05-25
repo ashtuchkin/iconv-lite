@@ -208,12 +208,12 @@ var asciiString = '\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x1
 
 var ensureBuffer = function(buf) {
     buf = buf || new Buffer(0);
-    return (buf instanceof Buffer) ? buf : new Buffer(buf.toString(), "utf8");
+    return (buf instanceof Buffer) ? buf : new Buffer(""+buf, "binary");
 }
 
 var ensureString = function(str) {
     str = str || "";
-    return (str instanceof String) ? str : str.toString((str instanceof Buffer) ? 'utf8' : undefined);
+    return (str instanceof Buffer) ? str.toString('utf8') : (""+str);
 }
 
 var getType = function(obj) {
