@@ -1,7 +1,7 @@
 {
     "name": "iconv-lite",
     "description": "Convert character encodings in pure javascript.",
-    "version": "0.2.10",
+    "version": "0.2.11",
     "license": "MIT",
     
     "keywords": ["iconv", "convert", "charset"],
@@ -15,7 +15,8 @@
         "wychi (https://github.com/wychi)",
         "David Kuo (https://github.com/david50407)",
         "ChangZhuo Chen (https://github.com/czchen)",
-        "Lee Treveil (https://github.com/leetreveil)"
+        "Lee Treveil (https://github.com/leetreveil)",
+        "Brian White (https://github.com/mscdex)"
     ],
     
     "main": "index.js",
