@@ -201,6 +201,7 @@ function loadEncodings() {
         [ require('./encodings/singlebyte'),
           require('./encodings/gbk'),
           require('./encodings/big5')
+          require('./encodings/cp949')
         ].forEach(function(encodings) {
             for (var key in encodings)
                 iconv.encodings[key] = encodings[key]
