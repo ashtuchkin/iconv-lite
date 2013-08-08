@@ -13,11 +13,12 @@ for (i=0; i<lines.length; i++)
 	{
 		col = line.split('\t');
 		cp949Table[parseInt(col[0],16)] = parseInt(col[1],16);
+		//cp949Table[parseInt(col[0],16)] = 51; // 3
 	}
 }
 
 module.exports = {
-	'ks_c_5601-1987': 'cp949',
+	'ks_c_56011987': 'cp949',
 	'cp949': {
 		type: 'table',
 		table: cp949Table
