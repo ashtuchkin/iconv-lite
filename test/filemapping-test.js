@@ -1,6 +1,7 @@
 var vows    = require("vows"),
 	assert  = require("assert"),
 	fs      = require("fs"),
+	path    = require("path"),
 	iconv   = require(__dirname+"/../");
 
 var testStringUtf = "\u00ba\u00b0\uc96fabc",
@@ -8,10 +9,10 @@ var testStringUtf = "\u00ba\u00b0\uc96fabc",
 
 // Returns an object with a buffer (other) and a string (utf8) that contain every character
 // We use this string/buffer to compare iconv-lite with iconv
-function getBigText() {
+function getBigText(filename) {
 	var utf8 = "";
 	var other = [];
-	var f = fs.readFileSync(require.resolve("../encodings/table/cp949.txt"), "utf8");
+	var f = fs.readFileSync(filename, "utf8");
 	var i;
 	var line;
 	var lines = f.split("\n");
@@ -52,13 +53,23 @@ vows.describe("CP949 tests").addBatch({
 	},
 
 	"compare with iconv result": function() {
-		var p = getBigText();
-
-		// compare iconv-lite with utf8
-		assert.strictEqual(iconv.fromEncoding(p.other, "cp949").toString(), p.utf8);
-
-		// compare iconv with utf8
-		var iconvc = new (require("iconv").Iconv)("cp949", "utf8");
-		assert.strictEqual(iconvc.convert(p.other).toString(), p.utf8);
+		var mapfolder = path.join(path.dirname(module.filename), "../encodings/filemapping");
+		var files = fs.readdirSync(mapfolder);
+		var t;
+		for (i=0; i<files.length; i++)
+		{
+			var x = files[i].indexOf(" ");
+			if (x === -1) x = files[i].indexOf(".");
+			var enc = files[i].substring(0, x);
+			//console.log("Test encoding " + enc);
+			var p = getBigText(path.join(mapfolder, files[i]));
+	
+			// compare iconv-lite with utf8
+			assert.strictEqual(iconv.fromEncoding(p.other, enc).toString(), p.utf8);
+	
+			// compare iconv with utf8
+			var iconvc = new (require("iconv").Iconv)(enc, "utf8");
+			assert.strictEqual(iconvc.convert(p.other).toString(), p.utf8);
+		}
 	},
 }).export(module)
