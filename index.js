@@ -93,7 +93,12 @@ var iconv = module.exports = {
         // Codepage double-byte encodings.
         table: function(options) {
             if (!options.table) {
-                throw new Error("Encoding '" + options.type + "' has incorect 'table' option");
+                if (options.init) {
+                    options.init.call(options);
+                }
+                if (!options.table) {
+                    throw new Error("Encoding '" + options.type + "' has incorect 'table' option");
+                }
             }
             if (!options.revCharsTable) {
                 var revCharsTable = options.revCharsTable = {};
@@ -200,7 +205,8 @@ function loadEncodings() {
     if (!iconv.encodingsLoaded) {
         [ require('./encodings/singlebyte'),
           require('./encodings/gbk'),
-          require('./encodings/big5')
+          require('./encodings/big5'),
+          require('./encodings/filemapping')
         ].forEach(function(encodings) {
             for (var key in encodings)
                 iconv.encodings[key] = encodings[key]
