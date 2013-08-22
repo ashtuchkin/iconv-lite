@@ -235,3 +235,48 @@ var getType = function(obj) {
     return Object.prototype.toString.call(obj).slice(8, -1);
 }
 
+var stream = require('stream');
+if ('Transform' in stream) {
+    var Transform = stream.Transform;
+    var detectIncompleteChar = {'utf8': (new(require('string_decoder').StringDecoder)()).detectIncompleteChar};
+    /** StreamEncoder constructs stream.Transform instance
+     *  which receives input {String} chunk and sends output {Buffer} with specified encoding
+     * @constructor StreamEncoder
+     * @param {String} [encoding='utf8'] specifies encoding
+     */
+    var StreamEncoder = iconv.StreamEncoder = function (encoding) {
+        Transform.call(this, {decodeStrings: false});
+        this.enc = encoding || 'utf8';
+    };
+    StreamEncoder.prototype = Object.create(Transform.prototype, {
+        constructor: {value: StreamEncoder}
+    });
+    StreamEncoder.prototype._transform = function(chunk, enc, done) {
+        this.push(iconv.toEncoding(chunk, this.enc));
+        done();
+    };
+    /** StreamDecoder constructs stream.Transform instance
+     *  which receives input chunk {Buffer} with specified encoding and sends output utf8 {String}
+     * @constructor StreamEncoder
+     * @param {String} [encoding='utf8'] specifies encoding
+     */
+    var StreamDecoder = iconv.StreamDecoder = function (encoding) {
+        Transform.call(this, {encoding: 'utf8'});
+        this.enc = encoding || 'utf8';
+        /** @private {Buffer} tail contains octets of incompleted chars*/
+        this.tail = new Buffer(0);
+    };
+    StreamDecoder.prototype = Object.create(Transform.prototype, {
+        constructor: {value: StreamDecoder}
+    });
+    StreamDecoder.prototype._transform = function(chunk, enc, done) {
+        var buf = Buffer.concat([this.tail, chunk]);
+        var incompleted = this.enc in detectIncompleteChar ? detectIncompleteChar[this.enc](buf) : 0;
+        if (incompleted > 0) {
+            this.tail = buf.slice(buf.length - incompleted);
+            buf = buf.slice(0, buf.length - incompleted);
+        }
+        this.push(iconv.fromEncoding(buf, this.enc));
+        done();
+    };
+}
