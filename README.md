@@ -3,9 +3,9 @@
 <!-- [![Build Status](https://secure.travis-ci.org/ashtuchkin/iconv-lite.png?branch=master)](http://travis-ci.org/ashtuchkin/iconv-lite) -->
 
  * Doesn't need native code compilation. Works on Windows and in sandboxed environments like [Cloud9](http://c9.io).
- * Intuitive encode/decode API.
- * Encoding is faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
  * Used in popular projects like [Grunt](http://gruntjs.com/), [Nodemailer](http://www.nodemailer.com/), [Yeoman](http://yeoman.io/) and others.
+ * Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
+ * Intuitive encode/decode API.
  * License: MIT.
 
 [![NPM Stats](https://nodei.co/npm/iconv-lite.png?downloads=true)](https://npmjs.org/packages/iconv-lite/)
