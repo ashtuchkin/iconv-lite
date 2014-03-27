@@ -206,6 +206,7 @@ function loadEncodings() {
         [ require('./encodings/singlebyte'),
           require('./encodings/gbk'),
           require('./encodings/big5'),
+          require('./encodings/cp932'),
           require('./encodings/filemapping')
         ].forEach(function(encodings) {
             for (var key in encodings)
