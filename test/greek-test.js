@@ -45,31 +45,25 @@ encodings.forEach(function(encoding) {
     var enc = encoding.variations[0];
     var key = "hi";
     var tests = {
-        "Convert to empty buffer": function() {
-            assert.strictEqual(iconv.toEncoding("", enc).toString('binary'), new Buffer('').toString('binary'));
-        },
-        "Convert from empty buffer": function() {
-            assert.strictEqual(iconv.fromEncoding(new Buffer(''), enc), "");
-        },
         "Convert from buffer": function() {
             for (var key in encoding.encodedStrings)
-                assert.strictEqual(iconv.fromEncoding(encoding.encodedStrings[key], enc), 
+                assert.strictEqual(iconv.decode(encoding.encodedStrings[key], enc), 
                     baseStrings[key]);
         },
         "Convert to buffer": function() {
             for (var key in encoding.encodedStrings)
-                assert.strictEqual(iconv.toEncoding(baseStrings[key], enc).toString('binary'), 
+                assert.strictEqual(iconv.encode(baseStrings[key], enc).toString('binary'), 
                     encoding.encodedStrings[key].toString('binary'));
         },
         "Try different variations of encoding": function() {
             encoding.variations.forEach(function(enc) {
-                assert.strictEqual(iconv.fromEncoding(encoding.encodedStrings[key], enc), baseStrings[key]);
-                assert.strictEqual(iconv.toEncoding(baseStrings[key], enc).toString('binary'), encoding.encodedStrings[key].toString('binary'));
+                assert.strictEqual(iconv.decode(encoding.encodedStrings[key], enc), baseStrings[key]);
+                assert.strictEqual(iconv.encode(baseStrings[key], enc).toString('binary'), encoding.encodedStrings[key].toString('binary'));
             });
         },
         "Untranslatable chars are converted to defaultCharSingleByte": function() {
             var expected = baseStrings.untranslatable.split('').map(function(c) {return iconv.defaultCharSingleByte; }).join('');
-            assert.strictEqual(iconv.toEncoding(baseStrings.untranslatable, enc).toString('binary'), expected); // Only '?' characters.
+            assert.strictEqual(iconv.encode(baseStrings.untranslatable, enc).toString('binary'), expected); // Only '?' characters.
         }
     };
     

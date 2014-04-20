@@ -1,5 +1,4 @@
 var vows    = require('vows'),
-    fs      = require('fs'),
     assert  = require('assert'),
     iconv   = require(__dirname + '/../');
 
@@ -10,18 +9,18 @@ var testString = "中文abc", //unicode contains Big5-code and ascii
 
 vows.describe("Big5 tests").addBatch({
     "Big5 correctly encoded/decoded": function() {    
-        assert.strictEqual(iconv.toEncoding(testString, "big5").toString('binary'), testStringBig5Buffer.toString('binary'));
-        assert.strictEqual(iconv.fromEncoding(testStringBig5Buffer, "big5"), testString);
-        assert.strictEqual(iconv.toEncoding(testString2, 'big5').toString('binary'), testStringBig5Buffer2.toString('binary'));
-        assert.strictEqual(iconv.fromEncoding(testStringBig5Buffer2, 'big5'), testString2);
+        assert.strictEqual(iconv.encode(testString, "big5").toString('hex'), testStringBig5Buffer.toString('hex'));
+        assert.strictEqual(iconv.decode(testStringBig5Buffer, "big5"), testString);
+        assert.strictEqual(iconv.encode(testString2, 'big5').toString('hex'), testStringBig5Buffer2.toString('hex'));
+        assert.strictEqual(iconv.decode(testStringBig5Buffer2, 'big5'), testString2);
     },
     "cp950 correctly encoded/decoded": function() {    
-        assert.strictEqual(iconv.toEncoding(testString, "cp950").toString('binary'), testStringBig5Buffer.toString('binary'));
-        assert.strictEqual(iconv.fromEncoding(testStringBig5Buffer, "cp950"), testString);
+        assert.strictEqual(iconv.encode(testString, "cp950").toString('hex'), testStringBig5Buffer.toString('hex'));
+        assert.strictEqual(iconv.decode(testStringBig5Buffer, "cp950"), testString);
     },
     "Big5 file read decoded,compare with iconv result": function() {
-        var contentBuffer = fs.readFileSync(__dirname+"/big5File.txt");
-        var str = iconv.fromEncoding(contentBuffer, "big5");
+        var contentBuffer = new Buffer('PEhUTUw+DQo8SEVBRD4gICAgDQoJPFRJVExFPiBtZXRhILzQxdKquqjPpc6hR6SkpOW69K22IDwvVElUTEU+DQoJPG1ldGEgSFRUUC1FUVVJVj0iQ29udGVudC1UeXBlIiBDT05URU5UPSJ0ZXh0L2h0bWw7IGNoYXJzZXQ9YmlnNSI+DQo8L0hFQUQ+DQo8Qk9EWT4NCg0Ks2+sT6RArdPBY8XppKSk5br0rbahSTxicj4NCihUaGlzIHBhZ2UgdXNlcyBiaWc1IGNoYXJhY3RlciBzZXQuKTxicj4NCmNoYXJzZXQ9YmlnNQ0KDQo8L0JPRFk+DQo8L0hUTUw+', 'base64');
+        var str = iconv.decode(contentBuffer, "big5");
         var iconvc = new (require('iconv').Iconv)('big5','utf8');
         assert.strictEqual(iconvc.convert(contentBuffer).toString(), str);
     },
@@ -30,7 +29,7 @@ vows.describe("Big5 tests").addBatch({
         // Reference: http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP950.TXT
         var chars = "·×";
         var big5Chars = new Buffer([0xA1, 0x50, 0xA1, 0xD1]);
-        assert.strictEqual(iconv.toEncoding(chars, "big5").toString('binary'), big5Chars.toString('binary'));
-        assert.strictEqual(iconv.fromEncoding(big5Chars, "big5"), chars)
+        assert.strictEqual(iconv.encode(chars, "big5").toString('hex'), big5Chars.toString('hex'));
+        assert.strictEqual(iconv.decode(big5Chars, "big5"), chars)
     },
 }).export(module)
