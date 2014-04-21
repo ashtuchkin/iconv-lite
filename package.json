@@ -34,6 +34,7 @@
     "devDependencies": {
         "vows": "",
         "request": "*",
+        "unorm": "*",
         "errto": "*",
         "async": "*",
         "iconv": ">=1.1"
