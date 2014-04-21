@@ -5,7 +5,7 @@ var utils = require("./utils"),
 async.parallel({
     $big5: utils.getFile.bind(null, "http://moztw.org/docs/big5/table/moz18-b2u.txt"), // Encodings with $ are not saved. They are used to calculate other encs.
     $gbk:  utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-gb18030.txt"),
-    cp932: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP932.TXT"),
+    $cp932: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP932.TXT"),
     cp936: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP936.TXT"),
     cp949: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP949.TXT"),
     cp950: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP950.TXT"),
@@ -59,6 +59,14 @@ async.parallel({
     for (var i = 0; i < 0x20; i++)
         data.shiftjis[i] = i;
     data.shiftjis[0x7F] = 0x7F;
+
+    // Create cp932-added
+    var cp932add = {};
+    for (var k in data.$cp932)
+        if (data.shiftjis[k] !== data.$cp932[k])
+            cp932add[k] = data.$cp932[k];
+
+    utils.writeTable("cp932-added", utils.generateTable(cp932add));
 
 
     // Write all plain tables to as-is.

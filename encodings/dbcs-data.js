@@ -10,7 +10,7 @@ module.exports = {
     '932': 'cp932',
     'cp932': {
         type: '_dbcs',
-        table: './tables/cp932.json',
+        table: ['./tables/shiftjis.json', './tables/cp932-added.json'],
     },
 
 
