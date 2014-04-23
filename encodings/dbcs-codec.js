@@ -5,7 +5,7 @@
 
 // To save memory, we read table files only when requested.
 
-exports._dbcs = function(options, iconv) {
+exports._dbcs = function(options) {
     if (!options)
         throw new Error("DBCS codec is called without the data.")
     if (!options.table)
@@ -74,11 +74,11 @@ exports._dbcs = function(options, iconv) {
             encodeTable[decodeLead[i]] = i;
 
     // Replace unassigned codes with default chars.
-    var defCharUni = iconv.defaultCharUnicode.charCodeAt(0);
+    var defCharUni = options.iconv.defaultCharUnicode.charCodeAt(0);
     for (var i = 0; i < decodeLead.length;  i++) if (decodeLead[i]  == -1) decodeLead[i]  = defCharUni;
     for (var i = 0; i < decodeTable.length; i++) if (decodeTable[i] == -1) decodeTable[i] = defCharUni;
 
-    var defCharSB  = encodeTable[iconv.defaultCharSingleByte.charCodeAt(0)];
+    var defCharSB  = encodeTable[options.iconv.defaultCharSingleByte.charCodeAt(0)];
     if (defCharSB == -1) defCharSB = encodeTable['?'];
     if (defCharSB == -1) defCharSB = "?".charCodeAt(0);
     for (var i = 0; i < encodeTable.length; i++) if (encodeTable[i] == -1) encodeTable[i] = defCharSB;

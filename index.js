@@ -63,7 +63,8 @@ var iconv = module.exports = {
                     break;
 
                 case "Function": // Codec itself.
-                    codecData = codec(codecOptions, iconv);
+                    codecOptions.iconv = iconv;
+                    codecData = codec(codecOptions);
                     iconv.codecData[saveEnc || enc] = codecData; // Save it to be reused later.
                     return codecData;
 

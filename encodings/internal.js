@@ -9,7 +9,7 @@ module.exports = {
     base64: { type: "_internal", enc: "base64" },
 
     // Codec.
-    _internal: function(options, iconv) {
+    _internal: function(options) {
         if (!options || !options.enc)
             throw new Error("Internal codec is called without encoding type.")
 
