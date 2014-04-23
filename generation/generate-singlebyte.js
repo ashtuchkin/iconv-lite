@@ -43,6 +43,10 @@ var encodingFamilies = [
         // KOI8 code pages
         encodings: ["KOI8-R", "KOI8-U"],
     },
+    {
+        // Platform specifics
+        encodings: ["HP-ROMAN8"]
+    }
 ];
 
 
@@ -86,6 +90,10 @@ var encodings = {
     "cp21866": "koi8u",
     "21866": "koi8u",
     "ibm1168": "koi8u",
+
+    "ibm1051": "hproman8",
+    "roman8": "hproman8",
+    "xroman8": "hproman8"
     
 };
 
