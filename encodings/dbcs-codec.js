@@ -29,8 +29,8 @@ exports._dbcs = function(options, iconv) {
             
             if (curAddr < 0x100) {
                 writeTable = decodeLead;
-
-            } else if (curAddr < 0x10000) {
+            }
+            else if (curAddr < 0x10000) {
                 if (decodeLead[curAddr >> 8] >= 0)
                     throw new Error("Overwrite lead byte in table " + options.table + ": " + chunk[0]);
                 
@@ -39,19 +39,23 @@ exports._dbcs = function(options, iconv) {
                 curAddr -= 0x8000;
                 if (curAddr < 0)
                     throw new Error("DB address < 0x8000 in table " + options.table + ": " + chunk[0]);
-            
-            } else
+            }
+            else
                 throw new Error("Unsupported address in table " + options.table + ": " + chunk[0]);
 
             for (var k = 1; k < chunk.length; k++) {
                 var part = chunk[k];
-                if (part.length) { // String
+                if (typeof part === "string") { // String, write as-is.
                     for (var l = 0; l < part.length; l++, curAddr++)
                         writeTable[curAddr] = part.charCodeAt(l);
-                } else { // Integer, meaning increasing sequence.
+                } 
+                else if (typeof part === "number") { // Integer, meaning increasing sequence starting with prev character.
+                    var charCode = writeTable[curAddr - 1] + 1;
                     for (var l = 0; l < part; l++, curAddr++)
-                        writeTable[curAddr] = writeTable[curAddr-1] + 1;
+                        writeTable[curAddr] = charCode++;
                 }
+                else
+                    throw new Error("Incorrect value type '" + typeof part + "' in table " + options.table + ": " + chunk[0]);
             }
         }
     }
