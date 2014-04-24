@@ -16,12 +16,10 @@ var iconv = module.exports = {
     // Public API
     encode: function(str, encoding) {
         str = ensureString(str);
-        //return iconv.getCodec(encoding).encoder().convert(str, true);
         return iconv.getCodec(encoding).encode(str);
     },
     decode: function(buf, encoding) {
         buf = ensureBuffer(buf);
-        //return iconv.getCodec(encoding).decoder().convert(buf, true);
         return iconv.getCodec(encoding).decode(buf);
     },
 
@@ -138,7 +136,7 @@ if (nodeVer[0] > 0 || nodeVer[1] >= 10) {
         if (typeof chunk != 'string')
             return done(new Error("Iconv encoding stream needs strings as its input."));
         try {
-            var res = this.conv.convert(chunk);
+            var res = this.conv.write(chunk);
             if (res) this.push(res);
             done();
         }
@@ -149,8 +147,10 @@ if (nodeVer[0] > 0 || nodeVer[1] >= 10) {
 
     IconvLiteEncoderStream.prototype._flush = function(done) {
         try {
-            var res = this.conv.convert(null, true);
-            if (res) this.push(res);
+            if (this.conv.end) {
+                var res = this.conv.end();
+                if (res) this.push(res);                
+            }
             done();
         }
         catch (e) {
@@ -174,7 +174,7 @@ if (nodeVer[0] > 0 || nodeVer[1] >= 10) {
         if (!Buffer.isBuffer(chunk))
             return done(new Error("Iconv decoding stream needs buffers as its input."));
         try {
-            var res = this.conv.convert(chunk);
+            var res = this.conv.write(chunk);
             if (res) this.push(res, this.encoding);
             done();
         }
@@ -185,8 +185,10 @@ if (nodeVer[0] > 0 || nodeVer[1] >= 10) {
 
     IconvLiteDecoderStream.prototype._flush = function(done) {
         try {
-            var res = this.conv.convert(null, true);
-            if (res) this.push(res, this.encoding);
+            if (this.conv.end) {
+                var res = this.conv.end();
+                if (res) this.push(res, this.encoding);                
+            }
             done();
         }
         catch (e) {

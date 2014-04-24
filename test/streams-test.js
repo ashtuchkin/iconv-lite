@@ -105,7 +105,7 @@ function checkEncodeStream(opts) {
         return feeder(opts.input)
             .pipe(iconv.encodeStream(opts.encoding, opts.encodingOptions));
     };
-    opts.outputType = opts.outputType || 'buffer-hex';
+    if (opts.outputType == null) opts.outputType = 'buffer-hex';
     if (Buffer.isBuffer(opts.output) && opts.outputType == 'buffer-hex')
         opts.output = opts.output.toString('hex');
     
@@ -121,7 +121,7 @@ function checkDecodeStream(opts) {
         return feeder(opts.input)
             .pipe(iconv.decodeStream(opts.encoding, opts.encodingOptions));
     };
-    opts.outputType = opts.outputType || 'string';    
+    if (opts.outputType == null) opts.outputType = 'string';
     opts.checkOutput = opts.checkOutput || function(res) {
         assert.equal(res, opts.output);
     };
@@ -187,6 +187,25 @@ vows.describe("Streaming mode").addBatch({
         },
         outputType: 'string',
         checkOutput: function(res) { assert.equal(res, "абвгде"); },
+    }),
+
+    "Decoding of incomplete chars using internal modules: utf8": checkDecodeStream({
+        encoding: "utf8",
+        input: [[0xE4], [0xB8, 0x82]],
+        output: "丂",
+    }),
+
+    "Decoding of incomplete chars using internal modules: ucs2 / surrogates": checkDecodeStream({
+        encoding: "ucs2",
+        input: [[0x3D], [0xD8, 0x3B], [0xDE]], // U+1F63B, 😻, SMILING CAT FACE WITH HEART-SHAPED EYES
+        outputType: false, // Don't concat
+        checkOutput: function(res) { assert.deepEqual(res, ["\uD83D\uDE3B"]); }, // We should have only 1 chunk.
+    }),
+
+    "Encoding using internal modules: utf8": checkEncodeStream({
+        encoding: "utf8",
+        input: "丂",
+        output: "e4b882",
     }),
 
 

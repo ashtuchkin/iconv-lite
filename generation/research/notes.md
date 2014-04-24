@@ -42,11 +42,13 @@ Codec interface:
     <static codec data>
     encoder(options) -> (encoder obj) {
       <stream data>,
-      convert(str, flush) -> buf,
+      write(str) -> buf,
+      end() -> buf, (optional)
     }, 
     decoder(options) -> (decoder obj) {
       <stream data>,
-      convert(buf, flush) -> str,
+      write(buf) -> str,
+      end() -> str, (optional)
     }
   }
 

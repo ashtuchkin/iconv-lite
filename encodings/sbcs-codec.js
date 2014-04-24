@@ -65,14 +65,11 @@ function decodeSingleByte(buf) {
 function encoderStreamSBCS(options) {
     return {
         encodeBuf: this.encodeBuf,
-        convert: encoderStreamSBCSConvert,
+        write: encoderStreamSBCSConvert,
     };
 }
 
-function encoderStreamSBCSConvert(str, flush) {
-    if (!str)
-        return;
-
+function encoderStreamSBCSConvert(str) {
     var buf = new Buffer(str.length);
     for (var i = 0; i < str.length; i++)
         buf[i] = this.encodeBuf[str.charCodeAt(i)];
@@ -84,13 +81,11 @@ function encoderStreamSBCSConvert(str, flush) {
 function decoderStreamSBCS(options) {
     return {
         decodeBuf: this.decodeBuf,
-        convert: decoderStreamSBCSConvert,
+        write: decoderStreamSBCSConvert,
     };
 }
 
 function decoderStreamSBCSConvert(buf, flush) {
-    if (buf == null)
-        return;
     // Strings are immutable in JS -> we use ucs2 buffer to speed up computations.
     var decodeBuf = this.decodeBuf;
     var newBuf = new Buffer(buf.length*2);
