@@ -32,6 +32,9 @@ exports._sbcs = function(options) {
         encode: encodeSingleByte,
         decode: decodeSingleByte,
 
+        encoder: encoderStreamSBCS,
+        decoder: decoderStreamSBCS,
+
         encodeBuf: encodeBuf,
         decodeBuf: decodeBuf,
     };
@@ -46,6 +49,48 @@ function encodeSingleByte(str) {
 }
 
 function decodeSingleByte(buf) {
+    // Strings are immutable in JS -> we use ucs2 buffer to speed up computations.
+    var decodeBuf = this.decodeBuf;
+    var newBuf = new Buffer(buf.length*2);
+    var idx1 = 0, idx2 = 0;
+    for (var i = 0, _len = buf.length; i < _len; i++) {
+        idx1 = buf[i]*2; idx2 = i*2;
+        newBuf[idx2] = decodeBuf[idx1];
+        newBuf[idx2+1] = decodeBuf[idx1+1];
+    }
+    return newBuf.toString('ucs2');
+}
+
+
+function encoderStreamSBCS(options) {
+    return {
+        encodeBuf: this.encodeBuf,
+        convert: encoderStreamSBCSConvert,
+    };
+}
+
+function encoderStreamSBCSConvert(str, flush) {
+    if (!str)
+        return;
+
+    var buf = new Buffer(str.length);
+    for (var i = 0; i < str.length; i++)
+        buf[i] = this.encodeBuf[str.charCodeAt(i)];
+    
+    return buf;
+}
+
+
+function decoderStreamSBCS(options) {
+    return {
+        decodeBuf: this.decodeBuf,
+        convert: decoderStreamSBCSConvert,
+    };
+}
+
+function decoderStreamSBCSConvert(buf, flush) {
+    if (buf == null)
+        return;
     // Strings are immutable in JS -> we use ucs2 buffer to speed up computations.
     var decodeBuf = this.decodeBuf;
     var newBuf = new Buffer(buf.length*2);

@@ -22,35 +22,68 @@ ArrayBuffer polyfill http://www.calormen.com/polyfill/ https://bitbucket.org/lin
 
 
 ### Streaming hurdles
- 
- * BOM in UTF-16
+http://userguide.icu-project.org/conversion/converters
+
+ * BOM in UTF-8/16
  * Surrogate chars
     UTF-16BE/16LE: Surrogate chars not streamable.
     CESU-8: Surrogate chars from UTF-8
- * Combining characters (see normalization.txt)
+ * Combining characters (see normalization.txt): both when encoding and decoding.
 
 
 ### General
 
 Everything goes to native javascript UTF16 (with surrogate pairs) and from it.
- * Decoder: takes buffer(s), returns string & bytes consumed.
- * Encoder: takes string, returns buf & chars consumed.
+We try to match what browsers do with encodings (as they have the most exposure).
+We ignore all non-alphanumeric chars in encoding aliases.
 
-when encoding, a state must be held in case there's a surrogate pair somewhere.
+Codec interface:
+  encodings._codec = function(<codec options>) -> (cached) {
+    <static codec data>
+    encoder(options) -> (encoder obj) {
+      <stream data>,
+      convert(str, flush) -> buf,
+    }, 
+    decoder(options) -> (decoder obj) {
+      <stream data>,
+      convert(buf, flush) -> str,
+    }
+  }
 
-Decoder:
-string write(buf) (keep state)
-string end() (emit remaining chars)
 
-OR
+### Edge cases
 
-processedBytes decode(buf, write(str))
+ * Browser support (see https://github.com/inexorabletash/text-encoding)
+   -> Slow conversion between strings and ArrayBuffers.
+   -> AMD/Require.js to load tables? Currently its 221k / 135k compressed.
+ * Codecs should be able to share tables.
 
-OR
+ * BOM for UTF-8/16/32 to determine endianness.
+ * Surrogate chars: can be in different chunks.
+ * Combining characters in input -> different combining chars in output.
+ * Callback to decide what to do with unconvertable chars.
+ * Ambiguous encoding names (Shift_JIS?)
+ * Save memory by clearing the cache / read tables?
+ * Stateful encodings ftw
+ * Set substitute characters when no mapping is found, in addition to defaults, f.ex.
+   in ISO-8859-1 it's 0x1A, in Unicode its U+FFFD. Both for encoding and decoding.
+   In stateful encodings should be encoded every time depending on states.
+ * When no mapping is found and we have substitution char, then it would still be better to
+   skip it when the char has Default_Ignorable_Code_Point Unicode property, f.ex. Soft Hyphen, Combining Grapheme Joiner etc.
+   http://unicode.org/cldr/utility/list-unicodeset.jsp?a=%5B:DI:%5D
 
-TextDecoder
-string decode(buf, {stream: true})
+We don't deal with:
+ * Bidirectional reordering
+ * Arabic shaping
 
+### Error conditions
+ * No mapping for a char is available -> callback that can consume data, write data, throw exception
+    * substitute character
+    * skip
+    * throw exception
+    * escape - replace by f.ex. \u1234 or &#x1234;
+ * Character sequence is incomplete (at the end of source data)
+ * Illegal char sequence found
 
 ### General structure
 iconv.encodings = {} all encodings, aliases, tables.
@@ -64,5 +97,4 @@ Encoding =
 /encodings/sbcs-codec.js, dbcs-codec.js - code to convert.
 /encodings/sbcs-data.js, .. - aliases/tables to use.
 /encodings/tables/cp950.json - (generally large) tables to be used with dbcs.
-
 
