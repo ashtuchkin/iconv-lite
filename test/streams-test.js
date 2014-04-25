@@ -221,6 +221,12 @@ describe("Streaming mode", function() {
         output: "e4b882",
     }));
 
+    it("Encoding using internal modules: utf8 with surrogates", checkEncodeStream({
+        encoding: "utf8",
+        input: ["\uD83D\uDE3B"],
+        output: "f09f98bb",
+    }));
+
     it("Decoding of incomplete chars in DBCS (gbk)", checkDecodeStream({
         encoding: "gbk",
         input: [[0x61, 0x81], [0x40, 0x61]],
