@@ -98,6 +98,7 @@ exports._dbcs = function(options) {
 function encoderDBCS(options) {
     return {
         write: encoderDBCSWrite,
+        end: function() {},
         
         encodeTable: this.encodeTable,
     }

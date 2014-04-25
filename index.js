@@ -17,24 +17,22 @@ var iconv = module.exports = {
     encode: function(str, encoding, options) {
         str = ensureString(str);
         var encoder = iconv.getCodec(encoding).encoder(options);
-        var res = encoder.write(str) || new Buffer();
-        if (encoder.end) {
-            var resTrail = encoder.end();
-            if (resTrail && resTrail.length > 0)
-                res = Buffer.concat([res, resTrail]);
-        }
-        return res;
+        var front = encoder.write(str);
+        var end = encoder.end();
+        if (end)
+            return Buffer.concat([front, end]);
+        else
+            return front;
     },
     decode: function(buf, encoding, options) {
         buf = ensureBuffer(buf);
         var decoder = iconv.getCodec(encoding).decoder(options);
-        var res = decoder.write(buf) || "";
-        if (decoder.end) {
-            var resTrail = decoder.end();
-            if (resTrail && resTrail.length > 0)
-                res += resTrail;
-        }
-        return res;
+        var front = decoder.write(buf);
+        var end = decoder.end();
+        if (end)
+            return front + end;
+        else
+            return front;
     },
 
     encodeStream: function(encoding, options) {
@@ -151,7 +149,7 @@ if (nodeVer[0] > 0 || nodeVer[1] >= 10) {
             return done(new Error("Iconv encoding stream needs strings as its input."));
         try {
             var res = this.conv.write(chunk);
-            if (res) this.push(res);
+            if (res && res.length) this.push(res);
             done();
         }
         catch (e) {
@@ -161,16 +159,25 @@ if (nodeVer[0] > 0 || nodeVer[1] >= 10) {
 
     IconvLiteEncoderStream.prototype._flush = function(done) {
         try {
-            if (this.conv.end) {
-                var res = this.conv.end();
-                if (res) this.push(res);                
-            }
+            var res = this.conv.end();
+            if (res && res.length) this.push(res);
             done();
         }
         catch (e) {
             done(e);
         }
     }
+
+    IconvLiteEncoderStream.prototype.collect = function(cb) {
+        var chunks = [];
+        this.on('error', cb);
+        this.on('data', function(chunk) { chunks.push(chunk); });
+        this.on('end', function() {
+            cb(null, Buffer.concat(chunks));
+        });
+        return this;
+    }
+
 
     // == Decoder stream =======================================================
     IconvLiteDecoderStream = function IconvLiteDecoderStream(conv, options) {
@@ -189,7 +196,7 @@ if (nodeVer[0] > 0 || nodeVer[1] >= 10) {
             return done(new Error("Iconv decoding stream needs buffers as its input."));
         try {
             var res = this.conv.write(chunk);
-            if (res) this.push(res, this.encoding);
+            if (res && res.length) this.push(res, this.encoding);
             done();
         }
         catch (e) {
@@ -199,16 +206,42 @@ if (nodeVer[0] > 0 || nodeVer[1] >= 10) {
 
     IconvLiteDecoderStream.prototype._flush = function(done) {
         try {
-            if (this.conv.end) {
-                var res = this.conv.end();
-                if (res) this.push(res, this.encoding);                
-            }
+            var res = this.conv.end();
+            if (res && res.length) this.push(res, this.encoding);                
             done();
         }
         catch (e) {
             done(e);
         }
     }
+
+    IconvLiteDecoderStream.prototype.collect = function(cb) {
+        var res = '';
+        this.on('error', cb);
+        this.on('data', function(chunk) { res += chunk; });
+        this.on('end', function() {
+            cb(null, res);
+        });
+        return this;
+    }
+
+    // == Sugar for Readable ===================================================
+    var Readable = require('stream').Readable;
+
+    var oldSetEncoding = Readable.prototype.setEncoding;
+    Readable.prototype.setEncoding = function setEncoding(enc, options) {
+        try {
+            oldSetEncoding.call(this, enc); // Try to use original function when possible.
+            return;
+        }
+        catch (e) {}
+
+        // Try to use our own decoder, it has the same interface.
+        this._readableState.decoder = iconv.getCodec(enc).decoder(options);
+        this._readableState.encoding = enc;
+    }
+
+    Readable.prototype.collect = IconvLiteDecoderStream.prototype.collect;
 
 }
 

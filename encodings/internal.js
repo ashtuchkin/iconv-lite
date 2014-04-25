@@ -35,6 +35,8 @@ function decoderInternal() {
 function encoderInternal() {
     return {
         write: encodeInternal,
+        end: function() {},
+        
         enc: this.enc,
     }
 }

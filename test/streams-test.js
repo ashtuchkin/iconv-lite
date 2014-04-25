@@ -1,5 +1,6 @@
 var assert = require('assert'),
-    iconv = require(__dirname+'/../');
+    iconv = require(__dirname+'/../'),
+    fs = require('fs');
 
 if (!iconv.supportsStreams())
     return;
@@ -240,3 +241,47 @@ describe("Streaming mode", function() {
     }));
 
 });
+
+describe("Streaming sugar", function() {
+    it("decodeStream.collect()", function(done) {
+        feeder([[0x61, 0x81], [0x40, 0x61]])
+            .pipe(iconv.decodeStream('gbk'))
+            .collect(function(err, outp) {
+                assert.ifError(err);
+                assert.equal(outp, "a丂a");
+                done();
+            });
+    });
+
+    it("encodeStream.collect()", function(done) {
+        feeder(["абв", "где"])
+            .pipe(iconv.encodeStream('windows-1251'))
+            .collect(function(err, outp) {
+                assert.ifError(err);
+                assert(outp instanceof Buffer);
+                assert.equal(outp.toString('hex'), "e0e1e2e3e4e5");
+                done();
+            });
+    });
+
+    it("Readable#setEncoding()", function(done) {
+        var readStream = fs.createReadStream(__filename);
+        readStream.setEncoding('windows-1251');
+        readStream.on('data', function(str) {
+            assert(typeof str == 'string');
+        });
+        readStream.on('end', done);
+    });
+
+    it("Readable#setEncoding() and collect", function(done) {
+        var readStream = fs.createReadStream(__filename);
+        readStream.setEncoding('windows-1251');
+        readStream.collect(function(err, str) {
+            assert.ifError(err);
+            assert(typeof str == 'string');
+            done();
+        });
+    });
+
+});
+

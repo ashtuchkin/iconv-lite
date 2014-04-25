@@ -40,6 +40,33 @@
         .pipe(iconv.decodeStream('win1251'))
         .pipe(iconv.encodeStream('ucs2'))
         .pipe(fs.createWriteStream('file-in-ucs2.txt'));
+
+    // Sugar: all encode/decode streams have .collect(cb) method to accumulate data.
+    http.createServer(function(req, res) {
+        req.pipe(iconv.decodeStream('win1251')).collect(function(err, body) {
+            assert(typeof body == 'string');
+            console.log(body); // full request body string
+        });
+    });
+
+    // Sugar: Readable#setEncoding() now supports all iconv encodings and collect method.
+    // Examples of Readable: HttpIncomingMessage, fs.ReadStream, 
+    http.createServer(function(req, res) {
+        req.setEncoding('win1251');
+        
+        // Classic collection
+        var body = '';
+        req.on('data', function(str) { body += str; });
+        req.on('end', function() {
+            // Do something with body.
+        });
+
+        // Alternative collection
+        req.collect(function(err, body) {
+            assert(typeof body == 'string');
+            // Do something with body.
+        });
+    });
     
 
 ## Supported encodings

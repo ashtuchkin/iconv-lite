@@ -38,6 +38,8 @@ exports._sbcs = function(options) {
 function encoderSBCS(options) {
     return {
         write: encoderSBCSWrite,
+        end: function() {},
+
         encodeBuf: this.encodeBuf,
     };
 }
@@ -54,6 +56,8 @@ function encoderSBCSWrite(str) {
 function decoderSBCS(options) {
     return {
         write: decoderSBCSWrite,
+        end: function() {},
+        
         decodeBuf: this.decodeBuf,
     };
 }
