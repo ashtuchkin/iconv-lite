@@ -91,6 +91,7 @@ exports._dbcs = function(options) {
         decodeLead: decodeLead,
         decodeTable: decodeTable,
         encodeTable: encodeTable,
+        defaultCharSingleByte: options.iconv.defaultCharSingleByte,
     };
 }
 
@@ -121,28 +122,50 @@ function encoderDBCSWrite(str) {
 
 function decoderDBCS(options) {
     return {
+        // Methods
         write: decoderDBCSWrite,
+        end: decoderDBCSEnd,
 
+        // Decoder state
+        leadByte: -1,
+
+        // Static data
         decodeLead: this.decodeLead,
         decodeTable: this.decodeTable,
+        defaultCharSingleByte: this.defaultCharSingleByte,
     }
 }
 
 function decoderDBCSWrite(buf) {
-    var newBuf = new Buffer(buf.length*2), uCode, dbcsCode, lead;
+    var newBuf = new Buffer(buf.length*2),
+        leadByte = this.leadByte, uCode;
     
-    for (var i = 0, j = 0; i < buf.length; i++, j+=2) {
-        dbcsCode = buf[i];
-        lead = this.decodeLead[dbcsCode];
-        if (lead >= 0)
-            uCode = lead;
-        else {
-            dbcsCode = (dbcsCode << 8) + buf[++i];
-            uCode = this.decodeTable[dbcsCode - 0x8000];
+    for (var i = 0, j = 0; i < buf.length; i++) {
+        var curByte = buf[i];
+        if (leadByte == -1) { // We have no leading byte in buffer.
+            uCode = this.decodeLead[curByte];
+            if (uCode < 0) { // Check if this is a leading byte of a double-byte char sequence.
+                leadByte = curByte; 
+                continue;
+            }
+        } else { // curByte is a trailing byte in double-byte char sequence.
+            uCode = this.decodeTable[(leadByte << 8) + curByte - 0x8000];
+            leadByte = -1;
         }
-        newBuf[j] = uCode & 0xFF; //low byte
-        newBuf[j+1] = uCode >> 8; //high byte
+        
+        // Write the character to buffer.
+        newBuf[j++] = uCode & 0xFF;
+        newBuf[j++] = uCode >> 8;
     }
+
+    this.leadByte = leadByte;
     return newBuf.slice(0, j).toString('ucs2');
+}
+
+function decoderDBCSEnd() {
+    if (this.leadByte != -1) {
+        this.leadByte = -1;
+        return this.defaultCharSingleByte; // Incomplete character at the end.
+    }
 }
 

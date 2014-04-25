@@ -221,4 +221,16 @@ describe("Streaming mode", function() {
         output: "e4b882",
     }));
 
+    it("Decoding of incomplete chars in DBCS (gbk)", checkDecodeStream({
+        encoding: "gbk",
+        input: [[0x61, 0x81], [0x40, 0x61]],
+        output: "a丂a"
+    }));
+
+    it("Decoding of incomplete chars at the end of the stream in DBCS (gbk)", checkDecodeStream({
+        encoding: "gbk",
+        input: [[0x61, 0x81]],
+        output: "a?"
+    }));
+
 });
