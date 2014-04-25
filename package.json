@@ -4,7 +4,7 @@
     "version": "0.4.0-pre",
     "license": "MIT",
     
-    "keywords": ["iconv", "convert", "charset"],
+    "keywords": ["iconv", "convert", "charset", "icu"],
     "author": "Alexander Shtuchkin <ashtuchkin@gmail.com>",
     "contributors": [
         "Jinwu Zhan (https://github.com/jenkinv)",
@@ -21,6 +21,7 @@
     
     "main": "index.js",
     "homepage": "https://github.com/ashtuchkin/iconv-lite",
+    "bugs": "https://github.com/ashtuchkin/iconv-lite/issues",
     "repository": {
         "type": "git",
         "url": "git://github.com/ashtuchkin/iconv-lite.git"
@@ -32,11 +33,11 @@
       "test": "vows --spec"
     },
     "devDependencies": {
-        "vows": "",
+        "vows": "*",
         "request": "*",
         "unorm": "*",
         "errto": "*",
         "async": "*",
-        "iconv": ">=1.1"
+        "iconv": "2.x"
     }
 }
