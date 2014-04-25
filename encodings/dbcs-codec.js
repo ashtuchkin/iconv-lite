@@ -85,8 +85,8 @@ exports._dbcs = function(options) {
     
 
     return {
-        encode: encodeDBCS,
-        decode: decodeDBCS,
+        encoder: encoderDBCS,
+        decoder: decoderDBCS,
 
         decodeLead: decodeLead,
         decodeTable: decodeTable,
@@ -94,7 +94,15 @@ exports._dbcs = function(options) {
     };
 }
 
-function encodeDBCS(str) {
+function encoderDBCS(options) {
+    return {
+        write: encoderDBCSWrite,
+        
+        encodeTable: this.encodeTable,
+    }
+}
+
+function encoderDBCSWrite(str) {
     var newBuf = new Buffer(str.length*2), dbcsCode;
 
     for (var i = 0, j = 0; i < str.length; i++) {
@@ -109,7 +117,18 @@ function encodeDBCS(str) {
     return newBuf.slice(0, j);
 }
 
-function decodeDBCS(buf) {
+
+
+function decoderDBCS(options) {
+    return {
+        write: decoderDBCSWrite,
+
+        decodeLead: this.decodeLead,
+        decodeTable: this.decodeTable,
+    }
+}
+
+function decoderDBCSWrite(buf) {
     var newBuf = new Buffer(buf.length*2), uCode, dbcsCode, lead;
     
     for (var i = 0, j = 0; i < buf.length; i++, j+=2) {

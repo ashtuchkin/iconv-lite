@@ -14,13 +14,27 @@ var iconv = module.exports = {
     defaultCharSingleByte: '?',
 
     // Public API
-    encode: function(str, encoding) {
+    encode: function(str, encoding, options) {
         str = ensureString(str);
-        return iconv.getCodec(encoding).encode(str);
+        var encoder = iconv.getCodec(encoding).encoder(options);
+        var res = encoder.write(str) || new Buffer();
+        if (encoder.end) {
+            var resTrail = encoder.end();
+            if (resTrail && resTrail.length > 0)
+                res = Buffer.concat([res, resTrail]);
+        }
+        return res;
     },
-    decode: function(buf, encoding) {
+    decode: function(buf, encoding, options) {
         buf = ensureBuffer(buf);
-        return iconv.getCodec(encoding).decode(buf);
+        var decoder = iconv.getCodec(encoding).decoder(options);
+        var res = decoder.write(buf) || "";
+        if (decoder.end) {
+            var resTrail = decoder.end();
+            if (resTrail && resTrail.length > 0)
+                res += resTrail;
+        }
+        return res;
     },
 
     encodeStream: function(encoding, options) {

@@ -16,9 +16,6 @@ module.exports = {
             throw new Error("Internal codec is called without encoding type.")
 
         return {
-            encode: encodeInternal,
-            decode: decodeInternal,
-
             encoder: encoderInternal,
             decoder: decoderInternal,
 
@@ -27,24 +24,22 @@ module.exports = {
     },
 };
 
-
-function encodeInternal(str) {
-    return new Buffer(str, this.enc);
-}
-
-function decodeInternal(buf) {
-    return buf.toString(this.enc);
-}
-
-
+// We use node.js internal decoder. It's signature is the same as ours.
 var StringDecoder = require('string_decoder').StringDecoder;
 
 function decoderInternal() {
     return new StringDecoder(this.enc);
 }
 
+
 function encoderInternal() {
     return {
-        write: encodeInternal.bind(this),
+        write: encodeInternal,
+        enc: this.enc,
     }
 }
+
+function encodeInternal(str) {
+    return new Buffer(str, this.enc);
+}
+
