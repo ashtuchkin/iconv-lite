@@ -1,5 +1,4 @@
-var vows    = require('vows'),
-    fs      = require('fs'),
+var fs      = require('fs'),
     assert  = require('assert'),
     iconv   = require(__dirname+'/../'),
     Iconv   = require('iconv').Iconv;
@@ -72,80 +71,78 @@ function strToHex(str) { return spacify4(swapBytes(new Buffer(str, 'ucs2')).toSt
 
 // Generate tests for all DBCS encodings.
 iconv.encode('', 'utf8'); // Load all encodings.
-var dbcsEncodingTests = {};
-for (var enc in iconv.encodings) {
-    if (iconv.encodings[enc].type === '_dbcs') (function(enc) {
-        // Create tests for this encoding.
-        dbcsEncodingTests["Decode DBCS encoding '" + enc + "'"] = function() {
-            var iconvChgs = iconvChanges[enc] || {};
-            var converter = new Iconv(aliases[enc] || enc, "utf-8");
-            var errors = [];
-            forAllChars(converter.convert.bind(converter), function(valid, inp, outp) {
-                if (!valid) // Skip invalid sequences.
-                    return;
 
-                var strExpected = outp.toString('utf-8');
-                var strActual = iconv.decode(inp, enc);
+describe("Full DBCS encoding tests", function() {
+    this.timeout(5000); // Tese tests are pretty slow.
 
-                var expectedChar = strExpected.charCodeAt(0);
-                if (0xE000 <= expectedChar && expectedChar < 0xF900)  // Skip Private use area.
-                    return;
+    for (var enc in iconv.encodings) {
+        if (iconv.encodings[enc].type === '_dbcs') (function(enc) {
+            // Create tests for this encoding.
+            it("Decode DBCS encoding '" + enc + "'", function() {
+                var iconvChgs = iconvChanges[enc] || {};
+                var converter = new Iconv(aliases[enc] || enc, "utf-8");
+                var errors = [];
+                forAllChars(converter.convert.bind(converter), function(valid, inp, outp) {
+                    if (!valid) // Skip invalid sequences.
+                        return;
 
-                if (iconvChgs[strExpected] == strActual)  // Skip iconv changes.
-                    return;
+                    var strExpected = outp.toString('utf-8');
+                    var strActual = iconv.decode(inp, enc);
 
-                if (strActual !== strExpected)
-                    errors.push({ input: inp.toString('hex'), strExpected: strExpected, strActual: strActual });
+                    var expectedChar = strExpected.charCodeAt(0);
+                    if (0xE000 <= expectedChar && expectedChar < 0xF900)  // Skip Private use area.
+                        return;
+
+                    if (iconvChgs[strExpected] == strActual)  // Skip iconv changes.
+                        return;
+
+                    if (strActual !== strExpected)
+                        errors.push({ input: inp.toString('hex'), strExpected: strExpected, strActual: strActual });
+                });
+
+                if (errors.length > 0)
+                    assert.fail(null, null, "Decoding mismatch: <input> | <expected> | <actual> | <expected char> | <actual char>\n"
+                        + errors.map(function(err) {
+                        return "          " + spacify2(err.input) + " | " + strToHex(err.strExpected) + " | " + strToHex(err.strActual) + " | " + 
+                            err.strExpected + " | " + err.strActual;
+                    }).join("\n") + "\n       ");
             });
 
-            if (errors.length > 0)
-                assert.fail(null, null, "Decoding mismatch: <input> | <expected> | <actual> | <expected char> | <actual char>\n"
-                    + errors.map(function(err) {
-                    return "          " + spacify2(err.input) + " | " + strToHex(err.strExpected) + " | " + strToHex(err.strActual) + " | " + 
-                        err.strExpected + " | " + err.strActual;
-                }).join("\n") + "\n       ");
-        };
+            it("Encode DBCS encoding '" + enc + "'", function() {
+                var iconvChgs = iconvChanges[enc] || {};
+                var converter = new Iconv("utf-8", aliases[enc] || enc);
+                var errors = [];
+                for (var i = 0; i < 0x10000; i++) {
+                    if (i == 0xD800) i = 0xF900; // Skip surrogates & private use.
 
-        dbcsEncodingTests["Encode DBCS encoding '" + enc + "'"] = function() {
-            var iconvChgs = iconvChanges[enc] || {};
-            var converter = new Iconv("utf-8", aliases[enc] || enc);
-            var errors = [];
-            for (var i = 0; i < 0x10000; i++) {
-                if (i == 0xD800) i = 0xF900; // Skip surrogates & private use.
+                    var str = String.fromCharCode(i);
+                    var strExpected = convertWithDefault(converter, str, new Buffer(iconv.defaultCharSingleByte)).toString('hex');
+                    var strActual = iconv.encode(str, enc).toString('hex');
 
-                var str = String.fromCharCode(i);
-                var strExpected = convertWithDefault(converter, str, new Buffer(iconv.defaultCharSingleByte)).toString('hex');
-                var strActual = iconv.encode(str, enc).toString('hex');
+                    if (strExpected == strActual)
+                        continue;
+                    
+                    var str1 = iconv.decode(new Buffer(strExpected, 'hex'), enc);
+                    var str2 = iconv.decode(new Buffer(strActual, 'hex'), enc);
+                    if (str1 == str && str2 == str)
+                       continue; // There are multiple ways to encode str, so it doesn't matter which we choose.
 
-                if (strExpected == strActual)
-                    continue;
-                
-                var str1 = iconv.decode(new Buffer(strExpected, 'hex'), enc);
-                var str2 = iconv.decode(new Buffer(strActual, 'hex'), enc);
-                if (str1 == str && str2 == str)
-                   continue; // There are multiple ways to encode str, so it doesn't matter which we choose.
+                    if ((enc == 'big5' || enc == 'gbk') && str1 == '?')
+                        continue; // Big5 and GBK variations that we use are much larger.
 
-                if ((enc == 'big5' || enc == 'gbk') && str1 == '?')
-                    continue; // Big5 and GBK variations that we use are much larger.
+                    if (iconvChgs[str] == iconv.decode(new Buffer(strExpected, 'hex'), enc))
+                        continue; // Skip iconv changes.
 
-                if (iconvChgs[str] == iconv.decode(new Buffer(strExpected, 'hex'), enc))
-                    continue; // Skip iconv changes.
+                    errors.push({input: strToHex(str), inputChar: str, strExpected: strExpected, strActual: strActual});
+                }
 
-                errors.push({input: strToHex(str), inputChar: str, strExpected: strExpected, strActual: strActual});
-            }
-
-            if (errors.length > 0)
-                assert.fail(null, null, "Encoding mismatch: <input> | <input char> | <expected> | <actual>\n"
-                    + errors.map(function(err) {
-                    return "          " + err.input + " | " + err.inputChar + " | " + spacify2(err.strExpected) + " | " + spacify2(err.strActual);
-                }).join("\n") + "\n       ");
-        };
-    })(enc);
-}
-
-
-
-vows.describe("DBCS encoding tests")
-    .addBatch(dbcsEncodingTests)
-    .export(module);
+                if (errors.length > 0)
+                    assert.fail(null, null, "Encoding mismatch: <input> | <input char> | <expected> | <actual>\n"
+                        + errors.map(function(err) {
+                        return "          " + err.input + " | " + err.inputChar + " | " + spacify2(err.strExpected) + " | " + spacify2(err.strActual);
+                    }).join("\n") + "\n       ");
+            });
+        })(enc);
+    }
+});
 

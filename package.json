@@ -30,10 +30,10 @@
         "node": ">=0.8.0"
     },
     "scripts": {
-      "test": "vows --spec"
+      "test": "mocha --reporter spec --grep ."
     },
     "devDependencies": {
-        "vows": "*",
+        "mocha": "*",
         "request": "*",
         "unorm": "*",
         "errto": "*",
