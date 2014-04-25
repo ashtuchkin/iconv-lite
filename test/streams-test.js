@@ -195,6 +195,13 @@ vows.describe("Streaming mode").addBatch({
         output: "丂",
     }),
 
+    "Decoding of incomplete chars using internal modules: utf8 / surrogates": checkDecodeStream({
+        encoding: "utf8",
+        input: [[0xF0], [0x9F, 0x98], [0xBB]], // U+1F63B, 😻, SMILING CAT FACE WITH HEART-SHAPED EYES
+        outputType: false, // Don't concat
+        checkOutput: function(res) { assert.deepEqual(res, ["\uD83D\uDE3B"]); }, // We should have only 1 chunk.
+    }),
+
     "Decoding of incomplete chars using internal modules: ucs2 / surrogates": checkDecodeStream({
         encoding: "ucs2",
         input: [[0x3D], [0xD8, 0x3B], [0xDE]], // U+1F63B, 😻, SMILING CAT FACE WITH HEART-SHAPED EYES
