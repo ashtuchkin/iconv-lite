@@ -152,6 +152,8 @@ module.exports = {
     "cshproman8": "hproman8",
     "r8": "hproman8",
     "roman8": "hproman8",
+    "xroman8": "hproman8",
+    "ibm1051": "hproman8",
 
     "mac": "macintosh",
     "csmacintosh": "macintosh",
