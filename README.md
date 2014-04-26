@@ -49,23 +49,29 @@
         });
     });
 
-    // Sugar: Readable#setEncoding() now supports all iconv encodings and collect method.
-    // Examples of Readable: HttpIncomingMessage, fs.ReadStream, 
-    http.createServer(function(req, res) {
-        req.setEncoding('win1251');
-        
-        // Classic collection
-        var body = '';
-        req.on('data', function(str) { body += str; });
-        req.on('end', function() {
-            // Do something with body.
-        });
+    // For the brave/lazy: make Node basic primitives understand all iconv encodings.
+    require('iconv-lite').extendNodeEncodings();
 
-        // Alternative collection
+    buf = new Buffer(str, 'win1251');
+    buf.write(str, 'gbk');
+    str = buf.toString('latin1');
+    assert(Buffer.isEncoding('iso-8859-15'));
+    Buffer.byteLength(str, 'us-ascii');
+
+    http.createServer(function(req, res) {
+        req.setEncoding('big5');
         req.collect(function(err, body) {
-            assert(typeof body == 'string');
-            // Do something with body.
+            console.log(body);
         });
+    });
+
+    fs.createReadStream("file.txt", "shift_jis");
+
+    // External modules are also supported (if they use Node primitives).
+    request = require('request');
+    request({
+        url: "http://github.com/", 
+        encoding: "cp932"
     });
     
 

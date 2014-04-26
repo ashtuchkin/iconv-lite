@@ -1,6 +1,5 @@
 var assert = require('assert'),
-    iconv = require(__dirname+'/../'),
-    fs = require('fs');
+    iconv = require(__dirname+'/../');
 
 if (!iconv.supportsStreams())
     return;
@@ -263,25 +262,5 @@ describe("Streaming sugar", function() {
                 done();
             });
     });
-
-    it("Readable#setEncoding()", function(done) {
-        var readStream = fs.createReadStream(__filename);
-        readStream.setEncoding('windows-1251');
-        readStream.on('data', function(str) {
-            assert(typeof str == 'string');
-        });
-        readStream.on('end', done);
-    });
-
-    it("Readable#setEncoding() and collect", function(done) {
-        var readStream = fs.createReadStream(__filename);
-        readStream.setEncoding('windows-1251');
-        readStream.collect(function(err, str) {
-            assert.ifError(err);
-            assert(typeof str == 'string');
-            done();
-        });
-    });
-
 });
 

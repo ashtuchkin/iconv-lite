@@ -59,6 +59,8 @@ var iconv = module.exports = {
     supportsStreams: function() {
         return !!IconvLiteEncoderStream;
     },
+    extendNodeEncodings: extendNodeEncodings,
+    undoExtendNodeEncodings: undoExtendNodeEncodings,
 
     // Search for a codec.
     getCodec: function(encoding) {
@@ -224,24 +226,210 @@ if (nodeVer[0] > 0 || nodeVer[1] >= 10) {
         });
         return this;
     }
+}
 
-    // == Sugar for Readable ===================================================
-    var Readable = require('stream').Readable;
+// == Extend Node primitives to use iconv-lite =================================
+var original = undefined; // original functions.
 
-    var oldSetEncoding = Readable.prototype.setEncoding;
-    Readable.prototype.setEncoding = function setEncoding(enc, options) {
-        try {
-            oldSetEncoding.call(this, enc); // Try to use original function when possible.
-            return;
-        }
-        catch (e) {}
+function extendNodeEncodings() {
+    if (original)
+        throw new Error("require('iconv-lite').extendNodeEncodings() is already called.")
+    original = {};
 
-        // Try to use our own decoder, it has the same interface.
-        this._readableState.decoder = iconv.getCodec(enc).decoder(options);
-        this._readableState.encoding = enc;
+    var nodeNativeEncodings = {
+        'hex': true, 'utf8': true, 'utf-8': true, 'ascii': true, 'binary': true, 
+        'base64': true, 'ucs2': true, 'ucs-2': true, 'utf16le': true, 'utf-16le': true,
+    };
+
+    Buffer.isNativeEncoding = function(enc) {
+        return nodeNativeEncodings[enc && enc.toLowerCase()];
     }
 
-    Readable.prototype.collect = IconvLiteDecoderStream.prototype.collect;
+    // -- SlowBuffer -----------------------------------------------------------
+    var SlowBuffer = require('buffer').SlowBuffer;
 
+    original.SlowBufferToString = SlowBuffer.prototype.toString;
+    SlowBuffer.prototype.toString = function(encoding, start, end) {
+        encoding = String(encoding || 'utf8').toLowerCase();
+        start = +start || 0;
+        if (typeof end !== 'number') end = this.length;
+
+        // Fastpath empty strings
+        if (+end == start)
+            return '';
+
+        // Use native conversion when possible
+        if (Buffer.isNativeEncoding(encoding))
+            return original.SlowBufferToString.call(this, encoding, start, end);
+
+        // Otherwise, use our decoding method.
+        return iconv.decode(this.slice(start, end), encoding);
+    }
+
+    original.SlowBufferWrite = SlowBuffer.prototype.write;
+    SlowBuffer.prototype.write = function(string, offset, length, encoding) {
+        // Support both (string, offset, length, encoding)
+        // and the legacy (string, encoding, offset, length)
+        if (isFinite(offset)) {
+            if (!isFinite(length)) {
+                encoding = length;
+                length = undefined;
+            }
+        } else {  // legacy
+            var swap = encoding;
+            encoding = offset;
+            offset = length;
+            length = swap;
+        }
+
+        offset = +offset || 0;
+        var remaining = this.length - offset;
+        if (!length) {
+            length = remaining;
+        } else {
+            length = +length;
+            if (length > remaining) {
+                length = remaining;
+            }
+        }
+        encoding = String(encoding || 'utf8').toLowerCase();
+
+        // Use native conversion when possible
+        if (Buffer.isNativeEncoding(encoding))
+            return original.SlowBufferWrite.call(this, string, offset, length, encoding);
+
+        if (string.length > 0 && (length < 0 || offset < 0))
+            throw new RangeError('attempt to write beyond buffer bounds');
+
+        // Otherwise, use our encoding method.
+        var buf = iconv.encode(string, encoding);
+        if (buf.length < length) length = buf.length;
+        buf.copy(this, offset, 0, length);
+        return length;
+    }
+
+    // -- Buffer ---------------------------------------------------------------
+
+    original.BufferIsEncoding = Buffer.isEncoding;
+    Buffer.isEncoding = function(encoding) {
+        return Buffer.isNativeEncoding(encoding) || iconv.encodingExists(encoding);
+    }
+
+    original.BufferByteLength = Buffer.byteLength;
+    Buffer.byteLength = SlowBuffer.byteLength = function(str, encoding) {
+        encoding = String(encoding || 'utf8').toLowerCase();
+
+        // Use native conversion when possible
+        if (Buffer.isNativeEncoding(encoding))
+            return original.BufferByteLength.call(this, str, encoding);
+
+        // Slow, I know, but we don't have a better way yet.
+        return iconv.encode(str, encoding).length;
+    }
+
+    original.BufferToString = Buffer.prototype.toString;
+    Buffer.prototype.toString = function(encoding, start, end) {
+        encoding = String(encoding || 'utf8').toLowerCase();
+
+        // Use native conversion when possible
+        if (Buffer.isNativeEncoding(encoding))
+            return original.BufferToString.call(this, encoding, start, end);
+
+        // Otherwise, use our decoding method.
+        return iconv.decode(this.slice(start, end), encoding);
+    }
+
+    original.BufferWrite = Buffer.prototype.write;
+    Buffer.prototype.write = function(string, offset, length, encoding) {
+        var _offset = offset, _length = length, _encoding = encoding;
+        // Support both (string, offset, length, encoding)
+        // and the legacy (string, encoding, offset, length)
+        if (isFinite(offset)) {
+            if (!isFinite(length)) {
+                encoding = length;
+                length = undefined;
+            }
+        } else {  // legacy
+            var swap = encoding;
+            encoding = offset;
+            offset = length;
+            length = swap;
+        }
+
+        encoding = String(encoding || 'utf8').toLowerCase();
+
+        // Use native conversion when possible
+        if (Buffer.isNativeEncoding(encoding))
+            return original.BufferWrite.call(this, string, _offset, _length, _encoding);
+
+        offset = +offset || 0;
+        var remaining = this.length - offset;
+        if (!length) {
+            length = remaining;
+        } else {
+            length = +length;
+            if (length > remaining) {
+                length = remaining;
+            }
+        }
+
+        if (string.length > 0 && (length < 0 || offset < 0))
+            throw new RangeError('attempt to write beyond buffer bounds');
+
+        // Otherwise, use our encoding method.
+        var buf = iconv.encode(string, encoding);
+        if (buf.length < length) length = buf.length;
+        buf.copy(this, offset, 0, length);
+        return length;
+
+        // TODO: Set _charsWritten.
+    }
+
+
+    // -- Readable -------------------------------------------------------------
+    if (iconv.supportsStreams()) {
+        var Readable = require('stream').Readable;
+
+        original.ReadableSetEncoding = Readable.prototype.setEncoding;
+        Readable.prototype.setEncoding = function setEncoding(enc, options) {
+            // Try to use original function when possible.
+            if (Buffer.isNativeEncoding(enc))
+                return original.ReadableSetEncoding.call(this, enc);
+
+            // Try to use our own decoder, it has the same interface.
+            this._readableState.decoder = iconv.getCodec(enc).decoder(options);
+            this._readableState.encoding = enc;
+        }
+
+        Readable.prototype.collect = IconvLiteDecoderStream.prototype.collect;
+    }
 }
+
+
+function undoExtendNodeEncodings() {
+    if (!original)
+        throw new Error("require('iconv-lite').undoExtendNodeEncodings(): Nothing to undo; extendNodeEncodings() is not called.")
+
+    delete Buffer.isNativeEncoding;
+
+    var SlowBuffer = require('buffer').SlowBuffer;
+
+    SlowBuffer.prototype.toString = original.SlowBufferToString;
+    SlowBuffer.prototype.write = original.SlowBufferWrite;
+
+    Buffer.isEncoding = original.BufferIsEncoding;
+    Buffer.byteLength = original.BufferByteLength;
+    Buffer.prototype.toString = original.BufferToString;
+    Buffer.prototype.write = original.BufferWrite;
+
+    if (iconv.supportsStreams()) {
+        var Readable = require('stream').Readable;
+
+        Readable.prototype.setEncoding = original.ReadableSetEncoding;
+        delete Readable.prototype.collect;
+    }
+
+    original = undefined;
+}
+
 
