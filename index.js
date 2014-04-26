@@ -263,6 +263,8 @@ function extendNodeEncodings() {
             return original.SlowBufferToString.call(this, encoding, start, end);
 
         // Otherwise, use our decoding method.
+        if (typeof start == 'undefined') start = 0;
+        if (typeof end == 'undefined') end = this.length;
         return iconv.decode(this.slice(start, end), encoding);
     }
 
@@ -336,6 +338,8 @@ function extendNodeEncodings() {
             return original.BufferToString.call(this, encoding, start, end);
 
         // Otherwise, use our decoding method.
+        if (typeof start == 'undefined') start = 0;
+        if (typeof end == 'undefined') end = this.length;
         return iconv.decode(this.slice(start, end), encoding);
     }
 

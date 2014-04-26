@@ -27,6 +27,9 @@ module.exports = {
 // We use node.js internal decoder. It's signature is the same as ours.
 var StringDecoder = require('string_decoder').StringDecoder;
 
+if (!StringDecoder.prototype.end) // Node v0.8 doesn't have this method.
+    StringDecoder.prototype.end = function() {};
+
 function decoderInternal() {
     return new StringDecoder(this.enc);
 }

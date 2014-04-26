@@ -5,16 +5,18 @@ var assert = require('assert'),
 describe("Extend Node native encodings", function() {
     before(function() {
         assert.throws(function() { new Buffer().toString("windows-1251"); });
-        assert.equal(Buffer.isEncoding("windows-1251"), false);
+        if (Buffer.isEncoding) // Node v0.8 doesn't have this method.
+            assert(!Buffer.isEncoding("windows-1251"));
 
-        iconv.extendNodeEncodings();    
+        iconv.extendNodeEncodings();
     });
 
     after(function() {
         iconv.undoExtendNodeEncodings();
         
         assert.throws(function() { new Buffer().toString("windows-1251"); });
-        assert.equal(Buffer.isEncoding("windows-1251"), false);
+        if (Buffer.isEncoding)
+            assert(!Buffer.isEncoding("windows-1251"));
     })
 
     it("SlowBuffer is supported", function() {
@@ -55,57 +57,59 @@ describe("Extend Node native encodings", function() {
         //assert.equal(buf.toString('big5'), "h丗丢丬乕o");
 
         assert.equal(Buffer.byteLength("丗丢丬乕乢亊亰仫", 'big5'), 16);
-        assert(Buffer.isEncoding("windows-1251"));
+        if (Buffer.isEncoding)
+            assert(Buffer.isEncoding("windows-1251"));
 
         // TODO: Set _charsWritten.
     });
 
-
-    it("Readable#setEncoding()", function(done) {
-        var readStream = fs.createReadStream(__filename);
-        readStream.setEncoding('windows-1251');
-        readStream.on('data', function(str) {
-            assert(typeof str == 'string');
-        });
-        readStream.on('end', done);
-    });
-
-    it("Readable#setEncoding() and collect", function(done) {
-        fs.createReadStream(__filename, "big5").collect(function(err, str) {
-            assert.ifError(err);
-            assert(typeof str == 'string');
-            var marker = "銝Ｖ葫銋册飾鈭窍滌隞"; // big5 to utf8 of "丢丬乕乢亊亰" <- don't delete this comment. it is the marker.
-            assert(str.indexOf(marker) != -1); 
-            done();
-        });
-    });
-
-    it("HTTP and Request example", function(done) {
-        var http = require('http'),
-            request = require('request'),
-            port = 33000,
-            testStr = "唨唩唫唭唲唴唵唶唸";
-
-        var server = http.createServer(function(req, res) {
-            req.setEncoding('gbk');
-            req.collect(function(err, body) {
-                res.end(iconv.encode(body, 'cp936'));
+    if (iconv.supportsStreams()) {
+        it("Readable#setEncoding()", function(done) {
+            var readStream = fs.createReadStream(__filename);
+            readStream.setEncoding('windows-1251');
+            readStream.on('data', function(str) {
+                assert(typeof str == 'string');
             });
+            readStream.on('end', done);
+        });
 
-        }).listen(33000, function() {
-            request({
-                url: "http://localhost:"+port,
-                encoding: 'cp936',
-                body: new Buffer(testStr, 'gbk'),
-            }, function(err, resp, body) {
-                assert.equal(body, testStr);                
+        it("Readable#setEncoding() and collect", function(done) {
+            fs.createReadStream(__filename, "big5").collect(function(err, str) {
+                assert.ifError(err);
+                assert(typeof str == 'string');
+                var marker = "銝Ｖ葫銋册飾鈭窍滌隞"; // big5 to utf8 of "丢丬乕乢亊亰" <- don't delete this comment. it is the marker.
+                assert(str.indexOf(marker) != -1); 
                 done();
             });
         });
 
-        setTimeout(function() {
-            server.close();
-        }, 300);
-    });
+        it("HTTP and Request example", function(done) {
+            var http = require('http'),
+                request = require('request'),
+                port = 33000,
+                testStr = "唨唩唫唭唲唴唵唶唸";
+
+            var server = http.createServer(function(req, res) {
+                req.setEncoding('gbk');
+                req.collect(function(err, body) {
+                    res.end(iconv.encode(body, 'cp936'));
+                });
+
+            }).listen(33000, function() {
+                request({
+                    url: "http://localhost:"+port,
+                    encoding: 'cp936',
+                    body: new Buffer(testStr, 'gbk'),
+                }, function(err, resp, body) {
+                    assert.equal(body, testStr);                
+                    done();
+                });
+            });
+
+            setTimeout(function() {
+                server.close();
+            }, 300);
+        });
+    }
 });
 
