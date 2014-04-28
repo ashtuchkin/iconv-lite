@@ -82,7 +82,7 @@ module.exports = {
         type: '_dbcs',
         table: ['./tables/cp936.json', './tables/gbk-added.json'],
     },
-    'xgbk': 'gbk'
+    'xgbk': 'gbk',
 
     // GB18030 is an algorithmic extension of GBK.
     'gb18030': {
