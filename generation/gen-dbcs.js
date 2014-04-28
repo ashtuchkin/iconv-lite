@@ -6,6 +6,7 @@ async.parallel({
     $big5: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-big5.txt"), // Encodings with $ are not saved. They are used to calculate other encs.
     $gbk:  utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-gb18030.txt"),
     $gbRanges: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-gb18030-ranges.txt"),
+    $eucKr: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-euc-kr.txt"),
     $cp932: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP932.TXT"),
     cp936: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP936.TXT"),
     cp949: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP949.TXT"),
@@ -92,6 +93,32 @@ async.parallel({
             cp932add[k] = data.$cp932[k];
 
     utils.writeTable("cp932-added", utils.generateTable(cp932add));
+
+    // Fill out EUC-KR Table and check that it is the same as cp949.
+    var eucKr = {};
+    for (var i = 0; i < 0x80; i++)
+        eucKr[i] = i;
+    for (var i = 0x8100; i < 0xFF00; i++) {
+        var lead = i >> 8, byte = i & 0xFF, ptr = null, t;
+        if (lead <= 0xC6) {
+            t = (26+26+126)*(lead-0x81) + byte;
+            if (0x41 <= byte && byte <= 0x5A)
+                ptr = t - 0x41;
+            else if (0x61 <= byte && byte <= 0x7A)
+                ptr = t + 26 - 0x61;
+            else if (0x81 <= byte && byte <= 0xFE)
+                ptr = t + 26 + 26 - 0x81; 
+        } else {
+            if (0xA1 <= byte && byte <= 0xFE)
+                ptr = (26+26+126)*(0xC7-0x81) + (lead-0xC7)*94+(byte-0xA1);
+        }
+        if (ptr !== null)
+            eucKr[i] = data.$eucKr[ptr];
+
+        // Compare with cp949
+        if (data.cp949[i] !== eucKr[i])
+            console.log("Warning: EUC-KR from Encoding Standard doesn't match with CP949 from Unicode.com: ", i, data.cp949[i], eucKr[i]);
+    }
 
 
     // Write all plain tables as-is.
