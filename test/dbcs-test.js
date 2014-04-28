@@ -85,7 +85,8 @@ var iconvCannotDecode = { // Characters that we can decode, but iconv cannot. En
         "fc6c": "悤", "fcb9": "撐", "fce2": "晴", "fcf1": "杞", "fdb7": "沜", "fdb8": "渝", "fdbb": "港", "fdf1": "煮", 
         "fe52": "猪", "fe6f": "瑜", "feaa": "瓩", "fedd": "砉",
     },
-    gbk: { "80": "€", "a2e3": "€", "a8bf": "ǹ", 
+    gbk: { // All these will appear in GB18030, + U+0080 = € is compatibility with Windows.
+        "80": "€", "a2e3": "€", "a8bf": "ǹ", 
         "a98a": "⿰", "a98b": "⿱", "a98c": "⿲", "a98d": "⿳", "a98e": "⿴", "a98f": "⿵", "a990": "⿶", 
         "a991": "⿷", "a992": "⿸", "a993": "⿹", "a994": "⿺", "a995": "⿻", "a989": "〾",
         "fe50": "⺁", "fe54": "⺄", "fe55": "㑳", "fe56": "㑇", "fe57": "⺈", "fe58": "⺋", "fe5a": "㖞", 
