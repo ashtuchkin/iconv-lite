@@ -91,7 +91,29 @@ module.exports = {
     "ksc56011987": "cp949",
 
 
-    // == Taiwan/Big5 ==========================================================
+    // == Big5/Taiwan/Hong Kong ================================================
+    // There are lots of tables for Big5 and cp950. Please see the following links for history:
+    // http://moztw.org/docs/big5/  http://www.haible.de/bruno/charsets/conversion-tables/Big5.html
+    // Variations, in roughly number of defined chars:
+    //  * Windows CP 950: Microsoft variant of Big5. Canonical: http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP950.TXT
+    //  * Windows CP 951: Microsoft variant of Big5-HKSCS-2001. Seems to be never public. http://me.abelcheung.org/articles/research/what-is-cp951/
+    //  * Big5-2003 (Taiwan standard) almost superset of cp950.
+    //  * Unicode-at-on (UAO) / Mozilla 1.8. Falling out of use on the Web. Not supported by other browsers.
+    //  * Big5-HKSCS (-2001, -2004, -2008). Hong Kong standard. 
+    //    many unicode code points moved from PUA to Supplementary plane (U+2XXXX) over the years.
+    //    Plus, it has 4 combining sequences.
+    //    Seems that Mozilla refused to support it for 10 yrs. https://bugzilla.mozilla.org/show_bug.cgi?id=162431 https://bugzilla.mozilla.org/show_bug.cgi?id=310299
+    //    because big5-hkscs is the only encoding to include astral characters in non-algorithmic way.
+    //    Implementations are not consistent within browsers; sometimes labeled as just big5.
+    //    MS Internet Explorer switches from big5 to big5-hkscs when a patch applied.
+    //    Great discussion & recap of what's going on https://bugzilla.mozilla.org/show_bug.cgi?id=912470#c31
+    //    In the encoder, it might make sense to support encoding old PUA mappings to Big5 bytes seq-s.
+    //    Official spec: http://www.ogcio.gov.hk/en/business/tech_promotion/ccli/terms/doc/2003cmp_2008.txt
+    //                   http://www.ogcio.gov.hk/tc/business/tech_promotion/ccli/terms/doc/hkscs-2008-big5-iso.txt
+    // 
+    // Current understanding of how to deal with Big5(-HKSCS) is in the Encoding Standard, http://encoding.spec.whatwg.org/#big5-encoder
+    // Unicode mapping (http://www.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/OTHER/BIG5.TXT) is said to be wrong.
+
     'windows950': 'cp950',
     '950': 'cp950',
     'cp950': {
@@ -99,8 +121,9 @@ module.exports = {
         table: './tables/cp950.json',
     },
 
-    // Big5 has many variations and is an extension of cp950. We use Mozilla's as a consensus.
-    'big5': {
+    // Big5 has many variations and is an extension of cp950. We use Encoding Standard's as a consensus.
+    'big5': 'big5hkscs',
+    'big5hkscs': {
         type: '_dbcs',
         table: ['./tables/cp950.json', './tables/big5-added.json'],
     },

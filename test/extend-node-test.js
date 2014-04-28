@@ -32,9 +32,9 @@ describe("Extend Node native encodings", function() {
         assert.equal(buf.write("abcde abcde", 3, 4, "windows-1251"), 4);
         assert.equal(buf.toString(), "hehabcd wo");
 
-        assert.equal(buf.write("丗丢丬乕乢亊亰仫", 1, "big5"), 9);
-        assert.equal(buf.toString('big5'), "h丗丢丬乕?"); // TODO: the following line is more correct.
-        //assert.equal(buf.toString('big5'), "h丗丢丬乕o");
+        assert.equal(buf.write("活洽派洶洛泵洹洧", 1, "big5"), 9);
+        assert.equal(buf.toString('big5'), "h活洽派洶�"); // TODO: the following line is more correct.
+        //assert.equal(buf.toString('big5'), "h活洽派洶o");
 
         // TODO: Set _charsWritten.
     });
@@ -52,11 +52,11 @@ describe("Extend Node native encodings", function() {
         assert.equal(buf.write("abcde abcde", 3, 4, "windows-1251"), 4);
         assert.equal(buf.toString(), "hehabcd wo");
 
-        assert.equal(buf.write("丗丢丬乕乢亊亰仫", 1, "big5"), 9);
-        assert.equal(buf.toString('big5'), "h丗丢丬乕?"); // TODO: the following line is more correct.
-        //assert.equal(buf.toString('big5'), "h丗丢丬乕o");
+        assert.equal(buf.write("活洽派洶洛泵洹洧", 1, "big5"), 9);
+        assert.equal(buf.toString('big5'), "h活洽派洶�"); // TODO: the following line is more correct.
+        //assert.equal(buf.toString('big5'), "h活洽派洶o");
 
-        assert.equal(Buffer.byteLength("丗丢丬乕乢亊亰仫", 'big5'), 16);
+        assert.equal(Buffer.byteLength("活洽派洶洛泵洹洧", 'big5'), 16);
         if (Buffer.isEncoding)
             assert(Buffer.isEncoding("windows-1251"));
 

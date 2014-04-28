@@ -236,7 +236,7 @@ describe("Streaming mode", function() {
     it("Decoding of incomplete chars at the end of the stream in DBCS (gbk)", checkDecodeStream({
         encoding: "gbk",
         input: [[0x61, 0x81]],
-        output: "a?"
+        output: "a�"
     }));
 
 });

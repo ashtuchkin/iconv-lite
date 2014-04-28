@@ -34,4 +34,19 @@ describe("Big5 tests", function() {
         assert.strictEqual(iconv.encode(chars, "big5").toString('hex'), big5Chars.toString('hex'));
         assert.strictEqual(iconv.decode(big5Chars, "big5"), chars)
     });
+
+    it("Big5 correctly encodes & decodes sequences", function() {
+        assert.strictEqual(iconv.encode("\u00CA\u0304", "big5").toString('hex'), "8862");
+        assert.strictEqual(iconv.encode("\u00EA\u030C", "big5").toString('hex'), "88a5");
+        assert.strictEqual(iconv.encode("\u00CA", "big5").toString('hex'), "8866");
+        assert.strictEqual(iconv.encode("\u00CA\u00CA", "big5").toString('hex'), "88668866");
+
+        assert.strictEqual(iconv.encode("\u00CA\uD800", "big5").toString('hex'), "88663f");         // Unfinished surrogate.
+        assert.strictEqual(iconv.encode("\u00CA\uD841\uDD47", "big5").toString('hex'), "8866fa40"); // Finished surrogate ('𠕇').
+        assert.strictEqual(iconv.encode("\u00CA𠕇", "big5").toString('hex'), "8866fa40");            // Finished surrogate ('𠕇').
+
+        assert.strictEqual(iconv.decode(new Buffer('8862', 'hex'), "big5"), "\u00CA\u0304");
+        assert.strictEqual(iconv.decode(new Buffer('8866', 'hex'), "big5"), "\u00CA");
+        assert.strictEqual(iconv.decode(new Buffer('8866fa40', 'hex'), "big5"), "\u00CA𠕇");
+    });
 });
