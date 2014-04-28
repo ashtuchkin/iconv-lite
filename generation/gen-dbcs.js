@@ -5,6 +5,7 @@ var utils = require("./utils"),
 async.parallel({
     $big5: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-big5.txt"), // Encodings with $ are not saved. They are used to calculate other encs.
     $gbk:  utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-gb18030.txt"),
+    $gbRanges: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-gb18030-ranges.txt"),
     $cp932: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP932.TXT"),
     cp936: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP936.TXT"),
     cp949: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP949.TXT"),
@@ -70,13 +71,21 @@ async.parallel({
 
     utils.writeTable("gbk-added", utils.generateTable(gbkadd));
 
+    // Write GB18030 ranges
+    var ranges = { uChars: [], gbChars: [] };
+    for (var k in data.$gbRanges) {
+        ranges.uChars.push(data.$gbRanges[k]);
+        ranges.gbChars.push(+k);
+    }
+    utils.writeFile("gb18030-ranges", JSON.stringify(ranges));
+
 
     // Add missing chars to ShiftJIS
     for (var i = 0; i < 0x20; i++)
         data.shiftjis[i] = i;
     data.shiftjis[0x7F] = 0x7F;
 
-    // Create cp932-added
+    // Create cp932-added as a difference between cp932 and ShiftJIS.
     var cp932add = {};
     for (var k in data.$cp932)
         if (data.shiftjis[k] !== data.$cp932[k])
@@ -85,13 +94,13 @@ async.parallel({
     utils.writeTable("cp932-added", utils.generateTable(cp932add));
 
 
-    // Write all plain tables to as-is.
+    // Write all plain tables as-is.
     for (var enc in data)
         if (enc[0] != "$") 
             utils.writeTable(enc, utils.generateTable(data[enc]));
 
 
-    console.log("Encodings regenerated.");
+    console.log("DBCS encodings regenerated.");
 }));
 
 

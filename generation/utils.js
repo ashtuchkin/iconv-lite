@@ -101,8 +101,10 @@ exports.generateTable = function(dbcs) {
 
 
 exports.writeTable = function(name, table) {
-    fs.writeFileSync(path.join(__dirname, "../encodings/tables", name + ".json"), 
-        "[\n" + table.map(function(a) {return JSON.stringify(a);}).join(",\n") + "\n]\n");
+    this.writeFile(name, "[\n" + table.map(function(a) {return JSON.stringify(a);}).join(",\n") + "\n]\n");
 }
 
+exports.writeFile = function(name, body) {
+    fs.writeFileSync(path.join(__dirname, "../encodings/tables", name + ".json"), body);
+}
 

@@ -75,6 +75,13 @@ module.exports = {
         table: ['./tables/cp936.json', './tables/gbk-added.json'],
     },
 
+    // GB18030 is an algorithmic extension of GBK.
+    'gb18030': {
+        type: '_dbcs',
+        table: ['./tables/cp936.json', './tables/gbk-added.json'],
+        gb18030: './tables/gb18030-ranges.json',
+    },
+
     // TODO: Support GB18030 (~27000 chars + whole unicode mapping, cp54936)
     // http://icu-project.org/docs/papers/gb18030.html
     // http://source.icu-project.org/repos/icu/data/trunk/charset/data/xml/gb-18030-2000.xml

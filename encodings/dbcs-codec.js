@@ -149,6 +149,14 @@ exports._dbcs = function(options) {
         }
     }
 
+    if (typeof options.gb18030 == 'string') {
+        options.gb18030 = require(options.gb18030);
+        for (var i = 0; i < 0x100; i++)
+            if ((0x81 <= i && i <= 0xFE) != (decodeLead[i] == -2))
+                throw new Error("Invalid GB18030 double-byte table; leading byte is not in range 0x81-0xFE: ", i.toString(16));
+    }
+        
+
     var defCharSB  = encodeTable[0][options.iconv.defaultCharSingleByte.charCodeAt(0)];
     if (defCharSB === -1) defCharSB = encodeTable[0]['?'];
     if (defCharSB === -1) defCharSB = "?".charCodeAt(0);
@@ -165,6 +173,7 @@ exports._dbcs = function(options) {
         encodeTable: encodeTable,
         encodeTableSeq: encodeTableSeq,
         defaultCharSingleByte: defCharSB,
+        gb18030: options.gb18030,
     };
 }
 
@@ -182,11 +191,15 @@ function encoderDBCS(options) {
         encodeTable: this.encodeTable,
         encodeTableSeq: this.encodeTableSeq,
         defaultCharSingleByte: this.defaultCharSingleByte,
+        gb18030: this.gb18030,
+
+        // Export for testing
+        findIdx: findIdx,
     }
 }
 
 function encoderDBCSWrite(str) {
-    var newBuf = new Buffer(str.length*2), 
+    var newBuf = new Buffer(str.length * (this.gb18030 ? 4 : 2)), 
         leadSurrogate = this.leadSurrogate,
         seqObj = this.seqObj, nextChar = -1,
         i = 0, j = 0;
@@ -267,6 +280,19 @@ function encoderDBCSWrite(str) {
                 seqObj = this.encodeTableSeq[-dbcsCode];
                 continue;
             }
+
+            if (dbcsCode == -1 && this.gb18030) {
+                // Use GB18030 algorithm to find character(s) to write.
+                var idx = findIdx(this.gb18030.uChars, uCode);
+                if (idx != -1) {
+                    var dbcsCode = this.gb18030.gbChars[idx] + (uCode - this.gb18030.uChars[idx]);
+                    newBuf[j++] = 0x81 + Math.floor(dbcsCode / 12600); dbcsCode = dbcsCode % 12600;
+                    newBuf[j++] = 0x30 + Math.floor(dbcsCode / 1260); dbcsCode = dbcsCode % 1260;
+                    newBuf[j++] = 0x81 + Math.floor(dbcsCode / 10); dbcsCode = dbcsCode % 10;
+                    newBuf[j++] = 0x30 + dbcsCode;
+                    continue;
+                }
+            }
         }
 
         // 3. Write dbcsCode character.
@@ -327,31 +353,77 @@ function decoderDBCS(options) {
         end: decoderDBCSEnd,
 
         // Decoder state
-        leadByte: -1,
+        leadBytes: -1,
 
         // Static data
         decodeLead: this.decodeLead,
         decodeTable: this.decodeTable,
         decodeTableSeq: this.decodeTableSeq,
         defaultCharUnicode: this.defaultCharUnicode,
+        gb18030: this.gb18030,
     }
 }
 
 function decoderDBCSWrite(buf) {
     var newBuf = new Buffer(buf.length*2),
-        leadByte = this.leadByte, uCode;
+        leadBytes = this.leadBytes, uCode;
     
     for (var i = 0, j = 0; i < buf.length; i++) {
         var curByte = buf[i];
-        if (leadByte === -1) { // We have no leading byte in buffer.
+        if (leadBytes === -1) { // We have no leading byte in buffer.
             uCode = this.decodeLead[curByte];
             if (uCode === -2) { // Check if this is a leading byte of a double-byte char sequence.
-                leadByte = curByte; 
+                leadBytes = curByte; 
                 continue;
             }
         } else { // curByte is a trailing byte in double-byte char sequence.
-            uCode = this.decodeTable[(leadByte << 8) + curByte - 0x8000];
-            leadByte = -1;
+
+            if (this.gb18030) {
+                if (leadBytes < 0x100) { // Single byte lead
+                    if (0x30 <= curByte && curByte <= 0x39) {
+                        leadBytes = leadBytes * 0x100 + curByte; // Move on.
+                        continue;
+                    }
+                    else // Usual decode table. 
+                        uCode = this.decodeTable[(leadBytes << 8) + curByte - 0x8000];
+                        
+                } else if (leadBytes < 0x10000) { // Double byte lead
+                    if (0x81 <= curByte && curByte <= 0xFE) {
+                        leadBytes = leadBytes * 0x100 + curByte; // Move on.
+                        continue;
+
+                    } else { // Incorrect byte.
+                        uCode = this.defaultCharUnicode.charCodeAt(0); 
+                        newBuf[j++] = uCode & 0xFF;    // Emit 'incorrect sequence' char.
+                        newBuf[j++] = uCode >> 8;
+                        newBuf[j++] = leadBytes & 0xFF; // Throw out first char, emit second char (it'll be '0'-'9').
+                        newBuf[j++] = 0;
+                        leadBytes = -1; i--; // Cur char will be processed once again, without leading.
+                        continue;
+                    }
+
+                } else { // Triple byte lead: we're ready.
+                    if (0x30 <= curByte && curByte <= 0x39) { // Complete sequence. Decode it.
+                        var ptr = ((((leadBytes >> 16)-0x81)*10 + ((leadBytes >> 8) & 0xFF)-0x30)*126 + (leadBytes & 0xFF)-0x81)*10 + curByte-0x30;
+                        var idx = findIdx(this.gb18030.gbChars, ptr);
+                        uCode = this.gb18030.uChars[idx] + ptr - this.gb18030.gbChars[idx];
+
+                    } else { // Incorrect 4-th byte.
+                        uCode = this.defaultCharUnicode.charCodeAt(0); 
+                        newBuf[j++] = uCode & 0xFF;    // Emit 'incorrect sequence' char.
+                        newBuf[j++] = uCode >> 8;
+                        newBuf[j++] = (leadBytes >> 8) & 0xFF; // Throw out first char, emit second char (it'll be '0'-'9').
+                        newBuf[j++] = 0;
+                        leadBytes = leadBytes & 0xFF; // Make third char a leading byte - it was in 0x81-0xFE range.
+                        i--; // Cur char will be processed once again.
+                        continue;
+                    }
+                }
+            } else
+                uCode = this.decodeTable[(leadBytes << 8) + curByte - 0x8000];
+
+            leadBytes = -1;
+            if (uCode == -1) i--; // Try curByte one more time in the next iteration without the lead byte.
         }
         
         // Decide what to do with character.
@@ -383,14 +455,41 @@ function decoderDBCSWrite(buf) {
         newBuf[j++] = uCode >> 8;
     }
 
-    this.leadByte = leadByte;
+    this.leadBytes = leadBytes;
     return newBuf.slice(0, j).toString('ucs2');
 }
 
 function decoderDBCSEnd() {
-    if (this.leadByte !== -1) {
-        this.leadByte = -1;
-        return this.defaultCharUnicode; // Incomplete character at the end. TODO: Callback.
+    if (this.leadBytes === -1)
+        return;
+
+    var ret = this.defaultCharUnicode;
+
+    if (this.gb18030 && this.leadBytes >= 0x100) {
+        if (this.leadBytes < 0x10000) 
+            // Double byte lead: throw out first char, emit second char (it'll be '0'-'9').
+            ret += String.fromCharCode(this.leadBytes & 0xFF); 
+        else
+            // Triple byte lead: throw out first char, emit second char (it'll be '0'-'9'), emit default for third char (its 0x81-0xFE).
+            ret += String.fromCharCode((this.leadBytes >> 8) & 0xFF) + this.defaultCharUnicode; 
     }
+
+    this.leadBytes = -1;
+    return ret;
 }
 
+// Binary search for GB18030. Returns largest i such that table[i] <= val.
+function findIdx(table, val) {
+    if (table[0] > val)
+        return -1;
+
+    var l = 0, r = table.length;
+    while (l < r-1) { // always table[l] <= val < table[r]
+        var mid = l + Math.floor((r-l+1)/2);
+        if (table[mid] <= val)
+            l = mid;
+        else
+            r = mid;
+    }
+    return l;
+}

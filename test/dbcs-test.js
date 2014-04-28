@@ -11,8 +11,11 @@ function forAllChars(converter, fn, origbuf, len) {
         origbuf = new Buffer(10);
         len = 1;
     }
+    if (!converter.chars) converter.chars = 1;
     var buf = origbuf.slice(0, len);
     for (var i = 0; i < 0x100; i++) {
+        if (converter.chars++ > 0x20000)
+            return; 
         buf[len-1] = i;
         try {
             var res = converter(buf);
@@ -57,6 +60,12 @@ var iconvChanges = { // Characters that iconv changing (iconv char -> our char)
 
     // Big5 is known for lots of different variations. We use Encoding Standard.
     big5hkscs: {"•": "‧", "､": "﹑", "‾": "¯", "∼": "～", "♁": "⊕", "☉": "⊙", "／": "∕", "＼": "﹨", "¥": "￥", "¢": "￠", "£": "￡"},
+
+    // Iconv encodes some chars to the PUA area. In ICU there's no such mapping.
+    gb18030: { "ḿ": "", "龴": "", "龵": "", "龶": "", "龷": "", "龸": "", "龹": "", 
+        "龺": "", "龻": "", "︐": "", "︑": "", "︒": "", "︓": "", "︔": "", "︕": "", 
+        "︖": "", "︗": "", "︘": "", "︙": "", 
+    }
 }
 
 var iconvCannotDecode = { // Characters that we can decode, but iconv cannot. Encoding -> correct char. Also use them for encoding check.
@@ -100,6 +109,9 @@ var iconvCannotDecode = { // Characters that we can decode, but iconv cannot. En
         "fe92": "䲣", "fe93": "䲟", "fe94": "䲠", "fe95": "䲡", "fe96": "䱷", "fe97": "䲢", 
         "fe98": "䴓", "fe99": "䴔", "fe9a": "䴕", "fe9b": "䴖", "fe9c": "䴗", "fe9d": "䴘", "fe9e": "䴙", "fe9f": "䶮",
     },
+    gb18030: {
+        "80": "€",
+    }
 }
 
 function swapBytes(buf) { for (var i = 0; i < buf.length; i+=2) buf.writeUInt16LE(buf.readUInt16BE(i), i); return buf; }
