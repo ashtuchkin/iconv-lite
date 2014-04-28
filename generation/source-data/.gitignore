@@ -1,0 +1,7 @@
+# This directory will contain temp files needed to create encoding data files.
+
+# Don't commit any files in this directory
+*
+
+# Except this file
+!.gitignore

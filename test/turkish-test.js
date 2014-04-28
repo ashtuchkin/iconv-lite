@@ -1,5 +1,4 @@
-var vows = require('vows'),
-    assert = require('assert'),
+var assert = require('assert'),
     iconv = require(__dirname+'/../');
 
 var ascii = '\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f'+
@@ -51,40 +50,34 @@ var encodings = [{
     }
 }];
 
-var testsBatch = {};
-encodings.forEach(function(encoding) {
-    var enc = encoding.variations[0];
-    var key = "turkish";
-    var tests = {
-        "Convert to empty buffer": function() {
-            assert.strictEqual(iconv.toEncoding("", enc).toString('binary'), new Buffer('').toString('binary'));
-        },
-        "Convert from empty buffer": function() {
-            assert.strictEqual(iconv.fromEncoding(new Buffer(''), enc), "");
-        },
-        "Convert from buffer": function() {
-            for (var key in encoding.encodedStrings)
-                assert.strictEqual(iconv.fromEncoding(encoding.encodedStrings[key], enc),
-                    encoding.strings[key]);
-        },
-        "Convert to buffer": function() {
-            for (var key in encoding.encodedStrings)
-                assert.strictEqual(iconv.toEncoding(encoding.strings[key], enc).toString('binary'),
-                    encoding.encodedStrings[key].toString('binary'));
-        },
-        "Try different variations of encoding": function() {
-            encoding.variations.forEach(function(enc) {
-                assert.strictEqual(iconv.fromEncoding(encoding.encodedStrings[key], enc), encoding.strings[key]);
-                assert.strictEqual(iconv.toEncoding(encoding.strings[key], enc).toString('binary'), encoding.encodedStrings[key].toString('binary'));
+describe("Test Turkish encodings", function() {
+    encodings.forEach(function(encoding) {
+        var enc = encoding.variations[0];
+        var key = "turkish";
+        describe(encoding.name+":", function() {
+            it("Convert from buffer", function() {
+                for (var key in encoding.encodedStrings)
+                    assert.strictEqual(iconv.decode(encoding.encodedStrings[key], enc),
+                        encoding.strings[key]);
             });
-        },
-        "Untranslatable chars are converted to defaultCharSingleByte": function() {
-            var expected = encoding.strings.untranslatable.split('').map(function(c) {return iconv.defaultCharSingleByte; }).join('');
-            assert.strictEqual(iconv.toEncoding(encoding.strings.untranslatable, enc).toString('binary'), expected); // Only '?' characters.
-        }
-    };
 
-    testsBatch[encoding.name+":"] = tests;
+            it("Convert to buffer", function() {
+                for (var key in encoding.encodedStrings)
+                    assert.strictEqual(iconv.encode(encoding.strings[key], enc).toString('binary'),
+                        encoding.encodedStrings[key].toString('binary'));
+            });
+
+            it("Try different variations of encoding", function() {
+                encoding.variations.forEach(function(enc) {
+                    assert.strictEqual(iconv.decode(encoding.encodedStrings[key], enc), encoding.strings[key]);
+                    assert.strictEqual(iconv.encode(encoding.strings[key], enc).toString('binary'), encoding.encodedStrings[key].toString('binary'));
+                });
+            });
+
+            it("Untranslatable chars are converted to defaultCharSingleByte", function() {
+                var expected = encoding.strings.untranslatable.split('').map(function(c) {return iconv.defaultCharSingleByte; }).join('');
+                assert.strictEqual(iconv.encode(encoding.strings.untranslatable, enc).toString('binary'), expected); // Only '?' characters.
+            });
+        });
+    });
 });
-
-vows.describe("Test Turkish encodings").addBatch(testsBatch).export(module);

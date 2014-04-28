@@ -1,237 +1,439 @@
-var RE_SPACEDASH = /[- ]/g;
-// Module exports
+
+var IconvLiteEncoderStream = false,
+    IconvLiteDecoderStream = false;
+
 var iconv = module.exports = {
-    toEncoding: function(str, encoding) {
-        return iconv.getCodec(encoding).toEncoding(str);
-    },
-    fromEncoding: function(buf, encoding) {
-        return iconv.getCodec(encoding).fromEncoding(buf);
-    },
-    encodingExists: function(enc) {
-        loadEncodings();
-        enc = enc.replace(RE_SPACEDASH, "").toLowerCase();
-        return (iconv.encodings[enc] !== undefined);
-    },
-    
+    // All codecs and aliases are kept here, keyed by encoding name.
+    // They are lazy loaded in `getCodec` by `/encodings/index.js` to make initial module loading fast.
+    encodings: null,
+
+    codecData: {},
+
+    // Characters emitted in case of error.
     defaultCharUnicode: '�',
     defaultCharSingleByte: '?',
 
-    encodingsLoaded: false,
-    
-    // Get correct codec for given encoding.
-    getCodec: function(encoding) {
-        loadEncodings();
-        var enc = encoding || "utf8";
-        var codecOptions = undefined;
-        while (1) {
-            if (getType(enc) === "String")
-                enc = enc.replace(RE_SPACEDASH, "").toLowerCase();
-            var codec = iconv.encodings[enc];
-            var type = getType(codec);
-            if (type === "String") {
-                // Link to other encoding.
-                codecOptions = {originalEncoding: enc};
-                enc = codec;
-            }
-            else if (type === "Object" && codec.type != undefined) {
-                // Options for other encoding.
-                codecOptions = codec;
-                enc = codec.type;
-            } 
-            else if (type === "Function")
-                // Codec itself.
-                return codec(codecOptions);
-            else
-                throw new Error("Encoding not recognized: '" + encoding + "' (searched as: '"+enc+"')");
+    // Public API
+    encode: function(str, encoding, options) {
+        str = ensureString(str);
+        var encoder = iconv.getCodec(encoding).encoder(options);
+        var front = encoder.write(str);
+        var end = encoder.end();
+        if (end)
+            return Buffer.concat([front, end]);
+        else
+            return front;
+    },
+    decode: function(buf, encoding, options) {
+        buf = ensureBuffer(buf);
+        var decoder = iconv.getCodec(encoding).decoder(options);
+        var front = decoder.write(buf);
+        var end = decoder.end();
+        if (end)
+            return front + end;
+        else
+            return front;
+    },
+
+    encodeStream: function(encoding, options) {
+        if (!IconvLiteEncoderStream)
+            throw new Error("Iconv-lite streams supported only since Node v0.10.");
+
+        return new IconvLiteEncoderStream(iconv.getCodec(encoding).encoder(options), options);
+    },
+    decodeStream: function(encoding, options) {
+        if (!IconvLiteDecoderStream)
+            throw new Error("Iconv-lite streams supported only since Node v0.10.");
+
+        return new IconvLiteDecoderStream(iconv.getCodec(encoding).decoder(options), options);
+    },
+
+    encodingExists: function(enc) {
+        try {
+            iconv.getCodec(enc);
+            return true;
+        } catch (e) {
+            return false;
         }
     },
-    
-    // Define basic encodings
-    encodings: {
-        internal: function(options) {
-            return {
-                toEncoding: toInternalEncoding,
-                fromEncoding: fromInternalEncoding,
-                options: options
-            };
-        },
-        utf8: "internal",
-        ucs2: "internal",
-        binary: "internal",
-        ascii: "internal",
-        base64: "internal",
+    supportsStreams: function() {
+        return !!IconvLiteEncoderStream;
+    },
+    extendNodeEncodings: extendNodeEncodings,
+    undoExtendNodeEncodings: undoExtendNodeEncodings,
+
+    // Search for a codec.
+    getCodec: function(encoding) {
+        if (!iconv.encodings)
+            iconv.encodings = require("./encodings"); // Lazy load all encoding definitions.
         
-        // Codepage single-byte encodings.
-        singlebyte: function(options) {
-            // Prepare chars if needed
-            if (!options.charsBuf) {
-                if (!options.chars || (options.chars.length !== 128 && options.chars.length !== 256))
-                    throw new Error("Encoding '"+options.type+"' has incorrect 'chars' (must be of len 128 or 256)");
-                
-                if (options.chars.length === 128)
-                    options.chars = asciiString + options.chars;
+        // Canonicalize encoding name: strip all non-alphanumeric chars and appended year.
+        var enc = (''+encoding).toLowerCase().replace(/[^0-9a-z]|:\d{4}$/g, "");
 
-                options.charsBuf = new Buffer(options.chars, 'ucs2');
-            }
-            
-            if (!options.revCharsBuf) {
-                options.revCharsBuf = new Buffer(65536);
-                var defChar = iconv.defaultCharSingleByte.charCodeAt(0);
-                for (var i = 0; i < options.revCharsBuf.length; i++)
-                    options.revCharsBuf[i] = defChar;
-                for (var i = 0; i < options.chars.length; i++)
-                    options.revCharsBuf[options.chars.charCodeAt(i)] = i;
-            }
+        var codecOptions, saveEnc;
+        while (1) {
+            var codecData = iconv.codecData[enc];
+            if (codecData)
+                return codecData;
 
-            return {
-                toEncoding: toSingleByteEncoding,
-                fromEncoding: fromSingleByteEncoding,
-                options: options,
-            };
-        },
+            var codec = iconv.encodings[enc];
 
-        // Codepage double-byte encodings.
-        table: function(options) {
-            if (!options.table) {
-                if (options.init) {
-                    options.init.call(options);
-                }
-                if (!options.table) {
-                    throw new Error("Encoding '" + options.type + "' has incorect 'table' option");
-                }
-            }
-            if (!options.revCharsTable) {
-                var revCharsTable = options.revCharsTable = {};
-                for (var i = 0; i <= 0xFFFF; i++) {
-                    revCharsTable[i] = 0;
-                }
+            switch (getType(codec)) {
+                case "String": // Direct alias to other encoding.
+                    enc = codec;
+                    break;
 
-                var table = options.table;
-                for (var key in table) {
-                    revCharsTable[table[key]] = +key;
-                }
+                case "Object": // Alias with additional options. Can be layered.
+                    if (!codecOptions) {
+                        codecOptions = codec;
+                        saveEnc = enc;
+                    }
+                    else
+                        for (var key in codec)
+                            codecOptions[key] = codec[key];
+
+                    enc = codec.type;
+                    break;
+
+                case "Function": // Codec itself.
+                    codecOptions.iconv = iconv;
+                    codecData = codec(codecOptions);
+                    iconv.codecData[saveEnc || enc] = codecData; // Save it to be reused later.
+                    return codecData;
+
+                default:
+                    throw new Error("Encoding not recognized: '" + encoding + "' (searched as: '"+enc+"')");
             }
-            
-            return {
-                toEncoding: toTableEncoding,
-                fromEncoding: fromTableEncoding,
-                options: options,
-            };
         }
-    }
+    },
+
 };
 
-function toInternalEncoding(str) {
-    return new Buffer(ensureString(str), this.options.originalEncoding);
-}
-
-function fromInternalEncoding(buf) {
-    return ensureBuffer(buf).toString(this.options.originalEncoding);
-}
-
-function toTableEncoding(str) {
-    str = ensureString(str);
-    var strLen = str.length;
-    var revCharsTable = this.options.revCharsTable;
-    var newBuf = new Buffer(strLen*2), gbkcode, unicode,
-        defaultChar = revCharsTable[iconv.defaultCharUnicode.charCodeAt(0)];
-
-    for (var i = 0, j = 0; i < strLen; i++) {
-        unicode = str.charCodeAt(i);
-        if (unicode >> 7) {
-            gbkcode = revCharsTable[unicode] || defaultChar;
-            newBuf[j++] = gbkcode >> 8; //high byte;
-            newBuf[j++] = gbkcode & 0xFF; //low byte
-        } else {//ascii
-            newBuf[j++] = unicode;
-        }
-    }
-    return newBuf.slice(0, j);
-}
-
-function fromTableEncoding(buf) {
-    buf = ensureBuffer(buf);
-    var bufLen = buf.length;
-    var table = this.options.table;
-    var newBuf = new Buffer(bufLen*2), unicode, gbkcode,
-        defaultChar = iconv.defaultCharUnicode.charCodeAt(0);
-
-    for (var i = 0, j = 0; i < bufLen; i++, j+=2) {
-        gbkcode = buf[i];
-        if (gbkcode & 0x80) {
-            gbkcode = (gbkcode << 8) + buf[++i];
-            unicode = table[gbkcode] || defaultChar;
-        } else {
-            unicode = gbkcode;
-        }
-        newBuf[j] = unicode & 0xFF; //low byte
-        newBuf[j+1] = unicode >> 8; //high byte
-    }
-    return newBuf.slice(0, j).toString('ucs2');
-}
-
-function toSingleByteEncoding(str) {
-    str = ensureString(str);
-    
-    var buf = new Buffer(str.length);
-    var revCharsBuf = this.options.revCharsBuf;
-    for (var i = 0; i < str.length; i++)
-        buf[i] = revCharsBuf[str.charCodeAt(i)];
-    
-    return buf;
-}
-
-function fromSingleByteEncoding(buf) {
-    buf = ensureBuffer(buf);
-    
-    // Strings are immutable in JS -> we use ucs2 buffer to speed up computations.
-    var charsBuf = this.options.charsBuf;
-    var newBuf = new Buffer(buf.length*2);
-    var idx1 = 0, idx2 = 0;
-    for (var i = 0, _len = buf.length; i < _len; i++) {
-        idx1 = buf[i]*2; idx2 = i*2;
-        newBuf[idx2] = charsBuf[idx1];
-        newBuf[idx2+1] = charsBuf[idx1+1];
-    }
-    return newBuf.toString('ucs2');
-}
-
-// Add aliases to convert functions
-iconv.encode = iconv.toEncoding;
-iconv.decode = iconv.fromEncoding;
-
-// Load other encodings manually from files in /encodings dir.
-function loadEncodings() {
-    if (!iconv.encodingsLoaded) {
-        [ require('./encodings/singlebyte'),
-          require('./encodings/gbk'),
-          require('./encodings/big5'),
-          require('./encodings/filemapping')
-        ].forEach(function(encodings) {
-            for (var key in encodings)
-                iconv.encodings[key] = encodings[key]
-        });
-        iconv.encodingsLoaded = true;
-    }
-}
-
+// Legacy aliases to convert functions
+iconv.toEncoding = iconv.encode;
+iconv.fromEncoding = iconv.decode;
 
 
 // Utilities
-var asciiString = '\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f'+
-              ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f';
+function getType(obj) {
+    return Object.prototype.toString.call(obj).slice(8, -1);
+}
 
-var ensureBuffer = function(buf) {
+function ensureBuffer(buf) {
     buf = buf || new Buffer(0);
     return (buf instanceof Buffer) ? buf : new Buffer(""+buf, "binary");
 }
 
-var ensureString = function(str) {
+function ensureString(str) {
     str = str || "";
     return (str instanceof Buffer) ? str.toString('utf8') : (""+str);
 }
 
-var getType = function(obj) {
-    return Object.prototype.toString.call(obj).slice(8, -1);
+// Streaming support for Node v0.10+
+var nodeVer = process.versions.node.split(".").map(Number);
+if (nodeVer[0] > 0 || nodeVer[1] >= 10) {
+    var Transform = require("stream").Transform;
+
+    // == Encoder stream =======================================================
+    IconvLiteEncoderStream = function IconvLiteEncoderStream(conv, options) {
+        this.conv = conv;
+        options = options || {};
+        options.decodeStrings = false; // We accept only strings, so we don't need to decode them.
+        Transform.call(this, options);
+    }
+
+    IconvLiteEncoderStream.prototype = Object.create(Transform.prototype, {
+        constructor: { value: IconvLiteEncoderStream }
+    });
+
+    IconvLiteEncoderStream.prototype._transform = function(chunk, encoding, done) {
+        if (typeof chunk != 'string')
+            return done(new Error("Iconv encoding stream needs strings as its input."));
+        try {
+            var res = this.conv.write(chunk);
+            if (res && res.length) this.push(res);
+            done();
+        }
+        catch (e) {
+            done(e);
+        }
+    }
+
+    IconvLiteEncoderStream.prototype._flush = function(done) {
+        try {
+            var res = this.conv.end();
+            if (res && res.length) this.push(res);
+            done();
+        }
+        catch (e) {
+            done(e);
+        }
+    }
+
+    IconvLiteEncoderStream.prototype.collect = function(cb) {
+        var chunks = [];
+        this.on('error', cb);
+        this.on('data', function(chunk) { chunks.push(chunk); });
+        this.on('end', function() {
+            cb(null, Buffer.concat(chunks));
+        });
+        return this;
+    }
+
+
+    // == Decoder stream =======================================================
+    IconvLiteDecoderStream = function IconvLiteDecoderStream(conv, options) {
+        this.conv = conv;
+        options = options || {};
+        options.encoding = this.encoding = 'utf8'; // We output strings.
+        Transform.call(this, options);
+    }
+
+    IconvLiteDecoderStream.prototype = Object.create(Transform.prototype, {
+        constructor: { value: IconvLiteDecoderStream }
+    });
+
+    IconvLiteDecoderStream.prototype._transform = function(chunk, encoding, done) {
+        if (!Buffer.isBuffer(chunk))
+            return done(new Error("Iconv decoding stream needs buffers as its input."));
+        try {
+            var res = this.conv.write(chunk);
+            if (res && res.length) this.push(res, this.encoding);
+            done();
+        }
+        catch (e) {
+            done(e);
+        }
+    }
+
+    IconvLiteDecoderStream.prototype._flush = function(done) {
+        try {
+            var res = this.conv.end();
+            if (res && res.length) this.push(res, this.encoding);                
+            done();
+        }
+        catch (e) {
+            done(e);
+        }
+    }
+
+    IconvLiteDecoderStream.prototype.collect = function(cb) {
+        var res = '';
+        this.on('error', cb);
+        this.on('data', function(chunk) { res += chunk; });
+        this.on('end', function() {
+            cb(null, res);
+        });
+        return this;
+    }
 }
+
+// == Extend Node primitives to use iconv-lite =================================
+var original = undefined; // original functions.
+
+function extendNodeEncodings() {
+    if (original)
+        throw new Error("require('iconv-lite').extendNodeEncodings() is already called.")
+    original = {};
+
+    var nodeNativeEncodings = {
+        'hex': true, 'utf8': true, 'utf-8': true, 'ascii': true, 'binary': true, 
+        'base64': true, 'ucs2': true, 'ucs-2': true, 'utf16le': true, 'utf-16le': true,
+    };
+
+    Buffer.isNativeEncoding = function(enc) {
+        return nodeNativeEncodings[enc && enc.toLowerCase()];
+    }
+
+    // -- SlowBuffer -----------------------------------------------------------
+    var SlowBuffer = require('buffer').SlowBuffer;
+
+    original.SlowBufferToString = SlowBuffer.prototype.toString;
+    SlowBuffer.prototype.toString = function(encoding, start, end) {
+        encoding = String(encoding || 'utf8').toLowerCase();
+        start = +start || 0;
+        if (typeof end !== 'number') end = this.length;
+
+        // Fastpath empty strings
+        if (+end == start)
+            return '';
+
+        // Use native conversion when possible
+        if (Buffer.isNativeEncoding(encoding))
+            return original.SlowBufferToString.call(this, encoding, start, end);
+
+        // Otherwise, use our decoding method.
+        if (typeof start == 'undefined') start = 0;
+        if (typeof end == 'undefined') end = this.length;
+        return iconv.decode(this.slice(start, end), encoding);
+    }
+
+    original.SlowBufferWrite = SlowBuffer.prototype.write;
+    SlowBuffer.prototype.write = function(string, offset, length, encoding) {
+        // Support both (string, offset, length, encoding)
+        // and the legacy (string, encoding, offset, length)
+        if (isFinite(offset)) {
+            if (!isFinite(length)) {
+                encoding = length;
+                length = undefined;
+            }
+        } else {  // legacy
+            var swap = encoding;
+            encoding = offset;
+            offset = length;
+            length = swap;
+        }
+
+        offset = +offset || 0;
+        var remaining = this.length - offset;
+        if (!length) {
+            length = remaining;
+        } else {
+            length = +length;
+            if (length > remaining) {
+                length = remaining;
+            }
+        }
+        encoding = String(encoding || 'utf8').toLowerCase();
+
+        // Use native conversion when possible
+        if (Buffer.isNativeEncoding(encoding))
+            return original.SlowBufferWrite.call(this, string, offset, length, encoding);
+
+        if (string.length > 0 && (length < 0 || offset < 0))
+            throw new RangeError('attempt to write beyond buffer bounds');
+
+        // Otherwise, use our encoding method.
+        var buf = iconv.encode(string, encoding);
+        if (buf.length < length) length = buf.length;
+        buf.copy(this, offset, 0, length);
+        return length;
+    }
+
+    // -- Buffer ---------------------------------------------------------------
+
+    original.BufferIsEncoding = Buffer.isEncoding;
+    Buffer.isEncoding = function(encoding) {
+        return Buffer.isNativeEncoding(encoding) || iconv.encodingExists(encoding);
+    }
+
+    original.BufferByteLength = Buffer.byteLength;
+    Buffer.byteLength = SlowBuffer.byteLength = function(str, encoding) {
+        encoding = String(encoding || 'utf8').toLowerCase();
+
+        // Use native conversion when possible
+        if (Buffer.isNativeEncoding(encoding))
+            return original.BufferByteLength.call(this, str, encoding);
+
+        // Slow, I know, but we don't have a better way yet.
+        return iconv.encode(str, encoding).length;
+    }
+
+    original.BufferToString = Buffer.prototype.toString;
+    Buffer.prototype.toString = function(encoding, start, end) {
+        encoding = String(encoding || 'utf8').toLowerCase();
+
+        // Use native conversion when possible
+        if (Buffer.isNativeEncoding(encoding))
+            return original.BufferToString.call(this, encoding, start, end);
+
+        // Otherwise, use our decoding method.
+        if (typeof start == 'undefined') start = 0;
+        if (typeof end == 'undefined') end = this.length;
+        return iconv.decode(this.slice(start, end), encoding);
+    }
+
+    original.BufferWrite = Buffer.prototype.write;
+    Buffer.prototype.write = function(string, offset, length, encoding) {
+        var _offset = offset, _length = length, _encoding = encoding;
+        // Support both (string, offset, length, encoding)
+        // and the legacy (string, encoding, offset, length)
+        if (isFinite(offset)) {
+            if (!isFinite(length)) {
+                encoding = length;
+                length = undefined;
+            }
+        } else {  // legacy
+            var swap = encoding;
+            encoding = offset;
+            offset = length;
+            length = swap;
+        }
+
+        encoding = String(encoding || 'utf8').toLowerCase();
+
+        // Use native conversion when possible
+        if (Buffer.isNativeEncoding(encoding))
+            return original.BufferWrite.call(this, string, _offset, _length, _encoding);
+
+        offset = +offset || 0;
+        var remaining = this.length - offset;
+        if (!length) {
+            length = remaining;
+        } else {
+            length = +length;
+            if (length > remaining) {
+                length = remaining;
+            }
+        }
+
+        if (string.length > 0 && (length < 0 || offset < 0))
+            throw new RangeError('attempt to write beyond buffer bounds');
+
+        // Otherwise, use our encoding method.
+        var buf = iconv.encode(string, encoding);
+        if (buf.length < length) length = buf.length;
+        buf.copy(this, offset, 0, length);
+        return length;
+
+        // TODO: Set _charsWritten.
+    }
+
+
+    // -- Readable -------------------------------------------------------------
+    if (iconv.supportsStreams()) {
+        var Readable = require('stream').Readable;
+
+        original.ReadableSetEncoding = Readable.prototype.setEncoding;
+        Readable.prototype.setEncoding = function setEncoding(enc, options) {
+            // Try to use original function when possible.
+            if (Buffer.isNativeEncoding(enc))
+                return original.ReadableSetEncoding.call(this, enc);
+
+            // Try to use our own decoder, it has the same interface.
+            this._readableState.decoder = iconv.getCodec(enc).decoder(options);
+            this._readableState.encoding = enc;
+        }
+
+        Readable.prototype.collect = IconvLiteDecoderStream.prototype.collect;
+    }
+}
+
+
+function undoExtendNodeEncodings() {
+    if (!original)
+        throw new Error("require('iconv-lite').undoExtendNodeEncodings(): Nothing to undo; extendNodeEncodings() is not called.")
+
+    delete Buffer.isNativeEncoding;
+
+    var SlowBuffer = require('buffer').SlowBuffer;
+
+    SlowBuffer.prototype.toString = original.SlowBufferToString;
+    SlowBuffer.prototype.write = original.SlowBufferWrite;
+
+    Buffer.isEncoding = original.BufferIsEncoding;
+    Buffer.byteLength = original.BufferByteLength;
+    Buffer.prototype.toString = original.BufferToString;
+    Buffer.prototype.write = original.BufferWrite;
+
+    if (iconv.supportsStreams()) {
+        var Readable = require('stream').Readable;
+
+        Readable.prototype.setEncoding = original.ReadableSetEncoding;
+        delete Readable.prototype.collect;
+    }
+
+    original = undefined;
+}
+
 
