@@ -108,9 +108,14 @@ var iconvCannotDecode = { // Characters that we can decode, but iconv cannot. En
         "fe88": "䦂", "fe89": "䦃", "fe8a": "䦅", "fe8b": "䦆", "fe8c": "䦟", "fe8d": "䦛", "fe8e": "䦷", "fe8f": "䦶",
         "fe92": "䲣", "fe93": "䲟", "fe94": "䲠", "fe95": "䲡", "fe96": "䱷", "fe97": "䲢", 
         "fe98": "䴓", "fe99": "䴔", "fe9a": "䴕", "fe9b": "䴖", "fe9c": "䴗", "fe9d": "䴘", "fe9e": "䴙", "fe9f": "䶮",
+
+        // iconv and ICU are mapping "a3 a0" -> U+E5E5. However, WebKit/Chrome maps it to U+3000 noting compatibility with older websites.
+        // Encoding Standard stands on the side of WebKit, so we are too.
+        // See discussion in https://www.w3.org/Bugs/Public/show_bug.cgi?id=25396 and http://goo.gl/ocjnDR
+        "a3a0": "\u3000",
     },
     gb18030: {
-        "80": "€",
+        "80": "€", "a3a0": "\u3000",
     }
 }
 
@@ -198,7 +203,7 @@ describe("Full DBCS encoding tests", function() {
                     var str2 = convertWithDefault(converterBack, bufActual).toString();
                     var str22 = convertWithDefault(converterBack, bufExpected).toString();
                     if (str1 == str && str12 == str && str22 == str && 
-                            (str2 == str || (str2 == '?' && iconvCannotDecodeChars[strActual] == str)))
+                            (str2 == str || (iconvCannotDecodeChars[strActual] == str)))
                         continue; // There are multiple ways to encode str, so it doesn't matter which we choose.
 
                     if (iconvChgs[str] == str1)

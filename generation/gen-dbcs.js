@@ -66,9 +66,6 @@ async.parallel({
         if (gbChar !== undefined && cpChar != gbChar)
             gbkadd[i] = gbChar;
     }
-    // Fix incorrect mapping in http://encoding.spec.whatwg.org/index-gb18030.txt
-    // Filed bug https://www.w3.org/Bugs/Public/show_bug.cgi?id=25396
-    gbkadd[0xA3A0] = 0xE5E5;
 
     utils.writeTable("gbk-added", utils.generateTable(gbkadd));
 
