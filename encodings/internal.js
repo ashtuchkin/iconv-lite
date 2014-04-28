@@ -5,6 +5,7 @@ module.exports = {
     // Encodings
     utf8:   { type: "_internal", enc: "utf8" },
     cesu8:  { type: "_internal", enc: "utf8" },
+    unicode11utf8: { type: "_internal", enc: "utf8" },
     ucs2:   { type: "_internal", enc: "ucs2" },
     utf16le:{ type: "_internal", enc: "ucs2" },
     binary: { type: "_internal", enc: "binary" },

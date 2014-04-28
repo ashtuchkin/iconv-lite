@@ -41,6 +41,9 @@ module.exports = {
     },
     'csshiftjis': 'shiftjis',
     'mskanji': 'shiftjis',
+    'sjis': 'shiftjis',
+    'windows-31j': 'shiftjis',
+    'x-sjis': 'shiftjis',
 
     // CP932 is an extension of Shift_JIS.
     'windows932': 'cp932',
@@ -59,6 +62,11 @@ module.exports = {
 
     // Oldest GB2312 (1981, ~7600 chars) is a subset of CP936
     'gb2312': 'cp936',
+    'gb231280': 'cp936',
+    'gb23121980': 'cp936',
+    'csgb2312': 'cp936',
+    'csiso58gb231280': 'cp936',
+    'isoir58': 'gbk',
 
     // Microsoft's CP936 is a subset and approximation of GBK.
     // TODO: Euro = 0x80 in cp936, but not in GBK (where it's valid but undefined)
@@ -74,6 +82,7 @@ module.exports = {
         type: '_dbcs',
         table: ['./tables/cp936.json', './tables/gbk-added.json'],
     },
+    'xgbk': 'gbk'
 
     // GB18030 is an algorithmic extension of GBK.
     'gb18030': {
@@ -82,12 +91,15 @@ module.exports = {
         gb18030: './tables/gb18030-ranges.json',
     },
 
+    'chinese': 'gb18030',
+
     // TODO: Support GB18030 (~27000 chars + whole unicode mapping, cp54936)
     // http://icu-project.org/docs/papers/gb18030.html
     // http://source.icu-project.org/repos/icu/data/trunk/charset/data/xml/gb-18030-2000.xml
     // http://www.khngai.com/chinese/charmap/tblgbk.php?page=0
 
     // == Korean ===============================================================
+    // EUC-KR, KS_C_5601 and KS X 1001 are exactly the same.
     'windows949': 'cp949',
     '949': 'cp949',
     'cp949': {
@@ -95,7 +107,14 @@ module.exports = {
         table: './tables/cp949.json',
     },
 
-    "ksc56011987": "cp949",
+    'cseuckr': 'cp949',
+    'csksc56011987': 'cp949',
+    'euckr': 'cp949',
+    'isoir149': 'cp949',
+    'korean': 'cp949',
+    'ksc56011987': 'cp949',
+    'ksc56011989': 'cp949',
+    'ksc5601': 'cp949',
 
 
     // == Big5/Taiwan/Hong Kong ================================================
@@ -134,5 +153,9 @@ module.exports = {
         type: '_dbcs',
         table: ['./tables/cp950.json', './tables/big5-added.json'],
     },
+
+    'cnbig5': 'big5hkscs',
+    'csbig5': 'big5hkscs',
+    'xxbig5': 'big5hkscs',
 
 };
