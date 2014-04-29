@@ -3,7 +3,7 @@ if (module.parent) // Skip this file from testing.
     return;
 
 var iconv = require('iconv');
-var iconv_lite = require("../index");
+var iconv_lite = require("../");
 
 var encoding = process.argv[2] || "windows-1251";
 var convertTimes = 10000;

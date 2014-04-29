@@ -19,7 +19,7 @@
         "Brian White (https://github.com/mscdex)"
     ],
     
-    "main": "index.js",
+    "main": "./lib/index.js",
     "homepage": "https://github.com/ashtuchkin/iconv-lite",
     "bugs": "https://github.com/ashtuchkin/iconv-lite/issues",
     "repository": {
@@ -38,6 +38,7 @@
         "unorm": "*",
         "errto": "*",
         "async": "*",
+        "browserify": "*",
         "iconv": "2.x"
     }
 }

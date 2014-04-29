@@ -5,7 +5,10 @@
  * Doesn't need native code compilation. Works on Windows and in sandboxed environments like [Cloud9](http://c9.io).
  * Used in popular projects like [Grunt](http://gruntjs.com/), [Nodemailer](http://www.nodemailer.com/), [Yeoman](http://yeoman.io/) and others.
  * Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
- * Intuitive encode/decode API + streaming API in Node v0.10+
+ * Intuitive encode/decode API
+ * Streaming support for Node v0.10+
+ * Can extend Node.js primitives (buffers, streams) to support all iconv-lite encodings - for the lazy.
+ * In-browser usage via [Browserify](https://github.com/substack/node-browserify) (150k gzip compressed with Buffer shim included).
  * License: MIT.
 
 [![NPM Stats](https://nodei.co/npm/iconv-lite.png?downloads=true)](https://npmjs.org/packages/iconv-lite/)
@@ -67,7 +70,7 @@
 
     fs.createReadStream("file.txt", "shift_jis");
 
-    // External modules are also supported (if they use Node primitives).
+    // External modules are also supported (if they use Node primitives, which they probably do).
     request = require('request');
     request({
         url: "http://github.com/", 
@@ -81,11 +84,11 @@
  *  All widespread singlebyte encodings: Windows 125x family, ISO-8859 family, 
     IBM/DOS codepages, Macintosh family, KOI8 family, all others supported by iconv library. 
     Aliases like 'latin1', 'us-ascii' also supported.
- *  Multibyte encodings: CP932, CP936, CP949, CP950, GBK, GB2313, Big5, Shift_JIS.
+ *  Multibyte encodings: CP932, CP936, CP949, CP950, GBK, GB2313, GB18030, Big5, Shift_JIS.
 
-Most singlebyte encodings are generated automatically from [node-iconv](https://github.com/bnoordhuis/node-iconv). Thank you Ben Noordhuis and iconv authors!
+Most singlebyte encodings are generated automatically from [node-iconv](https://github.com/bnoordhuis/node-iconv). Thank you Ben Noordhuis and libiconv authors!
 
-Not supported yet: GB18030, EUC family, ISO2022 family.
+Not supported yet: EUC family, ISO2022 family.
 
 
 ## Encoding/decoding speed

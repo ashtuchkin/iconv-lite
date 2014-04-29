@@ -1,17 +1,18 @@
 
 // Update this array if you add/rename/remove files in this directory.
+// We support Browserify by skipping automatic module discovery and requiring modules directly.
 var modules = [
-    "internal",
-    "sbcs-codec",
-    "sbcs-data",
-    "sbcs-data-generated",
-    "dbcs-codec",
-    "dbcs-data",
+    require("./internal"),
+    require("./sbcs-codec"),
+    require("./sbcs-data"),
+    require("./sbcs-data-generated"),
+    require("./dbcs-codec"),
+    require("./dbcs-data"),
 ];
 
-// Load all encoding definition files. Support Browserify by skipping fs module.
-modules.forEach(function(moduleName) {
-    var module = require("./"+moduleName);
+// Put all encoding/alias/codec definitions to single object and export it. 
+for (var i = 0; i < modules.length; i++) {
+    var module = modules[i];
     for (var enc in module)
         exports[enc] = module[enc];
-});
+}

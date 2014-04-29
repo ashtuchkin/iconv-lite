@@ -8,8 +8,10 @@
 exports._dbcs = function(options) {
     if (!options)
         throw new Error("DBCS codec is called without the data.")
-    if (!options.table)
-        throw new Error("Encoding '" + options.type + "' has no data.");
+    if (!options.tables)
+        throw new Error("Encoding '" + options.encodingName + "' has no data.");
+
+    var tables = options.tables(); // Load the tables.
     
     // Fill out DBCS -> Unicode decoding tables
     var decodeLead = [];
@@ -22,9 +24,8 @@ exports._dbcs = function(options) {
 
     var decodeTableSeq = [null, null, null]; // Sequences, start with 3. (they are designated by negative indexes and -1 is reserved for undefined, -2: leading byte)
 
-    if (!options.table.map) options.table = [options.table];
-    for (var i = 0; i < options.table.length; i++) {
-        var table = require(options.table[i]);
+    for (var i = 0; i < tables.length; i++) {
+        var table = tables[i];
         for (var j = 0; j < table.length; j++) { // Chunks.
             var chunk = table[j];
             var curAddr = parseInt(chunk[0], 16), writeTable;
@@ -34,16 +35,16 @@ exports._dbcs = function(options) {
             }
             else if (curAddr < 0x10000) {
                 if (decodeLead[curAddr >> 8] >= 0)
-                    throw new Error("Overwrite lead byte in table " + options.table + ": " + chunk[0]);
+                    throw new Error("Overwrite lead byte in table " + i + " in " + options.encodingName + " at chunk " + chunk[0]);
                 
                 decodeLead[curAddr >> 8] = -2; // DBCS lead byte.
                 writeTable = decodeTable;
                 curAddr -= 0x8000;
                 if (curAddr < 0)
-                    throw new Error("DB address < 0x8000 in table " + options.table + ": " + chunk[0]);
+                    throw new Error("DB address < 0x8000 in table " + i + " in "  + options.encodingName + " at chunk " + chunk[0]);
             }
             else
-                throw new Error("Unsupported address in table " + options.table + ": " + chunk[0]);
+                throw new Error("Unsupported address in table " + i + " in "  + options.encodingName + " at chunk " + chunk[0]);
 
             for (var k = 1; k < chunk.length; k++) {
                 var part = chunk[k];
@@ -55,7 +56,7 @@ exports._dbcs = function(options) {
                             if (0xDC00 <= codeTrail && codeTrail < 0xE000)
                                 writeTable[curAddr++] = 0x10000 + (code - 0xD800) * 0x400 + (codeTrail - 0xDC00);
                             else
-                                throw new Error("Incorrect surrogate pair in table " + options.table + ": " + chunk[0]);
+                                throw new Error("Incorrect surrogate pair in table " + i + " in "  + options.encodingName + " at chunk " + chunk[0]);
                         }
                         else if (0x0FF0 < code && code <= 0x0FFF) { // Character sequence (our own encoding)
                             var len = 0xFFF - code + 2;
@@ -76,7 +77,7 @@ exports._dbcs = function(options) {
                         writeTable[curAddr++] = charCode++;
                 }
                 else
-                    throw new Error("Incorrect value type '" + typeof part + "' in table " + options.table + ": " + chunk[0]);
+                    throw new Error("Incorrect value type '" + typeof part + "' in table " + i + " in "  + options.encodingName + " at chunk " + chunk[0]);
             }
         }
     }
@@ -84,8 +85,6 @@ exports._dbcs = function(options) {
     // Unicode -> DBCS. Split table in smaller tables by 256 chars each.
     var encodeTable = [];
     var encodeTableSeq = [null, null, null];
-    // for (var i = 0; i < 0x1100; i++) // Handle all 17 Unicode planes.
-    //     encodeTable[i] = null; // Unassigned
 
     var tables = [[decodeTable, 0x8000], [decodeLead, 0]];
     for (var t = 0; t < tables.length; t++) {
@@ -149,8 +148,8 @@ exports._dbcs = function(options) {
         }
     }
 
-    if (typeof options.gb18030 == 'string') {
-        options.gb18030 = require(options.gb18030);
+    if (typeof options.gb18030 === 'function') {
+        options.gb18030 = options.gb18030(); // Load GB18030 ranges.
         for (var i = 0; i < 0x100; i++)
             if ((0x81 <= i && i <= 0xFE) != (decodeLead[i] == -2))
                 throw new Error("Invalid GB18030 double-byte table; leading byte is not in range 0x81-0xFE: ", i.toString(16));

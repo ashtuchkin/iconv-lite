@@ -1,7 +1,7 @@
 var assert = require('assert'),
     iconv = require(__dirname+'/../');
 
-if (!iconv.supportsStreams())
+if (!iconv.supportsStreams)
     return;
 
 var Readable = require('stream').Readable,

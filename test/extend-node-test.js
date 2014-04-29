@@ -63,7 +63,7 @@ describe("Extend Node native encodings", function() {
         // TODO: Set _charsWritten.
     });
 
-    if (iconv.supportsStreams()) {
+    if (iconv.supportsStreams) {
         it("Readable#setEncoding()", function(done) {
             var readStream = fs.createReadStream(__filename);
             readStream.setEncoding('windows-1251');
