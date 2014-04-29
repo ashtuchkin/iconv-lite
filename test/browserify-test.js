@@ -1,9 +1,17 @@
 var assert = require('assert'),
     iconv = require('../');
 
+try {
+    // We manually install browserify and test it because on Node v0.8 it doesn't install cleanly and fails Travis tests.
+    require('browserify'); 
+} catch(e) {
+    return;
+}
+
 var nodeVer = process.versions.node.split(".").map(Number);
 if (nodeVer[0] != 0 || nodeVer[1] != 10)
     return; // Test browserify only on Node v0.10. In v0.11 it has problems with moving Buffers between contexts.
+
 
 describe("Full Browserify tests", function() {
     it("Smoke test", function(done) {

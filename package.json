@@ -38,7 +38,6 @@
         "unorm": "*",
         "errto": "*",
         "async": "*",
-        "browserify": "*",
         "iconv": "2.x"
     }
 }
