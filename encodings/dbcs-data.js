@@ -34,6 +34,8 @@ module.exports = {
     //  * ISO2022-JP-2004: Adds 0213-2004 Plane 1.
     //
     // After JIS X 0213 appeared, Shift_JIS-2004, EUC-JISX0213 and ISO2022-JP-2004 followed, with just changing the planes.
+    //
+    // Overall, it seems that it's a mess :( http://www8.plala.or.jp/tkubota1/unicode-symbols-map2.html
 
 
     'shiftjis': {
