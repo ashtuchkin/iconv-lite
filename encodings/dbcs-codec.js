@@ -1,182 +1,114 @@
 
-// Double-byte codec. This scheme is widespread and consists of 2 tables:
-//  1. Single-byte: mostly just ASCII, but can be more complex.
-//  2. Double-byte with leading byte not assigned in single-byte.
-
-// To save memory, we read table files only when requested.
+// Double-byte codec. In this scheme, a character is represented by 1-2 bytes.
+// Our codec supports surrogates, extensions for GB18030 and unicode sequences.
+// To save memory and loading time, we read table files only when requested.
 
 exports._dbcs = function(options) {
+    return new DBCSCodec(options);
+}
+
+// Class DBCSCodec reads and initializes mapping tables.
+function DBCSCodec(options) {
+    this.options = options;
     if (!options)
         throw new Error("DBCS codec is called without the data.")
-    if (!options.tables)
+    if (!options.table)
         throw new Error("Encoding '" + options.encodingName + "' has no data.");
 
-    var tables = options.tables(); // Load the tables.
-    
-    // Fill out DBCS -> Unicode decoding tables
-    var decodeLead = [];
+    // Decode tables: DBCS -> Unicode.
+
+    // decodeLead is for single-byte DBCS sequences, decodeTable - for double-byte.
+    // We store only top half of decodeTable (offset 0x8000) because no DBCS encoding has
+    // double-byte sequences with first byte < 0x80.
+    // Values: >= 0  -> unicode char. can be astral char (> 0xFFFF)
+    //         == -1 -> unassigned.
+    //         == -2 -> lead byte of a two-byte sequence (used only in decodeLead table)
+    //         <= -3 -> start of a sequence, negated index in decodeTableSeq.
+    this.decodeLead = [];
     for (var i = 0; i < 0x100; i++)
-        decodeLead[i] = -1; // Unassigned.
+        this.decodeLead[i] = -1; // Unassigned.
 
-    var decodeTable = [];
+    this.decodeTable = [];
     for (var i = 0; i < 0x8000; i++)
-        decodeTable[i] = -1; // Unassigned.
+        this.decodeTable[i] = -1; // Unassigned.
 
-    var decodeTableSeq = [null, null, null]; // Sequences, start with 3. (they are designated by negative indexes and -1 is reserved for undefined, -2: leading byte)
+    // Sometimes a DBCS char corresponds to a sequence of unicode chars. We store them as arrays of integers here,
+    // allocating indexes starting from 3. Then, a negated index is used as a value in decodeTable.
+    this.decodeTableSeq = [null, null, null];
 
-    for (var i = 0; i < tables.length; i++) {
-        var table = tables[i];
-        for (var j = 0; j < table.length; j++) { // Chunks.
-            var chunk = table[j];
-            var curAddr = parseInt(chunk[0], 16), writeTable;
-            
-            if (curAddr < 0x100) {
-                writeTable = decodeLead;
-            }
-            else if (curAddr < 0x10000) {
-                if (decodeLead[curAddr >> 8] >= 0)
-                    throw new Error("Overwrite lead byte in table " + i + " in " + options.encodingName + " at chunk " + chunk[0]);
-                
-                decodeLead[curAddr >> 8] = -2; // DBCS lead byte.
-                writeTable = decodeTable;
-                curAddr -= 0x8000;
-                if (curAddr < 0)
-                    throw new Error("DB address < 0x8000 in table " + i + " in "  + options.encodingName + " at chunk " + chunk[0]);
-            }
-            else
-                throw new Error("Unsupported address in table " + i + " in "  + options.encodingName + " at chunk " + chunk[0]);
 
-            for (var k = 1; k < chunk.length; k++) {
-                var part = chunk[k];
-                if (typeof part === "string") { // String, write as-is.
-                    for (var l = 0; l < part.length;) {
-                        var code = part.charCodeAt(l++);
-                        if (0xD800 <= code && code < 0xDC00) { // Surrogate
-                            var codeTrail = part.charCodeAt(l++);
-                            if (0xDC00 <= codeTrail && codeTrail < 0xE000)
-                                writeTable[curAddr++] = 0x10000 + (code - 0xD800) * 0x400 + (codeTrail - 0xDC00);
-                            else
-                                throw new Error("Incorrect surrogate pair in table " + i + " in "  + options.encodingName + " at chunk " + chunk[0]);
-                        }
-                        else if (0x0FF0 < code && code <= 0x0FFF) { // Character sequence (our own encoding)
-                            var len = 0xFFF - code + 2;
-                            var seq = [];
-                            for (var m = 0; m < len; m++)
-                                seq.push(part.charCodeAt(l++)); // Simple variation: don't support surrogates or subsequences in seq.
+    // Actual mapping tables consist of chunks. Use them to fill up decode tables.
+    var mappingTable = options.table();
+    for (var i = 0; i < mappingTable.length; i++)
+        this._addDecodeChunk(mappingTable[i]);
 
-                            decodeTableSeq.push(seq);
-                            writeTable[curAddr++] = -(decodeTableSeq.length-1); // negative char code -> sequence idx.
-                        }
-                        else
-                            writeTable[curAddr++] = code; // Basic char
-                    }
-                } 
-                else if (typeof part === "number") { // Integer, meaning increasing sequence starting with prev character.
-                    var charCode = writeTable[curAddr - 1] + 1;
-                    for (var l = 0; l < part; l++)
-                        writeTable[curAddr++] = charCode++;
-                }
-                else
-                    throw new Error("Incorrect value type '" + typeof part + "' in table " + i + " in "  + options.encodingName + " at chunk " + chunk[0]);
-            }
+    this.defaultCharUnicode = options.iconv.defaultCharUnicode;
+
+
+
+    // Encode tables: Unicode -> DBCS.
+
+    // `encodeTable` is array mapping from unicode char to encoded char. All its values are integers for performance.
+    // Because it can be sparse, it is represented as array of buckets by 256 chars each. Bucket can be null.
+    // When the value >= 0 -> it is a normal char. Write the value (if <=256 then 1 byte, if <=65536 then 2 bytes).
+    // When value is -1    -> no conversion found. Output a default char.
+    // When value < -1     -> it's a negated index in encodeTableSeq, see below. The character starts a sequence.
+    this.encodeTable = [];
+    
+    // `encodeTableSeq` is used when a sequence of unicode characters is encoded as a single code. We use a tree of
+    // objects where keys correspond to characters in sequence and leafs are the encoded dbcs values. A special '-1' key
+    // means end of sequence (needed when one sequence is a strict subsequence of another).
+    // Objects are kept separately from encodeTable to increase performance.
+    // Table is initialized with 2 nulls so that the negative sequence ids started with -2.
+    this.encodeTableSeq = [null, null];
+
+    // Some chars can be decoded, but need not be encoded.
+    var skipEncodeChars = {};
+    if (options.encodeSkipVals)
+        for (var i = 0; i < options.encodeSkipVals.length; i++) {
+            var range = options.encodeSkipVals[i];
+            for (var j = range.from; j <= range.to; j++)
+                skipEncodeChars[j] = true;
         }
+        
+
+    // Use decode tables to fill out encode tables.
+    for (var i = 0; i < this.decodeLead.length; i++)
+        this._setEncodeChar(this.decodeLead[i], i);
+    
+    for (var i = 0; i < this.decodeTable.length; i++) {
+        if (skipEncodeChars[i + 0x8000])
+            continue;
+
+        var uChar = this.decodeTable[i];
+        if (uChar >= 0)
+            this._setEncodeChar(uChar, i + 0x8000);
+        else if (uChar < -2)
+            this._setEncodeSequence(this.decodeTableSeq[-uChar], i + 0x8000)
     }
 
-    // Unicode -> DBCS. Split table in smaller tables by 256 chars each.
-    var encodeTable = [];
-    var encodeTableSeq = [null, null, null];
+    // Add more encoding pairs when needed.
+    for (var uChar in options.encodeAdd || {})
+        this._setEncodeChar(uChar.charCodeAt(0), options.encodeAdd[uChar]);
 
-    var tables = [[decodeTable, 0x8000], [decodeLead, 0]];
-    for (var t = 0; t < tables.length; t++) {
-        var table = tables[t][0], offset = tables[t][1];
-        for (var i = 0; i < table.length; i++) {
-            var uCode = table[i];
-            if (uCode >= 0) {
-                var high = uCode >> 8; // This could be > 0xFF because of astral characters.
-                var low = uCode & 0xFF;
-                var subtable = encodeTable[high];
-                if (subtable === undefined) {
-                    encodeTable[high] = subtable = [];
-                    for (var j = 0; j < 0x100; j++)
-                        subtable[j] = -1;
-                }
-                if (subtable[low] < -2)
-                    encodeTableSeq[-subtable[low]][-1] = i + offset;
-                else
-                    subtable[low] = i + offset;
-            }
-            else if (uCode < -2) { // Sequence.
-                var seq = decodeTableSeq[-uCode];
-                //console.log((i+offset).toString(16), uCode, seq.map(function(uCode) {return uCode.toString(16)}));
-                uCode = seq[0];
 
-                var high = uCode >> 8;
-                var low = uCode & 0xFF;
-                var subtable = encodeTable[high];
-                if (subtable === undefined) {
-                    encodeTable[high] = subtable = [];
-                    for (var j = 0; j < 0x100; j++)
-                        subtable[j] = -1;
-                }
-
-                var seqObj;
-                if (subtable[low] < -1)
-                    seqObj = encodeTableSeq[-subtable[low]];
-                else {
-                    seqObj = {};
-                    if (subtable[low] !== -1) seqObj[-1] = subtable[low];
-                    encodeTableSeq.push(seqObj);
-                    subtable[low] = -(encodeTableSeq.length - 1);
-                }
-
-                for (var j = 1; j < seq.length; j++) {
-                    uCode = seq[j];
-                    if (j === seq.length-1) {
-                        seqObj[uCode] = i + offset;
-                    } else {
-                        var oldVal = seqObj[uCode];
-                        if (typeof oldVal === 'object')
-                            seqObj = oldVal;
-                        else {
-                            seqObj = seqObj[uCode] = {}
-                            if (oldVal !== undefined)
-                                seqObj[-1] = oldVal
-                        }
-                    }
-                }
-            }
-        }
-    }
-
+    // Load GB18030 tables if needed.
     if (typeof options.gb18030 === 'function') {
-        options.gb18030 = options.gb18030(); // Load GB18030 ranges.
+        this.gb18030 = options.gb18030(); // Load GB18030 ranges.
         for (var i = 0; i < 0x100; i++)
-            if ((0x81 <= i && i <= 0xFE) != (decodeLead[i] == -2))
+            if ((0x81 <= i && i <= 0xFE) != (this.decodeLead[i] == -2))
                 throw new Error("Invalid GB18030 double-byte table; leading byte is not in range 0x81-0xFE: ", i.toString(16));
     }
         
 
-    var defCharSB  = encodeTable[0][options.iconv.defaultCharSingleByte.charCodeAt(0)];
-    if (defCharSB === -1) defCharSB = encodeTable[0]['?'];
-    if (defCharSB === -1) defCharSB = "?".charCodeAt(0);
-
-    return {
-        encoder: encoderDBCS,
-        decoder: decoderDBCS,
-
-        decodeLead: decodeLead,
-        decodeTable: decodeTable,
-        decodeTableSeq: decodeTableSeq,
-        defaultCharUnicode: options.iconv.defaultCharUnicode,
-
-        encodeTable: encodeTable,
-        encodeTableSeq: encodeTableSeq,
-        defaultCharSingleByte: defCharSB,
-        gb18030: options.gb18030,
-    };
+    this.defCharSB  = this.encodeTable[0][options.iconv.defaultCharSingleByte.charCodeAt(0)];
+    if (this.defCharSB === -1) this.defCharSB = this.encodeTable[0]['?'];
+    if (this.defCharSB === -1) this.defCharSB = "?".charCodeAt(0);
 }
 
-function encoderDBCS(options) {
+// Public interface: create encoder and decoder objects. 
+// The methods (write, end) are simple functions to not inhibit optimizations.
+DBCSCodec.prototype.encoder = function encoderDBCS(options) {
     return {
         // Methods
         write: encoderDBCSWrite,
@@ -189,13 +121,154 @@ function encoderDBCS(options) {
         // Static data
         encodeTable: this.encodeTable,
         encodeTableSeq: this.encodeTableSeq,
-        defaultCharSingleByte: this.defaultCharSingleByte,
+        defaultCharSingleByte: this.defCharSB,
         gb18030: this.gb18030,
 
         // Export for testing
         findIdx: findIdx,
     }
 }
+
+DBCSCodec.prototype.decoder = function decoderDBCS(options) {
+    return {
+        // Methods
+        write: decoderDBCSWrite,
+        end: decoderDBCSEnd,
+
+        // Decoder state
+        leadBytes: -1,
+
+        // Static data
+        decodeLead: this.decodeLead,
+        decodeTable: this.decodeTable,
+        decodeTableSeq: this.decodeTableSeq,
+        defaultCharUnicode: this.defaultCharUnicode,
+        gb18030: this.gb18030,
+    }
+}
+
+
+
+// Decoder helpers
+DBCSCodec.prototype._addDecodeChunk = function(chunk) {
+    // First element of chunk is the hex dbcs code where we start.
+    var curAddr = parseInt(chunk[0], 16);
+
+    // Choose the decoding table where we'll write our chars.
+    var writeTable;
+    if (curAddr < 0x100) {
+        writeTable = this.decodeLead;
+    }
+    else if (curAddr < 0x10000) {
+        if (this.decodeLead[curAddr >> 8] >= 0)
+            throw new Error("Overwrite lead byte in " + this.options.encodingName + " at chunk " + chunk[0]);
+        
+        this.decodeLead[curAddr >> 8] = -2; // DBCS lead byte.
+        writeTable = this.decodeTable;
+        curAddr -= 0x8000;
+        if (curAddr < 0)
+            throw new Error("DB address < 0x8000 in "  + this.options.encodingName + " at chunk " + chunk[0]);
+    }
+    else
+        throw new Error("Unsupported address in "  + this.options.encodingName + " at chunk " + chunk[0]);
+
+    // Write all other elements of the chunk to the table.
+    for (var k = 1; k < chunk.length; k++) {
+        var part = chunk[k];
+        if (typeof part === "string") { // String, write as-is.
+            for (var l = 0; l < part.length;) {
+                var code = part.charCodeAt(l++);
+                if (0xD800 <= code && code < 0xDC00) { // Decode surrogate
+                    var codeTrail = part.charCodeAt(l++);
+                    if (0xDC00 <= codeTrail && codeTrail < 0xE000)
+                        writeTable[curAddr++] = 0x10000 + (code - 0xD800) * 0x400 + (codeTrail - 0xDC00);
+                    else
+                        throw new Error("Incorrect surrogate pair in "  + this.options.encodingName + " at chunk " + chunk[0]);
+                }
+                else if (0x0FF0 < code && code <= 0x0FFF) { // Character sequence (our own encoding used)
+                    var len = 0xFFF - code + 2;
+                    var seq = [];
+                    for (var m = 0; m < len; m++)
+                        seq.push(part.charCodeAt(l++)); // Simple variation: don't support surrogates or subsequences in seq.
+
+                    this.decodeTableSeq.push(seq);
+                    writeTable[curAddr++] = -(this.decodeTableSeq.length-1); // negative char code -> sequence idx.
+                }
+                else
+                    writeTable[curAddr++] = code; // Basic char
+            }
+        } 
+        else if (typeof part === "number") { // Integer, meaning increasing sequence starting with prev character.
+            var charCode = writeTable[curAddr - 1] + 1;
+            for (var l = 0; l < part; l++)
+                writeTable[curAddr++] = charCode++;
+        }
+        else
+            throw new Error("Incorrect type '" + typeof part + "' given in "  + this.options.encodingName + " at chunk " + chunk[0]);
+    }
+}
+
+// Encoder helpers
+DBCSCodec.prototype._getEncodeBucket = function(uCode) {
+    var high = uCode >> 8; // This could be > 0xFF because of astral characters.
+    var bucket = this.encodeTable[high];
+    if (bucket === undefined) {
+        this.encodeTable[high] = bucket = []; // Create bucket on demand.
+        for (var j = 0; j < 0x100; j++)
+            bucket[j] = -1;
+    }
+    return bucket;
+}
+
+DBCSCodec.prototype._setEncodeChar = function(uCode, dbcsCode) {
+    var bucket = this._getEncodeBucket(uCode);
+    var low = uCode & 0xFF;
+    if (bucket[low] < -1)
+        this.encodeTableSeq[-bucket[low]][-1] = dbcsCode; // There's already a sequence, set a single-char subsequence of it.
+    else
+        bucket[low] = dbcsCode;
+}
+
+DBCSCodec.prototype._setEncodeSequence = function(seq, dbcsCode) {
+    
+    // Get the root of character tree according to first character of the sequence.
+    var uCode = seq[0];
+    var bucket = this._getEncodeBucket(uCode);
+    var low = uCode & 0xFF;
+
+    var node;
+    if (bucket[low] < -1) {
+        // There's already a sequence with  - use it.
+        node = this.encodeTableSeq[-bucket[low]]; 
+    }
+    else {
+        // There was no sequence object - allocate a new one.
+        this.encodeTableSeq.push(node = {});
+        if (bucket[low] !== -1) node[-1] = bucket[low]; // If a char was set before - make it a single-char subsequence.
+        bucket[low] = -(this.encodeTableSeq.length - 1); 
+    }
+
+    // Traverse the character tree, allocating new nodes as needed.
+    for (var j = 1; j < seq.length-1; j++) {
+        var oldVal = node[uCode];
+        if (typeof oldVal === 'object')
+            node = oldVal;
+        else {
+            node = node[uCode] = {}
+            if (oldVal !== undefined)
+                node[-1] = oldVal
+        }
+    }
+
+    // Set the leaf to given dbcsCode.
+    uCode = seq[seq.length-1];
+    node[uCode] = dbcsCode;
+}
+
+
+
+// == Actual Encoding ==========================================================
+
 
 function encoderDBCSWrite(str) {
     var newBuf = new Buffer(str.length * (this.gb18030 ? 4 : 2)), 
@@ -275,7 +348,7 @@ function encoderDBCSWrite(str) {
             if (subtable !== undefined)
                 dbcsCode = subtable[uCode & 0xFF];
             
-            if (dbcsCode < -2) { // Sequence start
+            if (dbcsCode < -1) { // Sequence start
                 seqObj = this.encodeTableSeq[-dbcsCode];
                 continue;
             }
@@ -344,24 +417,8 @@ function encoderDBCSEnd() {
 }
 
 
+// == Actual Decoding ==========================================================
 
-function decoderDBCS(options) {
-    return {
-        // Methods
-        write: decoderDBCSWrite,
-        end: decoderDBCSEnd,
-
-        // Decoder state
-        leadBytes: -1,
-
-        // Static data
-        decodeLead: this.decodeLead,
-        decodeTable: this.decodeTable,
-        decodeTableSeq: this.decodeTableSeq,
-        defaultCharUnicode: this.defaultCharUnicode,
-        gb18030: this.gb18030,
-    }
-}
 
 function decoderDBCSWrite(buf) {
     var newBuf = new Buffer(buf.length*2),

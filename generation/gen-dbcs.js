@@ -7,11 +7,11 @@ async.parallel({
     $gbk:  utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-gb18030.txt"),
     $gbRanges: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-gb18030-ranges.txt"),
     $eucKr: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-euc-kr.txt"),
+    $jis0208: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-jis0208.txt"),
     $cp932: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP932.TXT"),
     cp936: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP936.TXT"),
     cp949: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP949.TXT"),
     cp950: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP950.TXT"),
-    shiftjis: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/OBSOLETE/EASTASIA/JIS/SHIFTJIS.TXT"),
 }, errTo(console.log, function(data) {
     // First, parse all files.
     for (var enc in data) {
@@ -78,18 +78,28 @@ async.parallel({
     utils.writeFile("gb18030-ranges", JSON.stringify(ranges));
 
 
-    // Add missing chars to ShiftJIS
-    for (var i = 0; i < 0x20; i++)
-        data.shiftjis[i] = i;
-    data.shiftjis[0x7F] = 0x7F;
+    // Use http://encoding.spec.whatwg.org/#shift_jis-decoder
+    var shiftjis = {};
+    for (var i = 0; i <= 0x80; i++)
+        shiftjis[i] = i;
+    for (var i = 0xA1; i <= 0xDF; i++)
+        shiftjis[i] = 0xFF61 + i - 0xA1;
 
-    // Create cp932-added as a difference between cp932 and ShiftJIS.
-    var cp932add = {};
-    for (var k in data.$cp932)
-        if (data.shiftjis[k] !== data.$cp932[k])
-            cp932add[k] = data.$cp932[k];
+    for (var lead = 0x81; lead < 0xFF; lead++)
+        if (lead < 0xA1 || lead > 0xDF)
+            for (var byte = 0; byte < 0xFF; byte++) {
+                var offset = (byte < 0x7F) ? 0x40 : 0x41;
+                var leadOffset = (lead < 0xA0) ? 0x81 : 0xC1;
+                if ((0x40 <= byte && byte <= 0x7E) || (0x80 <= byte && byte <= 0xFC)) {
+                    var pointer = (lead - leadOffset) * 188 + byte - offset;
+                    if (data.$jis0208[pointer])
+                        shiftjis[(lead << 8) + byte] = data.$jis0208[pointer];
+                    else if (8836 <= pointer && pointer <= 10528)
+                        shiftjis[(lead << 8) + byte] = 0xE000 + pointer - 8836; // Interoperable legacy from Windows known as EUDC
+                }
+            }
 
-    utils.writeTable("cp932-added", utils.generateTable(cp932add));
+    utils.writeTable("shiftjis", utils.generateTable(shiftjis));
 
     // Fill out EUC-KR Table and check that it is the same as cp949.
     var eucKr = {};

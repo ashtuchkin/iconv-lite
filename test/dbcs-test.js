@@ -49,14 +49,13 @@ function convertWithDefault(converter, buf) {
 }
 
 var aliases = {
-    shiftjis: 'shift-jis',
+    shiftjis: 'cp932',
     big5hkscs: 'big5-hkscs',
 };
 var iconvChanges = { // Characters that iconv changing (iconv char -> our char)
-    // cp932 is changed in iconv (see comments in cp932.h)
-    cp932: {"〜":"～","‖":"∥","−":"－","¢":"￠","£":"￡","¬":"￢"},
+    // shiftjis/cp932 is changed in iconv (see comments in cp932.h)
+    shiftjis: {"〜":"～","‖":"∥","−":"－","¢":"￠","£":"￡","¬":"￢"},
     cp950: {"¥":"￥"},
-    shiftjis: {"＼":"\\"}, // iconv has changed mapping of 5c (reverse solidus) to ff3c (full width reverse solidus)
 
     // Big5 is known for lots of different variations. We use Encoding Standard.
     big5hkscs: {"•": "‧", "､": "﹑", "‾": "¯", "∼": "～", "♁": "⊕", "☉": "⊙", "／": "∕", "＼": "﹨", "¥": "￥", "¢": "￠", "£": "￡"},
@@ -69,7 +68,7 @@ var iconvChanges = { // Characters that iconv changing (iconv char -> our char)
 }
 
 var iconvCannotDecode = { // Characters that we can decode, but iconv cannot. Encoding -> correct char. Also use them for encoding check.
-    shiftjis: { "815f": "\\" },
+    shiftjis: { "80": "\x80", "5c": "¥", "7e": "‾" },
     big5hkscs: {
         "8e69": "箸", "8e6f": "簆", "8e7e": "糎", "8eab": "緒", "8eb4": "縝", "8ecd": "者", "8ed0": "耨", "8f57": "菁",
         "8f69": "蒨", "8f6e": "萏", "8fcb": "覦", "8fcc": "覩", "8ffe": "起", "906d": "都", "907a": "銹", "90dc": "靜",

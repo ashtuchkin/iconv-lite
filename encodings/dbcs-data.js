@@ -40,21 +40,18 @@ module.exports = {
 
     'shiftjis': {
         type: '_dbcs',
-        tables: function() { return [require('./tables/shiftjis.json')] },
+        table: function() { return require('./tables/shiftjis.json') },
+        encodeAdd: {'\u00a5': 0x5C, '\u203E': 0x7E},
+        encodeSkipVals: [{from: 0xED40, to: 0xF940}],
     },
     'csshiftjis': 'shiftjis',
     'mskanji': 'shiftjis',
     'sjis': 'shiftjis',
     'windows-31j': 'shiftjis',
     'x-sjis': 'shiftjis',
-
-    // CP932 is an extension of Shift_JIS.
-    'windows932': 'cp932',
-    '932': 'cp932',
-    'cp932': {
-        type: '_dbcs',
-        tables: function() { return [require('./tables/shiftjis.json'), require('./tables/cp932-added.json')] },
-    },
+    'windows932': 'shiftjis',
+    '932': 'shiftjis',
+    'cp932': 'shiftjis',
 
     // TODO: KDDI extension to Shift_JIS
     // TODO: IBM CCSID 942 = CP932, but F0-F9 custom chars and other char changes.
@@ -77,20 +74,20 @@ module.exports = {
     '936': 'cp936',
     'cp936': {
         type: '_dbcs',
-        tables: function() { return [require('./tables/cp936.json')] },
+        table: function() { return require('./tables/cp936.json') },
     },
 
     // GBK (~22000 chars) is an extension of CP936 that added user-mapped chars and some other.
     'gbk': {
         type: '_dbcs',
-        tables: function() { return [require('./tables/cp936.json'), require('./tables/gbk-added.json')] },
+        table: function() { return require('./tables/cp936.json').concat(require('./tables/gbk-added.json')) },
     },
     'xgbk': 'gbk',
 
     // GB18030 is an algorithmic extension of GBK.
     'gb18030': {
         type: '_dbcs',
-        tables: function() { return [require('./tables/cp936.json'), require('./tables/gbk-added.json')] },
+        table: function() { return require('./tables/cp936.json').concat(require('./tables/gbk-added.json')) },
         gb18030: function() { return require('./tables/gb18030-ranges.json') },
     },
 
@@ -107,7 +104,7 @@ module.exports = {
     '949': 'cp949',
     'cp949': {
         type: '_dbcs',
-        tables: function() { return [require('./tables/cp949.json')] },
+        table: function() { return require('./tables/cp949.json') },
     },
 
     'cseuckr': 'cp949',
@@ -147,14 +144,14 @@ module.exports = {
     '950': 'cp950',
     'cp950': {
         type: '_dbcs',
-        tables: function() { return [require('./tables/cp950.json')] },
+        table: function() { return require('./tables/cp950.json') },
     },
 
     // Big5 has many variations and is an extension of cp950. We use Encoding Standard's as a consensus.
     'big5': 'big5hkscs',
     'big5hkscs': {
         type: '_dbcs',
-        tables: function() { return [require('./tables/cp950.json'), require('./tables/big5-added.json')] },
+        table: function() { return require('./tables/cp950.json').concat(require('./tables/big5-added.json')) },
     },
 
     'cnbig5': 'big5hkscs',
