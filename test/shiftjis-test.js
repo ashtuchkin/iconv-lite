@@ -24,4 +24,9 @@ describe("ShiftJIS tests", function() {
         assert.strictEqual(iconv.encode(str, "shiftjis").toString('hex'), res);
         assert.strictEqual(iconv.encode(str2, "shiftjis").toString('hex'), res2);
     });
+
+    it("ShiftJIS includes extensions", function() {
+        assert.strictEqual(iconv.decode(new Buffer('8740', 'hex'), 'shiftjis'), '①');
+        assert.strictEqual(iconv.encode('①', 'shiftjis').toString('hex'), '8740');
+    });
 });
