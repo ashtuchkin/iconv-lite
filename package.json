@@ -38,6 +38,6 @@
         "unorm": "*",
         "errto": "*",
         "async": "*",
-        "iconv": "2.x"
+        "iconv": "^2.1.4"
     }
 }
