@@ -53,6 +53,12 @@ module.exports = {
     '932': 'shiftjis',
     'cp932': 'shiftjis',
 
+    'eucjp': {
+        type: '_dbcs',
+        table: function() { return require('./tables/eucjp.json') },
+        encodeAdd: {'\u00a5': 0x5C, '\u203E': 0x7E},
+    },
+
     // TODO: KDDI extension to Shift_JIS
     // TODO: IBM CCSID 942 = CP932, but F0-F9 custom chars and other char changes.
     // TODO: IBM CCSID 943 = Shift_JIS = CP932 with original Shift_JIS lower 128 chars.

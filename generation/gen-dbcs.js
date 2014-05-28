@@ -8,6 +8,7 @@ async.parallel({
     $gbRanges: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-gb18030-ranges.txt"),
     $eucKr: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-euc-kr.txt"),
     $jis0208: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-jis0208.txt"),
+    $jis0212: utils.getFile.bind(null, "http://encoding.spec.whatwg.org/index-jis0212.txt"),
     $cp932: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP932.TXT"),
     cp936: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP936.TXT"),
     cp949: utils.getFile.bind(null, "http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP949.TXT"),
@@ -100,6 +101,21 @@ async.parallel({
             }
 
     utils.writeTable("shiftjis", utils.generateTable(shiftjis));
+
+    // Fill out EUC-JP table according to http://encoding.spec.whatwg.org/#euc-jp
+    var eucJp = {};
+    for (var i = 0; i < 0x80; i++)
+        eucJp[i] = i;
+    for (var i = 0xA1; i <= 0xDF; i++)
+        eucJp[(0x8E << 8) + i] = 0xFF61 + i - 0xA1;
+    for (var i = 0xA1; i <= 0xFE; i++)
+        for (var j = 0xA1; j <= 0xFE; j++) {
+            eucJp[               (i << 8) + j] = data.$jis0208[(i - 0xA1) * 94 + (j - 0xA1)];
+            eucJp[(0x8F << 16) + (i << 8) + j] = data.$jis0212[(i - 0xA1) * 94 + (j - 0xA1)];
+        }
+            
+    utils.writeTable("eucjp", utils.generateTable(eucJp, 3));
+
 
     // Fill out EUC-KR Table and check that it is the same as cp949.
     var eucKr = {};

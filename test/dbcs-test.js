@@ -55,6 +55,7 @@ var aliases = {
 var iconvChanges = { // Characters that iconv changing (iconv char -> our char)
     // shiftjis/cp932 is changed in iconv (see comments in cp932.h)
     shiftjis: {"〜":"～","‖":"∥","−":"－","¢":"￠","£":"￡","¬":"￢"},
+    eucjp:    {"〜":"～","‖":"∥","−":"－","¢":"￠","£":"￡","¬":"￢"},
     cp950: {"¥":"￥"},
 
     // Big5 is known for lots of different variations. We use Encoding Standard.
@@ -68,7 +69,30 @@ var iconvChanges = { // Characters that iconv changing (iconv char -> our char)
 }
 
 var iconvCannotDecode = { // Characters that we can decode, but iconv cannot. Encoding -> correct char. Also use them for encoding check.
-    shiftjis: { "80": "\x80", "5c": "¥", "7e": "‾" },
+    shiftjis: { "80": "\x80", "5c": "¥", "7e": "‾", "81ca": "￢" },
+    eucjp: {
+        "adf0": "≒", "adf1": "≡", "adf2": "∫", "adf3": "∮", "adf4": "∑", "adf5": "√", "adf6": "⊥", "adf7": "∠", "adf8": "∟", "adf9": "⊿",
+        "adfa": "∵", "adfb": "∩", "adfc": "∪", "a1c2": "∥", "ade2": "№", "ade4": "℡", 
+        
+        "adb5": "Ⅰ", "adb6": "Ⅱ", "adb7": "Ⅲ", "adb8": "Ⅳ", "adb9": "Ⅴ", "adba": "Ⅵ", "adbb": "Ⅶ", "adbc": "Ⅷ", "adbd": "Ⅸ", "adbe": "Ⅹ",
+        "fcf1": "ⅰ", "fcf2": "ⅱ", "fcf3": "ⅲ", "fcf4": "ⅳ", "fcf5": "ⅴ", "fcf6": "ⅵ", "fcf7": "ⅶ", "fcf8": "ⅷ", "fcf9": "ⅸ", "fcfa": "ⅹ",
+        "ada1": "①", "ada2": "②", "ada3": "③", "ada4": "④", "ada5": "⑤", "ada6": "⑥", "ada7": "⑦", "ada8": "⑧", "ada9": "⑨", "adaa": "⑩",
+        "adab": "⑪", "adac": "⑫", "adad": "⑬", "adae": "⑭", "adaf": "⑮", "adb0": "⑯", "adb1": "⑰", "adb2": "⑱", "adb3": "⑲", "adb4": "⑳",
+
+        "ade0": "〝", "ade1": "〟", "adea": "㈱", "adeb": "㈲", "adec": "㈹", "ade5": "㊤", "ade6": "㊥", "ade7": "㊦", "ade8": "㊧", "ade9": "㊨",
+        "adc6": "㌃", "adca": "㌍", "adc1": "㌔", "adc4": "㌘", "adc2": "㌢", "adcc": "㌣", "adcb": "㌦", "adc5": "㌧", "adcd": "㌫", "adc7": "㌶",
+        "adcf": "㌻", "adc0": "㍉", "adce": "㍊", "adc3": "㍍", "adc8": "㍑", "adc9": "㍗", "addf": "㍻", "adef": "㍼", "adee": "㍽", "aded": "㍾",
+        "add3": "㎎", "add4": "㎏", "add0": "㎜", "add1": "㎝", "add2": "㎞", "add6": "㎡", "add5": "㏄", "ade3": "㏍", "f9af": "仼", "f9c1": "僴",
+        "f9c7": "凬", "f9ce": "匇", "f9cf": "匤", "f9d6": "咊", "f9da": "坙", "f9e1": "增", "f9ee": "寬", "f9f2": "峵", "f9f4": "嵓", "f9fe": "德",
+        "faa3": "悅", "faa7": "愠", "fab3": "敎", "fab6": "昻", "fabb": "晥", "facb": "栁", "fad4": "橫", "fad8": "櫢", "fae7": "淲", "fae6": "淸",
+        "faf3": "瀨", "f9a7": "炻", "fbb3": "甁", "fbb5": "皂", "fbb7": "皞", "fbc1": "礰", "fbc9": "竧", "fbd1": "綠", "fbd2": "緖", "fbd8": "荢",
+        "fbe2": "薰", "fbe5": "蠇", "fbf0": "譿", "fbf2": "賴", "fbf4": "赶", "fbfa": "郞", "fbfc": "鄕", "fcce": "閒", "fcd4": "霻", "fcd6": "靍",
+        "fcd8": "靑", "fce0": "馞", "fce2": "髙", "fce5": "魲", "fcee": "黑", "fac6": "朗", "fccf": "隆", "f9d4": "﨎", "f9df": "﨏", "f9e0": "塚",
+        "f9f5": "﨑", "fabe": "晴", "face": "﨓", "fad0": "﨔", "fafb": "凞", "fba3": "猪", "fbba": "益", "fbc2": "礼", "fbc3": "神", "fbc4": "祥",
+        "fbc6": "福", "fbca": "靖", "fbcd": "精", "fbd6": "羽", "fbe1": "﨟", "fbe3": "蘒", "fbe4": "﨡", "fbed": "諸", "fbf5": "﨣", "fbf7": "﨤",
+        "fbf8": "逸", "fbfb": "都", "fcb9": "﨧", "fcc0": "﨨", "fcd0": "﨩", "fcdc": "飯", "fcdd": "飼", "fcdf": "館", "fcec": "鶴", "fcfe": "＂",
+        "fcfd": "＇", "a1dd": "－", "a1f1": "￠", "a1f2": "￡", "a2cc": "￢", "fcfc": "￤",
+    },
     big5hkscs: {
         "8e69": "箸", "8e6f": "簆", "8e7e": "糎", "8eab": "緒", "8eb4": "縝", "8ecd": "者", "8ed0": "耨", "8f57": "菁",
         "8f69": "蒨", "8f6e": "萏", "8fcb": "覦", "8fcc": "覩", "8ffe": "起", "906d": "都", "907a": "銹", "90dc": "靜",

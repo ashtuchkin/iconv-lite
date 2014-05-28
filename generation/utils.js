@@ -60,10 +60,11 @@ function arrToStr(arr) {
 // [0] = address of start of the chunk, hex string.
 // <str> - characters of the chunk.
 // <num> - increasing sequence of the length num, starting with prev character.
-exports.generateTable = function(dbcs) {
+exports.generateTable = function(dbcs, maxBytes) {
     var minSeqLen = 4;
     var table = [], range, block, seqLen;
-    for (var i = 0x0000; i < 0x10000; i++)
+    var max = 1 << ((maxBytes || 2) * 8);
+    for (var i = 0x0000; i < max; i++)
         if (dbcs[i] !== undefined) {
             if (dbcs[i-1] === undefined) { // Range started.
                 range = [i.toString(16)]; // Range[0] is starting address.
