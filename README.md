@@ -16,67 +16,67 @@
 ## Usage
 
 ```javascript
-    var iconv = require('iconv-lite');
-    
-    // Convert from an encoded buffer to js string.
-    str = iconv.decode(buf, 'win1251');
-    
-    // Convert from js string to an encoded buffer.
-    buf = iconv.encode("Sample input string", 'win1251');
+var iconv = require('iconv-lite');
 
-    // Check if encoding is supported
-    iconv.encodingExists("us-ascii")
+// Convert from an encoded buffer to js string.
+str = iconv.decode(buf, 'win1251');
+
+// Convert from js string to an encoded buffer.
+buf = iconv.encode("Sample input string", 'win1251');
+
+// Check if encoding is supported
+iconv.encodingExists("us-ascii")
 
 
-    // Decode stream example (from binary stream to js strings)
-    // Only available in Node v0.10+
-    http.createServer(function(req, res) {
-        var converterStream = iconv.decodeStream('win1251');
-        req.pipe(converterStream);
+// Decode stream example (from binary stream to js strings)
+// Only available in Node v0.10+
+http.createServer(function(req, res) {
+    var converterStream = iconv.decodeStream('win1251');
+    req.pipe(converterStream);
 
-        converterStream.on('data', function(str) {
-            console.log(str); // Do something with decoded strings, chunk-by-chunk.
-        });
+    converterStream.on('data', function(str) {
+        console.log(str); // Do something with decoded strings, chunk-by-chunk.
     });
+});
 
-    // Convert encoding streaming example
-    fs.createReadStream('file-in-win1251.txt')
-        .pipe(iconv.decodeStream('win1251'))
-        .pipe(iconv.encodeStream('ucs2'))
-        .pipe(fs.createWriteStream('file-in-ucs2.txt'));
+// Convert encoding streaming example
+fs.createReadStream('file-in-win1251.txt')
+    .pipe(iconv.decodeStream('win1251'))
+    .pipe(iconv.encodeStream('ucs2'))
+    .pipe(fs.createWriteStream('file-in-ucs2.txt'));
 
-    // Sugar: all encode/decode streams have .collect(cb) method to accumulate data.
-    http.createServer(function(req, res) {
-        req.pipe(iconv.decodeStream('win1251')).collect(function(err, body) {
-            assert(typeof body == 'string');
-            console.log(body); // full request body string
-        });
+// Sugar: all encode/decode streams have .collect(cb) method to accumulate data.
+http.createServer(function(req, res) {
+    req.pipe(iconv.decodeStream('win1251')).collect(function(err, body) {
+        assert(typeof body == 'string');
+        console.log(body); // full request body string
     });
+});
 
-    // For the brave/lazy: make Node basic primitives understand all iconv encodings.
-    require('iconv-lite').extendNodeEncodings();
+// For the brave/lazy: make Node basic primitives understand all iconv encodings.
+require('iconv-lite').extendNodeEncodings();
 
-    buf = new Buffer(str, 'win1251');
-    buf.write(str, 'gbk');
-    str = buf.toString('latin1');
-    assert(Buffer.isEncoding('iso-8859-15'));
-    Buffer.byteLength(str, 'us-ascii');
+buf = new Buffer(str, 'win1251');
+buf.write(str, 'gbk');
+str = buf.toString('latin1');
+assert(Buffer.isEncoding('iso-8859-15'));
+Buffer.byteLength(str, 'us-ascii');
 
-    http.createServer(function(req, res) {
-        req.setEncoding('big5');
-        req.collect(function(err, body) {
-            console.log(body);
-        });
+http.createServer(function(req, res) {
+    req.setEncoding('big5');
+    req.collect(function(err, body) {
+        console.log(body);
     });
+});
 
-    fs.createReadStream("file.txt", "shift_jis");
+fs.createReadStream("file.txt", "shift_jis");
 
-    // External modules are also supported (if they use Node primitives, which they probably do).
-    request = require('request');
-    request({
-        url: "http://github.com/", 
-        encoding: "cp932"
-    });
+// External modules are also supported (if they use Node primitives, which they probably do).
+request = require('request');
+request({
+    url: "http://github.com/", 
+    encoding: "cp932"
+});
 ```    
 
 ## Supported encodings
@@ -105,19 +105,19 @@ Note: your results may vary, so please always check on your hardware.
 
 ## Notes
 
-When decoding, be sure to supply a Buffer to decode() method, otherwise (bad things happen)[https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding].  
+When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).  
 Untranslatable characters are set to � or ?. No transliteration is currently supported.
 
 ## Testing
 
 ```bash
-> git clone git@github.com:ashtuchkin/iconv-lite.git
-> cd iconv-lite
-> npm install
-> npm test
+$ git clone git@github.com:ashtuchkin/iconv-lite.git
+$ cd iconv-lite
+$ npm install
+$ npm test
     
-> # To view performance:
-> node test/performance.js
+$ # To view performance:
+$ node test/performance.js
 ```
 
 ## Adoption
