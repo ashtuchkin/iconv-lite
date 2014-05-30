@@ -15,6 +15,7 @@
 
 ## Usage
 
+```javascript
     var iconv = require('iconv-lite');
     
     // Convert from an encoded buffer to js string.
@@ -76,7 +77,7 @@
         url: "http://github.com/", 
         encoding: "cp932"
     });
-    
+```    
 
 ## Supported encodings
 
@@ -109,13 +110,15 @@ Untranslatable characters are set to � or ?. No transliteration is currently s
 
 ## Testing
 
-    git clone git@github.com:ashtuchkin/iconv-lite.git
-    cd iconv-lite
-    npm install
-    npm test
+```bash
+> git clone git@github.com:ashtuchkin/iconv-lite.git
+> cd iconv-lite
+> npm install
+> npm test
     
-    # To view performance:
-    node test/performance.js
+> # To view performance:
+> node test/performance.js
+```
 
 ## Adoption
 [![NPM](https://nodei.co/npm-dl/iconv-lite.png)](https://nodei.co/npm/iconv-lite/)
