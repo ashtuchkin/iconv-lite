@@ -19,6 +19,7 @@ describe("Full Browserify tests", function() {
         var vm = require('vm');
 
         var b = browserify();
+        b.require('buffer');
         b.require(require('path').resolve(__dirname, '../'), {expose: 'iconv-lite'});
 
         b.bundle(function(err, data) {
@@ -33,7 +34,7 @@ describe("Full Browserify tests", function() {
             browserIconvLite.browserOnly = true;
             assert(!iconv.browserOnly); // Check that we really have another copy.
 
-            var browserBuffer = browserIconvLite.Buffer;
+            var browserBuffer = browserContext.require('buffer').Buffer;  //browserIconvLite.Buffer;
             assert(browserBuffer);
 
             // Test internal encodings are present (these are handled by Browserify).
@@ -49,6 +50,10 @@ describe("Full Browserify tests", function() {
             // Test double-byte encodings are present.
             assert.equal(browserIconvLite.encode("中国", 'gbk').toString('hex'), "d6d0b9fa");
             assert.equal(browserIconvLite.decode(new browserBuffer("d6d0b9fa", 'hex'), 'gbk'), "中国");
+
+            // Test that streaming and extend-node API-s are not present.
+            assert(data.indexOf('encodeStream') == -1);
+            assert(data.indexOf('extendNodeEncodings') == -1);
 
             done();
         });

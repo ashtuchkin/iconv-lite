@@ -32,6 +32,10 @@
     "scripts": {
       "test": "mocha --reporter spec --grep ."
     },
+    "browser": {
+        "./extend-node": false,
+        "./streams": false
+    },
     "devDependencies": {
         "mocha": "*",
         "request": "*",
