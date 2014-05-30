@@ -7,8 +7,8 @@
  * Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
  * Intuitive encode/decode API
  * Streaming support for Node v0.10+
- * Can extend Node.js primitives (buffers, streams) to support all iconv-lite encodings - for the lazy.
- * In-browser usage via [Browserify](https://github.com/substack/node-browserify) (150k gzip compressed with Buffer shim included).
+ * Can extend Node.js primitives (buffers, streams) to support all iconv-lite encodings.
+ * In-browser usage via [Browserify](https://github.com/substack/node-browserify) (~180k gzip compressed with Buffer shim included).
  * License: MIT.
 
 [![NPM Stats](https://nodei.co/npm/iconv-lite.png?downloads=true)](https://npmjs.org/packages/iconv-lite/)
@@ -19,7 +19,7 @@
 var iconv = require('iconv-lite');
 
 // Convert from an encoded buffer to js string.
-str = iconv.decode(buf, 'win1251');
+str = iconv.decode(new Buffer('68656c6c6f', 'hex'), 'win1251');
 
 // Convert from js string to an encoded buffer.
 buf = iconv.encode("Sample input string", 'win1251');
@@ -81,11 +81,11 @@ request({
 
 ## Supported encodings
 
- *  All node.js native encodings: 'utf8', 'ucs2', 'ascii', 'binary', 'base64'
+ *  All node.js native encodings: utf8, ucs2, ascii, binary, base64, hex.
  *  All widespread singlebyte encodings: Windows 125x family, ISO-8859 family, 
     IBM/DOS codepages, Macintosh family, KOI8 family, all others supported by iconv library. 
     Aliases like 'latin1', 'us-ascii' also supported.
- *  Multibyte encodings: CP932, CP936, CP949, CP950, GB2313, GBK, GB18030, Big5, Shift_JIS, EUC-JP.
+ *  All widespread multibyte encodings: CP932, CP936, CP949, CP950, GB2313, GBK, GB18030, Big5, Shift_JIS, EUC-JP.
 
 Most singlebyte encodings are generated automatically from [node-iconv](https://github.com/bnoordhuis/node-iconv). Thank you Ben Noordhuis and libiconv authors!
 
