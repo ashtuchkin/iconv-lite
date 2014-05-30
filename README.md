@@ -85,11 +85,11 @@ request({
  *  All widespread singlebyte encodings: Windows 125x family, ISO-8859 family, 
     IBM/DOS codepages, Macintosh family, KOI8 family, all others supported by iconv library. 
     Aliases like 'latin1', 'us-ascii' also supported.
- *  Multibyte encodings: CP932, CP936, CP949, CP950, GBK, GB2313, GB18030, Big5, Shift_JIS.
+ *  Multibyte encodings: CP932, CP936, CP949, CP950, GB2313, GBK, GB18030, Big5, Shift_JIS, EUC-JP.
 
 Most singlebyte encodings are generated automatically from [node-iconv](https://github.com/bnoordhuis/node-iconv). Thank you Ben Noordhuis and libiconv authors!
 
-Not supported yet: EUC family, ISO2022 family.
+Multibyte encodings are generated from [Unicode.org mappings](http://www.unicode.org/Public/MAPPINGS/) and [WHATWG Encoding Standard mappings](http://encoding.spec.whatwg.org/). Thank you, respective authors!
 
 
 ## Encoding/decoding speed
@@ -105,7 +105,7 @@ Note: your results may vary, so please always check on your hardware.
 
 ## Notes
 
-When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).  
+When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things usually happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).  
 Untranslatable characters are set to � or ?. No transliteration is currently supported.
 
 ## Testing
