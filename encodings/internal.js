@@ -10,6 +10,7 @@ module.exports = {
     utf16le:{ type: "_internal", enc: "ucs2" },
     binary: { type: "_internal", enc: "binary" },
     base64: { type: "_internal", enc: "base64" },
+    hex:    { type: "_internal", enc: "hex" },
 
     // Codec.
     _internal: function(options) {

@@ -4,6 +4,7 @@ var assert = require('assert'),
 var testString = "Hello123!";
 var testStringLatin1 = "Hello123!£Å÷×çþÿ¿®";
 var testStringBase64 = "SGVsbG8xMjMh";
+var testStringHex = "48656c6c6f31323321";
 
 describe("Generic UTF8-UCS2 tests", function() {
     
@@ -24,6 +25,11 @@ describe("Generic UTF8-UCS2 tests", function() {
     it("Base64 correctly encoded/decoded", function() {    
         assert.strictEqual(iconv.encode(testStringBase64, "base64").toString("binary"), testString);
         assert.strictEqual(iconv.decode(new Buffer(testString, "binary"), "base64"), testStringBase64);
+    });
+
+    it("Hex correctly encoded/decoded", function() {    
+        assert.strictEqual(iconv.encode(testStringHex, "hex").toString("binary"), testString);
+        assert.strictEqual(iconv.decode(new Buffer(testString, "binary"), "hex"), testStringHex);
     });
     
     it("Latin1 correctly encoded/decoded", function() {    
