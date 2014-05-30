@@ -31,10 +31,6 @@ describe("Generic UTF8-UCS2 tests", function() {
         assert.strictEqual(iconv.decode(new Buffer(testStringLatin1, "binary"), "latin1"), testStringLatin1);
     });
     
-    it("Convert from string, not buffer (binary encoding used)", function() {
-        assert.strictEqual(iconv.decode(testStringLatin1, "binary"), testStringLatin1);
-    });
-    
     it("Convert to string, not buffer (utf8 used)", function() {
         var res = iconv.encode(new Buffer(testStringLatin1, "utf8"), "utf8");
         assert.ok(res instanceof Buffer);
@@ -43,20 +39,17 @@ describe("Generic UTF8-UCS2 tests", function() {
     
     it("Throws on unknown encodings", function() {
         assert.throws(function() { iconv.encode("a", "xxx"); });
-        assert.throws(function() { iconv.decode("a", "xxx"); });
+        assert.throws(function() { iconv.decode(new Buffer("a"), "xxx"); });
     });
     
     it("Convert non-strings and non-buffers", function() {
         assert.strictEqual(iconv.encode({}, "utf8").toString(), "[object Object]");
         assert.strictEqual(iconv.encode(10, "utf8").toString(), "10");
         assert.strictEqual(iconv.encode(undefined, "utf8").toString(), "");
-        assert.strictEqual(iconv.decode({}, "utf8"), "[object Object]");
-        assert.strictEqual(iconv.decode(10, "utf8"), "10");
-        assert.strictEqual(iconv.decode(undefined, "utf8"), "");
     });
     
-    it("Aliases encode and decode work the same as encode and decode", function() {
+    it("Aliases toEncoding and fromEncoding work the same as encode and decode", function() {
         assert.strictEqual(iconv.toEncoding(testString, "latin1").toString("binary"), iconv.encode(testString, "latin1").toString("binary"));
-        assert.strictEqual(iconv.fromEncoding(testStringLatin1, "latin1"), iconv.decode(testStringLatin1, "latin1"));
+        assert.strictEqual(iconv.fromEncoding(new Buffer(testStringLatin1), "latin1"), iconv.decode(new Buffer(testStringLatin1), "latin1"));
     });
 });

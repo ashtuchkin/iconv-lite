@@ -104,7 +104,7 @@ Note: your results may vary, so please always check on your hardware.
 
 ## Notes
 
-When decoding, a 'binary'-encoded string can be used as a source buffer.  
+When decoding, be sure to supply a Buffer to decode() method, otherwise (bad things happen)[https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding].  
 Untranslatable characters are set to � or ?. No transliteration is currently supported.
 
 ## Testing
