@@ -14,22 +14,24 @@
 [![NPM Stats](https://nodei.co/npm/iconv-lite.png?downloads=true)](https://npmjs.org/packages/iconv-lite/)
 
 ## Usage
-
+### Basic API
 ```javascript
 var iconv = require('iconv-lite');
 
 // Convert from an encoded buffer to js string.
-str = iconv.decode(new Buffer('68656c6c6f', 'hex'), 'win1251');
+str = iconv.decode(new Buffer([0x68, 0x65, 0x6c, 0x6c, 0x6f]), 'win1251');
 
 // Convert from js string to an encoded buffer.
 buf = iconv.encode("Sample input string", 'win1251');
 
 // Check if encoding is supported
 iconv.encodingExists("us-ascii")
+```
 
+### Streaming API (Node v0.10+)
+```javascript
 
-// Decode stream example (from binary stream to js strings)
-// Only available in Node v0.10+
+// Decode stream (from binary stream to js strings)
 http.createServer(function(req, res) {
     var converterStream = iconv.decodeStream('win1251');
     req.pipe(converterStream);
@@ -52,10 +54,14 @@ http.createServer(function(req, res) {
         console.log(body); // full request body string
     });
 });
+```
 
-// For the brave/lazy: make Node basic primitives understand all iconv encodings.
-require('iconv-lite').extendNodeEncodings();
+### Extend Node.js own encodings
+```javascript
+// After this call all Node basic primitives will understand iconv-lite encodings.
+iconv.extendNodeEncodings();
 
+// Examples:
 buf = new Buffer(str, 'win1251');
 buf.write(str, 'gbk');
 str = buf.toString('latin1');
@@ -77,7 +83,10 @@ request({
     url: "http://github.com/", 
     encoding: "cp932"
 });
-```    
+
+// To remove extensions
+iconv.undoExtendNodeEncodings();
+```
 
 ## Supported encodings
 
