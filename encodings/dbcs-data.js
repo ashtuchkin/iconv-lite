@@ -72,6 +72,7 @@ module.exports = {
     'gb23121980': 'cp936',
     'csgb2312': 'cp936',
     'csiso58gb231280': 'cp936',
+    'euccn': 'cp936',
     'isoir58': 'gbk',
 
     // Microsoft's CP936 is a subset and approximation of GBK.
