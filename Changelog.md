@@ -1,4 +1,8 @@
 
+# 0.4.2 / 2014-06-12
+
+ * don't throw exception if `extendNodeEncodings()` is called more than once
+
 # 0.4.1 / 2014-06-11
 
  * codepage 808 added
