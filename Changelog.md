@@ -1,4 +1,9 @@
 
+# 0.4.1 / 2014-06-11
+
+ * codepage 808 added
+
+
 # 0.4.0 / 2014-06-10
 
  * code is rewritten from scratch

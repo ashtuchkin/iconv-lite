@@ -8,7 +8,10 @@ function convertWithDefault(converter, buf, def) {
     return res.length > 0 ? res : def;
 }
 
-var skipEncodings = {maccenteuro: true}; // Not supported by iconv.
+var skipEncodings = { // Not supported by iconv.
+    maccenteuro: true,
+    cp808: true,
+}; 
 var aliases = {
     armscii8: "ARMSCII-8",
     georgianacademy: "GEORGIAN-ACADEMY",
