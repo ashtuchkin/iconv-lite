@@ -1,4 +1,8 @@
 
+# 0.4.3 / 2014-06-14
+
+ * added encodings UTF-16BE and UTF-16 with BOM
+
 # 0.4.2 / 2014-06-12
 
  * don't throw exception if `extendNodeEncodings()` is called more than once
