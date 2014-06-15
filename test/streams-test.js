@@ -239,6 +239,29 @@ describe("Streaming mode", function() {
         output: "a�"
     }));
 
+    it("Decoding of uneven length buffers from UTF-16LE", checkDecodeStream({
+        encoding: "UTF-16LE",
+        input: [[0x61], [0x0]],
+        output: "a"
+    }));
+
+    it("Decoding of uneven length buffers from UTF-16BE", checkDecodeStream({
+        encoding: "UTF-16BE",
+        input: [[0x0], [0x61]],
+        output: "a"
+    }));
+
+    it("Decoding of uneven length buffers from UTF-16BE - 2", checkDecodeStream({
+        encoding: "UTF-16BE",
+        input: [[0x00, 0x61, 0x00], [0x62, 0x00, 0x63]],
+        output: "abc"
+    }));
+
+    it("Decoding of uneven length buffers from UTF-16", checkDecodeStream({
+        encoding: "UTF-16",
+        input: [[0x61], [0x0], [0x20], [0x0]],
+        output: "a "
+    }));
 });
 
 describe("Streaming sugar", function() {

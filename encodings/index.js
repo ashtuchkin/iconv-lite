@@ -3,6 +3,7 @@
 // We support Browserify by skipping automatic module discovery and requiring modules directly.
 var modules = [
     require("./internal"),
+    require("./utf16"),
     require("./sbcs-codec"),
     require("./sbcs-data"),
     require("./sbcs-data-generated"),
