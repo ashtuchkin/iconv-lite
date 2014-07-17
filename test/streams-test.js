@@ -268,6 +268,24 @@ describe("Streaming mode", function() {
         input: ['aGV', 'sbG8gd2', '9ybGQ='],
         output: new Buffer('hello world').toString('hex')
     }));
+
+    it("Decoding of UTF-7 with base64 between chunks", checkDecodeStream({
+        encoding: "UTF-7",
+        input: [new Buffer('+T2'), new Buffer('BZf'), new Buffer('Q hei+AN8-t')],
+        output: '\u4F60\u597D heißt'
+    }));
+
+    it("Encoding of UTF-7-IMAP with base64 between chunks", checkEncodeStream({
+        encoding: "UTF-7-IMAP",
+        input: ['\uffff','\uedca','\u9876','\u5432','\u1fed'],
+        output: new Buffer('&,,,typh2VDIf7Q-').toString('hex')
+    }));
+
+    it("Decoding of UTF-7-IMAP with base64 between chunks", checkDecodeStream({
+        encoding: "UTF-7-IMAP",
+        input: [new Buffer('&T2'), new Buffer('BZf'), new Buffer('Q hei&AN8-t')],
+        output: '\u4F60\u597D heißt'
+    }));
 });
 
 describe("Streaming sugar", function() {

@@ -4,6 +4,7 @@
 var modules = [
     require("./internal"),
     require("./utf16"),
+    require("./utf7"),
     require("./sbcs-codec"),
     require("./sbcs-data"),
     require("./sbcs-data-generated"),
