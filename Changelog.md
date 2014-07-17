@@ -1,4 +1,9 @@
 
+# 0.4.4 / 2014-07-16
+
+ * added encodings UTF-7 (RFC2152) and UTF-7-IMAP (RFC3501 Section 5.1.3)
+ * fixed streaming base64 encoding
+
 # 0.4.3 / 2014-06-14
 
  * added encodings UTF-16BE and UTF-16 with BOM
