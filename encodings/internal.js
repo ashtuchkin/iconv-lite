@@ -20,7 +20,7 @@ module.exports = {
             throw new Error("Internal codec is called without encoding type.")
 
         return {
-            encoder: encoderInternal,
+            encoder: options.enc == "base64" ? encoderBase64 : encoderInternal,
             decoder: decoderInternal,
 
             enc: options.enc,
@@ -39,6 +39,7 @@ function decoderInternal() {
     return new StringDecoder(this.enc);
 }
 
+// Encoder is mostly trivial
 
 function encoderInternal() {
     return {
@@ -51,5 +52,30 @@ function encoderInternal() {
 
 function encodeInternal(str) {
     return new Buffer(str, this.enc);
+}
+
+
+// Except base64 encoder, which must keep its state.
+
+function encoderBase64() {
+    return {
+        write: encodeBase64Write,
+        end: encodeBase64End,
+
+        prevStr: '',
+    };
+}
+
+function encodeBase64Write(str) {
+    str = this.prevStr + str;
+    var completeQuads = str.length - (str.length % 4);
+    this.prevStr = str.slice(completeQuads);
+    str = str.slice(0, completeQuads);
+
+    return new Buffer(str, "base64");
+}
+
+function encodeBase64End() {
+    return new Buffer(this.prevStr, "base64");
 }
 

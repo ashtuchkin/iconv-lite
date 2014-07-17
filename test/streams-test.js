@@ -262,6 +262,12 @@ describe("Streaming mode", function() {
         input: [[0x61], [0x0], [0x20], [0x0]],
         output: "a "
     }));
+
+    it("Encoding base64 between chunks", checkEncodeStream({
+        encoding: "base64",
+        input: ['aGV', 'sbG8gd2', '9ybGQ='],
+        output: new Buffer('hello world').toString('hex')
+    }));
 });
 
 describe("Streaming sugar", function() {
