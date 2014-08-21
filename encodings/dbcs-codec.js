@@ -503,7 +503,7 @@ function decoderDBCSWrite(buf) {
             uCode = seq[seq.length-1];
         }
         else
-            throw new Error("Unknown table value when decoding: " + val);
+            throw new Error("iconv-lite internal error: invalid decoding table value " + uCode + " at " + nodeIdx + "/" + curByte);
 
         // Write the character to buffer, handling higher planes using surrogate pair.
         if (uCode > 0xFFFF) { 
