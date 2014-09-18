@@ -118,7 +118,9 @@ Note: your results may vary, so please always check on your hardware.
 ## Notes
 
 When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things usually happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).  
-Untranslatable characters are set to � or ?. No transliteration is currently supported.
+Untranslatable characters are set to � or ?. No transliteration is currently supported.  
+Uses BOM to determine endianness, but doesn't remove it. Use ['strip-bom' module](https://github.com/sindresorhus/strip-bom).  
+Node versions 0.10.31 and 0.11.13 are buggy, don't use them (see #65, #77).  
 
 ## Testing
 
@@ -130,6 +132,10 @@ $ npm test
     
 $ # To view performance:
 $ node test/performance.js
+
+$ # To view test coverage:
+$ npm run coverage
+$ open coverage/lcov-report/index.html
 ```
 
 ## Adoption
