@@ -31,6 +31,8 @@
         "node": ">=0.8.0"
     },
     "scripts": {
+      "coverage": "istanbul cover _mocha -- --grep .",
+      "coverage-open": "open coverage/lcov-report/index.html",
       "test": "mocha --reporter spec --grep ."
     },
     "browser": {
@@ -43,6 +45,7 @@
         "unorm": "*",
         "errto": "*",
         "async": "*",
+        "istanbul": "*",
         "iconv": "~2.1.4"
     }
 }
