@@ -41,7 +41,7 @@
     },
     "devDependencies": {
         "mocha": "*",
-        "request": "*",
+        "request": "2.47",
         "unorm": "*",
         "errto": "*",
         "async": "*",
