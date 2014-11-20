@@ -1,4 +1,9 @@
 
+# 0.4.5 / 2014-11-20
+
+ * fix windows-31j and x-sjis encoding support (@nleush)
+ * minor fix: undefined variable reference when internal error happens
+
 # 0.4.4 / 2014-07-16
 
  * added encodings UTF-7 (RFC2152) and UTF-7-IMAP (RFC3501 Section 5.1.3)
