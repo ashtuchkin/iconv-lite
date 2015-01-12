@@ -19,15 +19,15 @@ module.exports = {
     // Aliases of generated encodings.
     "ascii8bit": "ascii",
     "usascii": "ascii",
-    "ansix3.4": "ascii",
-    "ansix3.41968": "ascii",
-    "ansix3.41986": "ascii",
+    "ansix34": "ascii",
+    "ansix341968": "ascii",
+    "ansix341986": "ascii",
     "csascii": "ascii",
     "cp367": "ascii",
     "ibm367": "ascii",
     "isoir6": "ascii",
     "iso646us": "ascii",
-    "iso646.irv": "ascii",
+    "iso646irv": "ascii",
     "us": "ascii",
 
     "latin1": "iso88591",
@@ -110,8 +110,8 @@ module.exports = {
     "isoceltic": "iso885914",
 
     "tis6200": "tis620",
-    "tis620.25291": "tis620",
-    "tis620.25330": "tis620",
+    "tis62025291": "tis620",
+    "tis62025330": "tis620",
 
     "10000": "macroman",
     "10006": "macgreek",
