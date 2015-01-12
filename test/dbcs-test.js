@@ -151,7 +151,7 @@ function strToHex(str) { return spacify4(swapBytes(new Buffer(str, 'ucs2')).toSt
 iconv.encode('', 'utf8'); // Load all encodings.
 
 describe("Full DBCS encoding tests", function() {
-    this.timeout(5000); // These tests are pretty slow.
+    this.timeout(10000); // These tests are pretty slow.
 
     for (var enc in iconv.encodings) {
         if (iconv.encodings[enc].type === '_dbcs') (function(enc) {

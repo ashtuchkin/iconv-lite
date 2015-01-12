@@ -1,4 +1,9 @@
 
+# 0.4.6 / 2015-01-12
+ 
+ * fix rare aliases of single-byte encodings (thanks @mscdex)
+ * double the timeout for dbcs tests to make them less flaky on travis
+
 # 0.4.5 / 2014-11-20
 
  * fix windows-31j and x-sjis encoding support (@nleush)
