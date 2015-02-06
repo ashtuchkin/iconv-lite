@@ -80,8 +80,11 @@ function DBCSCodec(options) {
     this._fillEncodeTable(0, 0, skipEncodeChars);
 
     // Add more encoding pairs when needed.
-    for (var uChar in options.encodeAdd || {})
-        this._setEncodeChar(uChar.charCodeAt(0), options.encodeAdd[uChar]);
+    if (options.encodeAdd) {
+        for (var uChar in options.encodeAdd)
+            if (Object.prototype.hasOwnProperty.call(options.encodeAdd, uChar))
+                this._setEncodeChar(uChar.charCodeAt(0), options.encodeAdd[uChar]);
+    }
 
     this.defCharSB  = this.encodeTable[0][options.iconv.defaultCharSingleByte.charCodeAt(0)];
     if (this.defCharSB === UNASSIGNED) this.defCharSB = this.encodeTable[0]['?'];

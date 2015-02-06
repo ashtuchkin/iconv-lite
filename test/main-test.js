@@ -58,4 +58,24 @@ describe("Generic UTF8-UCS2 tests", function() {
         assert.strictEqual(iconv.toEncoding(testString, "latin1").toString("binary"), iconv.encode(testString, "latin1").toString("binary"));
         assert.strictEqual(iconv.fromEncoding(new Buffer(testStringLatin1), "latin1"), iconv.decode(new Buffer(testStringLatin1), "latin1"));
     });
+
+    it("handles Object & Array prototypes monkey patching", function() {
+        Object.prototype.permits = function() {};
+        Array.prototype.sample2 = function() {};
+
+        iconv._codecDataCache = {}; // Clean up cache so that all encodings are loaded.
+
+        assert.strictEqual(iconv.decode(new Buffer("abc"), "gbk"), "abc");
+        assert.strictEqual(iconv.decode(new Buffer("abc"), "win1251"), "abc");
+        assert.strictEqual(iconv.decode(new Buffer("abc"), "utf7"), "abc");
+        assert.strictEqual(iconv.decode(new Buffer("abc"), "utf8"), "abc");
+
+        assert.strictEqual(iconv.encode("abc", "gbk").toString(), "abc");
+        assert.strictEqual(iconv.encode("abc", "win1251").toString(), "abc");
+        assert.strictEqual(iconv.encode("abc", "utf7").toString(), "abc");
+        assert.strictEqual(iconv.encode("abc", "utf8").toString(), "abc");
+
+        delete Object.prototype.permits;
+        delete Array.prototype.sample2;
+    });
 });

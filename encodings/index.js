@@ -16,5 +16,6 @@ var modules = [
 for (var i = 0; i < modules.length; i++) {
     var module = modules[i];
     for (var enc in module)
-        exports[enc] = module[enc];
+        if (Object.prototype.hasOwnProperty.call(module, enc))
+            exports[enc] = module[enc];
 }
