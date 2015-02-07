@@ -107,13 +107,13 @@ Multibyte encodings are generated from [Unicode.org mappings](http://www.unicode
 
 ## Encoding/decoding speed
 
-Comparison with node-iconv module (1000x256kb, on MacBook Pro, Core i5/2.6 GHz, Node v0.10.26). 
+Comparison with node-iconv module (1000x256kb, on MacBook Pro, Core i5/2.6 GHz, Node v0.12.0). 
 Note: your results may vary, so please always check on your hardware.
 
-    operation             iconv@2.1.4   iconv-lite@0.4.0
+    operation             iconv@2.1.4   iconv-lite@0.4.7
     ----------------------------------------------------------
-    encode('win1251')     ~130 Mb/s     ~380 Mb/s
-    decode('win1251')     ~127 Mb/s     ~210 Mb/s
+    encode('win1251')     ~96 Mb/s      ~320 Mb/s
+    decode('win1251')     ~95 Mb/s      ~246 Mb/s
 
 
 ## Notes
