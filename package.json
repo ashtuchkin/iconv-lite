@@ -47,6 +47,6 @@
         "errto": "*",
         "async": "*",
         "istanbul": "*",
-        "iconv": "2.1.4"
+        "iconv": "2.1.5"
     }
 }
