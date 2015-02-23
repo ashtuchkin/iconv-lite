@@ -12,7 +12,7 @@
  * In-browser usage via [Browserify](https://github.com/substack/node-browserify) (~180k gzip compressed with Buffer shim included).
  * License: MIT.
 
-[![NPM Stats](https://nodei.co/npm/iconv-lite.png?downloads=true)](https://npmjs.org/packages/iconv-lite/)
+[![NPM Stats](https://nodei.co/npm/iconv-lite.png?downloads=true&downloadRank=true)](https://npmjs.org/packages/iconv-lite/)
 
 ## Usage
 ### Basic API
