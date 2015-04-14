@@ -25,6 +25,8 @@ exports.utf7 = function(options) {
     };
 };
 
+exports.unicode11utf7 = 'utf7'; // Alias UNICODE-1-1-UTF-7
+
 
 var nonDirectChars = /[^A-Za-z0-9'\(\),-\.\/:\? \n\r\t]+/g;
 
