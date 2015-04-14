@@ -1,4 +1,9 @@
 
+# 0.4.8 / 2015-04-14
+ 
+ * added alias UNICODE-1-1-UTF-7 for UTF-7 encoding (#94)
+
+
 # 0.4.7 / 2015-02-05
 
  * stop official support of Node.js v0.8. Should still work, but no guarantees.
