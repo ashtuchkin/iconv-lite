@@ -4,8 +4,8 @@
 
 exports.utf16be = function() {
     return {
-        encoder: utf16beEncoder,
-        decoder: utf16beDecoder,
+        encoder: function() { return new Utf16beEncoder() },
+        decoder: function() { return new Utf16beDecoder() },
 
         bomAware: true,
     };
@@ -14,14 +14,10 @@ exports.utf16be = function() {
 
 // -- Encoding
 
-function utf16beEncoder() {
-    return {
-        write: utf16beEncoderWrite,
-        end: function() {},
-    }
+function Utf16beEncoder() {
 }
 
-function utf16beEncoderWrite(str) {
+Utf16beEncoder.prototype.write = function(str) {
     var buf = new Buffer(str, 'ucs2');
     for (var i = 0; i < buf.length; i += 2) {
         var tmp = buf[i]; buf[i] = buf[i+1]; buf[i+1] = tmp;
@@ -29,19 +25,17 @@ function utf16beEncoderWrite(str) {
     return buf;
 }
 
+Utf16beEncoder.prototype.end = function() {
+}
+
 
 // -- Decoding
 
-function utf16beDecoder() {
-    return {
-        write: utf16beDecoderWrite,
-        end: function() {},
-
-        overflowByte: -1,
-    };
+function Utf16beDecoder() {
+    this.overflowByte = -1;
 }
 
-function utf16beDecoderWrite(buf) {
+Utf16beDecoder.prototype.write = function(buf) {
     if (buf.length == 0)
         return '';
 
@@ -64,6 +58,9 @@ function utf16beDecoderWrite(buf) {
     return buf2.slice(0, j).toString('ucs2');
 }
 
+Utf16beDecoder.prototype.end = function() {
+}
+
 
 // == UTF-16 codec =============================================================
 // Decoder chooses automatically from UTF-16LE and UTF-16BE using BOM and space-based heuristic.
@@ -78,7 +75,7 @@ function utf16beDecoderWrite(buf) {
 exports.utf16 = function(codecOptions, iconv) {
     return {
         encoder: utf16Encoder,
-        decoder: utf16Decoder,
+        decoder: function(options) { return new Utf16Decoder(options, this.iconv) },
 
         iconv: iconv,
         // bomAware-ness is handled inside encoder/decoder functions
@@ -96,83 +93,77 @@ function utf16Encoder(options) {
 
 // -- Decoding
 
-function utf16Decoder(options) {
-    return {
-        write: utf16DecoderWrite,
-        end: utf16DecoderEnd,
+function Utf16Decoder(options, iconv) {
+    this.decoder = null;
+    this.initialBytes = [];
+    this.initialBytesLen = 0;
 
-        internalDecoder: null,
-        initialBytes: [],
-        initialBytesLen: 0,
-
-        options: options || {},
-        iconv: this.iconv,
-    };
+    this.options = options || {};
+    this.iconv = iconv;
 }
 
-function utf16DecoderWrite(buf) {
-    if (this.internalDecoder)
-        return this.internalDecoder.write(buf);
+Utf16Decoder.prototype.write = function(buf) {
+    if (!this.decoder) {
+        // Codec is not chosen yet. Accumulate initial bytes.
+        this.initialBytes.push(buf);
+        this.initialBytesLen += buf.length;
+        
+        if (this.initialBytesLen < 16) // We need more bytes to use space heuristic (see below)
+            return '';
 
-    // Codec is not chosen yet. Accumulate initial bytes.
-    this.initialBytes.push(buf);
-    this.initialBytesLen += buf.length;
-    
-    if (this.initialBytesLen < 16) // We need > 2 bytes to use space heuristic (see below)
-        return '';
+        // We have enough bytes -> detect endianness.
+        var buf = Buffer.concat(this.initialBytes);
+        this.initialBytes.length = this.initialBytesLen = 0;
 
-    // We have enough bytes -> decide endianness.
-    return utf16DecoderDecideEndianness.call(this);
+        this.decoder = this.detectDecoder(buf);
+    }
+
+    return this.decoder.write(buf);
 }
 
-function utf16DecoderEnd() {
-    if (this.internalDecoder)
-        return this.internalDecoder.end();
+Utf16Decoder.prototype.end = function() {
+    if (!this.decoder) {
+        var buf = Buffer.concat(this.initialBytes);
+        this.decoder = this.detectDecoder(buf);
 
-    var res = utf16DecoderDecideEndianness.call(this);
-    var trail;
+        var res = this.decoder.write(buf),
+            trail = this.decoder.end();
 
-    if (this.internalDecoder)
-        trail = this.internalDecoder.end();
-
-    return (trail && trail.length > 0) ? (res + trail) : res;
+        return trail ? (res + trail) : res;
+    }
+    return this.decoder.end();
 }
 
-function utf16DecoderDecideEndianness() {
-    var buf = Buffer.concat(this.initialBytes);
-    this.initialBytes.length = this.initialBytesLen = 0;
-
-    if (buf.length < 2)
-        return ''; // Not a valid UTF-16 sequence anyway.
-
+Utf16Decoder.prototype.detectDecoder = function(buf) {
     // Default encoding.
     var enc = this.options.default || 'utf-16be';
 
-    // Check BOM.
-    if (buf[0] == 0xFE && buf[1] == 0xFF) // UTF-16BE BOM
-        enc = 'utf-16be';
-    else if (buf[0] == 0xFF && buf[1] == 0xFE) // UTF-16LE BOM
-        enc = 'utf-16le';
-    else {
-        // No BOM found. Try to deduce encoding from initial content.
-        // Most of the time, the content has spaces (U+0020), but the opposite (U+2000) is very uncommon.
-        // So, we count spaces as if it was LE or BE, and decide from that.
-        var spaces = [0, 0], // Counts of space chars in both positions
-            _len = Math.min(buf.length - (buf.length % 2), 64); // Len is always even.
-
-        for (var i = 0; i < _len; i += 2) {
-            if (buf[i] == 0x00 && buf[i+1] == 0x20) spaces[0]++;
-            if (buf[i] == 0x20 && buf[i+1] == 0x00) spaces[1]++;
-        }
-
-        if (spaces[0] > 0 && spaces[1] == 0)  
+    if (buf.length >= 2) {
+        // Check BOM.
+        if (buf[0] == 0xFE && buf[1] == 0xFF) // UTF-16BE BOM
             enc = 'utf-16be';
-        else if (spaces[0] == 0 && spaces[1] > 0)
+        else if (buf[0] == 0xFF && buf[1] == 0xFE) // UTF-16LE BOM
             enc = 'utf-16le';
+        else {
+            // No BOM found. Try to deduce encoding from initial content.
+            // Most of the time, the content has spaces (U+0020), but the opposite (U+2000) is very uncommon.
+            // So, we count spaces as if it was LE or BE, and decide from that.
+            var spacesLE = 0, spacesBE = 0, // Counts of space chars in both positions
+                _len = Math.min(buf.length - (buf.length % 2), 64); // Len is always even.
+
+            for (var i = 0; i < _len; i += 2) {
+                if (buf[i] == 0x00 && buf[i+1] == 0x20) spacesBE++;
+                if (buf[i] == 0x20 && buf[i+1] == 0x00) spacesLE++;
+            }
+
+            if (spacesBE > 0 && spacesLE == 0)
+                enc = 'utf-16be';
+            else if (spacesBE == 0 && spacesLE > 0)
+                enc = 'utf-16le';
+        }
     }
 
-    this.internalDecoder = this.iconv.getDecoder(enc, this.options);
-    return this.internalDecoder.write(buf);
+    return this.iconv.getDecoder(enc, this.options);
 }
 
 
