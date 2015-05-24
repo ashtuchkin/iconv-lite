@@ -9,6 +9,9 @@ describe("Extend Node native encodings", function() {
             assert(!Buffer.isEncoding("windows-1251"));
 
         iconv.extendNodeEncodings();
+
+        if (Buffer.isEncoding)
+            assert(Buffer.isEncoding("windows-1251"));
     });
 
     after(function() {
@@ -64,21 +67,24 @@ describe("Extend Node native encodings", function() {
     });
 
     if (iconv.supportsStreams) {
+        // Marker: å∫ç∂  (don't delete this comment - it is read by tests below)
+        var markerInWin1251 = 'ГҐв€«'+'Г§в€‚';
+
         it("Readable#setEncoding()", function(done) {
             var readStream = fs.createReadStream(__filename);
             readStream.setEncoding('windows-1251');
             readStream.on('data', function(str) {
-                assert(typeof str == 'string');
+                assert.equal(typeof str, 'string');
+                assert.notEqual(str.indexOf(markerInWin1251), -1);
             });
             readStream.on('end', done);
         });
 
         it("Readable#setEncoding() and collect", function(done) {
-            fs.createReadStream(__filename, "big5").collect(function(err, str) {
+            fs.createReadStream(__filename, {encoding: "win1251"}).collect(function(err, str) {
                 assert.ifError(err);
-                assert(typeof str == 'string');
-                var marker = "銝Ｖ葫銋册飾鈭窍滌隞"; // big5 to utf8 of "丢丬乕乢亊亰" <- don't delete this comment. it is the marker.
-                assert(str.indexOf(marker) != -1); 
+                assert.equal(typeof str, 'string');
+                assert.notEqual(str.indexOf(markerInWin1251), -1);
                 done();
             });
         });
@@ -87,28 +93,31 @@ describe("Extend Node native encodings", function() {
             var http = require('http'),
                 request = require('request'),
                 port = 33000,
-                testStr = "唨唩唫唭唲唴唵唶唸";
+                testStr = "Ах, как внезапно кончился диван!";
 
             var server = http.createServer(function(req, res) {
-                req.setEncoding('gbk');
+                req.setEncoding('win1251');
                 req.collect(function(err, body) {
-                    res.end(iconv.encode(body, 'cp936'));
+                    assert.ifError(err);
+                    assert.equal(body, testStr);
+                    body = iconv.encode(body, 'koi8-r')
+                    assert.notEqual(body.toString(), testStr);
+                    res.end(body);
                 });
 
-            }).listen(33000, function() {
+            }).listen(port, function() {
+                var body = new Buffer(testStr, 'win1251');
+                assert.notEqual(body.toString(), testStr);
                 request({
                     url: "http://localhost:"+port,
-                    encoding: 'cp936',
-                    body: new Buffer(testStr, 'gbk'),
+                    encoding: 'koi8-r',
+                    body: body,
                 }, function(err, resp, body) {
+                    assert.ifError(err);
                     assert.equal(body, testStr);                
-                    done();
+                    server.close(done);
                 });
             });
-
-            setTimeout(function() {
-                server.close();
-            }, 300);
         });
     }
 });
