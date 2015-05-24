@@ -79,7 +79,7 @@ encodingFamilies.forEach(function(family){
 
 // Write encodings.
 fs.writeFileSync(path.join(__dirname, "..", destFileName), 
-    "\n// Generated data for sbcs codec. Don't edit manually. Regenerate using generation/gen-sbcs.js script.\n"+
+    "\"use strict\"\n\n// Generated data for sbcs codec. Don't edit manually. Regenerate using generation/gen-sbcs.js script.\n"+
     "module.exports = "+JSON.stringify(encodings, undefined, "  "));
 
 

@@ -1,3 +1,4 @@
+"use strict"
 
 // Export Node.js internal encodings.
 
