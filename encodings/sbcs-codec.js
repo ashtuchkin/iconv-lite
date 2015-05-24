@@ -2,29 +2,29 @@
 // Single-byte codec. Needs a 'chars' string parameter that contains 256 or 128 chars that
 // correspond to encoded bytes (if 128 - then lower half is ASCII). 
 
-exports._sbcs = function(options) {
-    if (!options)
+exports._sbcs = function(codecOptions, iconv) {
+    if (!codecOptions)
         throw new Error("SBCS codec is called without the data.")
     
     // Prepare char buffer for decoding.
-    if (!options.chars || (options.chars.length !== 128 && options.chars.length !== 256))
-        throw new Error("Encoding '"+options.type+"' has incorrect 'chars' (must be of len 128 or 256)");
+    if (!codecOptions.chars || (codecOptions.chars.length !== 128 && codecOptions.chars.length !== 256))
+        throw new Error("Encoding '"+codecOptions.type+"' has incorrect 'chars' (must be of len 128 or 256)");
     
-    if (options.chars.length === 128) {
+    if (codecOptions.chars.length === 128) {
         var asciiString = "";
         for (var i = 0; i < 128; i++)
             asciiString += String.fromCharCode(i);
-        options.chars = asciiString + options.chars;
+        codecOptions.chars = asciiString + codecOptions.chars;
     }
 
-    var decodeBuf = new Buffer(options.chars, 'ucs2');
+    var decodeBuf = new Buffer(codecOptions.chars, 'ucs2');
     
     // Encoding buffer.
     var encodeBuf = new Buffer(65536);
-    encodeBuf.fill(options.iconv.defaultCharSingleByte.charCodeAt(0));
+    encodeBuf.fill(iconv.defaultCharSingleByte.charCodeAt(0));
 
-    for (var i = 0; i < options.chars.length; i++)
-        encodeBuf[options.chars.charCodeAt(i)] = i;
+    for (var i = 0; i < codecOptions.chars.length; i++)
+        encodeBuf[codecOptions.chars.charCodeAt(i)] = i;
 
     return {
         encoder: encoderSBCS,
@@ -35,7 +35,7 @@ exports._sbcs = function(options) {
     };
 }
 
-function encoderSBCS(options) {
+function encoderSBCS() {
     return {
         write: encoderSBCSWrite,
         end: function() {},
@@ -53,7 +53,7 @@ function encoderSBCSWrite(str) {
 }
 
 
-function decoderSBCS(options) {
+function decoderSBCS() {
     return {
         write: decoderSBCSWrite,
         end: function() {},

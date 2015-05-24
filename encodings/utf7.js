@@ -1,15 +1,15 @@
 
 // UTF-7 codec, according to https://tools.ietf.org/html/rfc2152
-// Below is UTF-7-IMAP codec, according to http://tools.ietf.org/html/rfc3501#section-5.1.3
+// See also below a UTF-7-IMAP codec, according to http://tools.ietf.org/html/rfc3501#section-5.1.3
 
-exports.utf7 = function(options) {
+exports.utf7 = function(codecOptions, iconv) {
     return {
         encoder: function utf7Encoder() {
             return {
                 write: utf7EncoderWrite,
                 end: function() {},
 
-                iconv: options.iconv,
+                iconv: iconv,
             };
         },
         decoder: function utf7Decoder() {
@@ -17,7 +17,7 @@ exports.utf7 = function(options) {
                 write: utf7DecoderWrite,
                 end: utf7DecoderEnd,
 
-                iconv: options.iconv,
+                iconv: iconv,
                 inBase64: false,
                 base64Accum: '',
             };
@@ -126,14 +126,14 @@ function utf7DecoderEnd() {
 //  * "-&" while in base64 is not allowed.
 
 
-exports.utf7imap = function(options) {
+exports.utf7imap = function(codecOptions, iconv) {
     return {
         encoder: function utf7ImapEncoder() {
             return {
                 write: utf7ImapEncoderWrite,
                 end: utf7ImapEncoderEnd,
 
-                iconv: options.iconv,
+                iconv: iconv,
                 inBase64: false,
                 base64Accum: new Buffer(6),
                 base64AccumIdx: 0,
@@ -144,7 +144,7 @@ exports.utf7imap = function(options) {
                 write: utf7ImapDecoderWrite,
                 end: utf7ImapDecoderEnd,
 
-                iconv: options.iconv,
+                iconv: iconv,
                 inBase64: false,
                 base64Accum: '',
             };

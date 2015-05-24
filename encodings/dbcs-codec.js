@@ -3,8 +3,8 @@
 // Our codec supports UTF-16 surrogates, extensions for GB18030 and unicode sequences.
 // To save memory and loading time, we read table files only when requested.
 
-exports._dbcs = function(options) {
-    return new DBCSCodec(options);
+exports._dbcs = function(codecOptions, iconv) {
+    return new DBCSCodec(codecOptions, iconv);
 }
 
 var UNASSIGNED = -1,
@@ -19,15 +19,15 @@ for (var i = 0; i < 0x100; i++)
 
 
 // Class DBCSCodec reads and initializes mapping tables.
-function DBCSCodec(options) {
-    this.options = options;
-    if (!options)
+function DBCSCodec(codecOptions, iconv) {
+    this.encodingName = codecOptions.encodingName;
+    if (!codecOptions)
         throw new Error("DBCS codec is called without the data.")
-    if (!options.table)
-        throw new Error("Encoding '" + options.encodingName + "' has no data.");
+    if (!codecOptions.table)
+        throw new Error("Encoding '" + this.encodingName + "' has no data.");
 
     // Load tables.
-    var mappingTable = options.table();
+    var mappingTable = codecOptions.table();
 
 
     // Decode tables: MBCS -> Unicode.
@@ -49,7 +49,7 @@ function DBCSCodec(options) {
     for (var i = 0; i < mappingTable.length; i++)
         this._addDecodeChunk(mappingTable[i]);
 
-    this.defaultCharUnicode = options.iconv.defaultCharUnicode;
+    this.defaultCharUnicode = iconv.defaultCharUnicode;
 
     
     // Encode tables: Unicode -> DBCS.
@@ -69,9 +69,9 @@ function DBCSCodec(options) {
 
     // Some chars can be decoded, but need not be encoded.
     var skipEncodeChars = {};
-    if (options.encodeSkipVals)
-        for (var i = 0; i < options.encodeSkipVals.length; i++) {
-            var range = options.encodeSkipVals[i];
+    if (codecOptions.encodeSkipVals)
+        for (var i = 0; i < codecOptions.encodeSkipVals.length; i++) {
+            var range = codecOptions.encodeSkipVals[i];
             for (var j = range.from; j <= range.to; j++)
                 skipEncodeChars[j] = true;
         }
@@ -80,20 +80,20 @@ function DBCSCodec(options) {
     this._fillEncodeTable(0, 0, skipEncodeChars);
 
     // Add more encoding pairs when needed.
-    if (options.encodeAdd) {
-        for (var uChar in options.encodeAdd)
-            if (Object.prototype.hasOwnProperty.call(options.encodeAdd, uChar))
-                this._setEncodeChar(uChar.charCodeAt(0), options.encodeAdd[uChar]);
+    if (codecOptions.encodeAdd) {
+        for (var uChar in codecOptions.encodeAdd)
+            if (Object.prototype.hasOwnProperty.call(codecOptions.encodeAdd, uChar))
+                this._setEncodeChar(uChar.charCodeAt(0), codecOptions.encodeAdd[uChar]);
     }
 
-    this.defCharSB  = this.encodeTable[0][options.iconv.defaultCharSingleByte.charCodeAt(0)];
+    this.defCharSB  = this.encodeTable[0][iconv.defaultCharSingleByte.charCodeAt(0)];
     if (this.defCharSB === UNASSIGNED) this.defCharSB = this.encodeTable[0]['?'];
     if (this.defCharSB === UNASSIGNED) this.defCharSB = "?".charCodeAt(0);
 
 
     // Load & create GB18030 tables when needed.
-    if (typeof options.gb18030 === 'function') {
-        this.gb18030 = options.gb18030(); // Load GB18030 ranges.
+    if (typeof codecOptions.gb18030 === 'function') {
+        this.gb18030 = codecOptions.gb18030(); // Load GB18030 ranges.
 
         // Add GB18030 decode tables.
         var thirdByteNodeIdx = this.decodeTables.length;
@@ -117,7 +117,7 @@ function DBCSCodec(options) {
 
 // Public interface: create encoder and decoder objects. 
 // The methods (write, end) are simple functions to not inhibit optimizations.
-DBCSCodec.prototype.encoder = function encoderDBCS(options) {
+DBCSCodec.prototype.encoder = function encoderDBCS() {
     return {
         // Methods
         write: encoderDBCSWrite,
@@ -138,7 +138,7 @@ DBCSCodec.prototype.encoder = function encoderDBCS(options) {
     }
 }
 
-DBCSCodec.prototype.decoder = function decoderDBCS(options) {
+DBCSCodec.prototype.decoder = function decoderDBCS() {
     return {
         // Methods
         write: decoderDBCSWrite,
@@ -178,7 +178,7 @@ DBCSCodec.prototype._getDecodeTrieNode = function(addr) {
             node = this.decodeTables[NODE_START - val];
         }
         else
-            throw new Error("Overwrite byte in " + this.options.encodingName + ", addr: " + addr.toString(16));
+            throw new Error("Overwrite byte in " + this.encodingName + ", addr: " + addr.toString(16));
     }
     return node;
 }
@@ -203,7 +203,7 @@ DBCSCodec.prototype._addDecodeChunk = function(chunk) {
                     if (0xDC00 <= codeTrail && codeTrail < 0xE000)
                         writeTable[curAddr++] = 0x10000 + (code - 0xD800) * 0x400 + (codeTrail - 0xDC00);
                     else
-                        throw new Error("Incorrect surrogate pair in "  + this.options.encodingName + " at chunk " + chunk[0]);
+                        throw new Error("Incorrect surrogate pair in "  + this.encodingName + " at chunk " + chunk[0]);
                 }
                 else if (0x0FF0 < code && code <= 0x0FFF) { // Character sequence (our own encoding used)
                     var len = 0xFFF - code + 2;
@@ -224,10 +224,10 @@ DBCSCodec.prototype._addDecodeChunk = function(chunk) {
                 writeTable[curAddr++] = charCode++;
         }
         else
-            throw new Error("Incorrect type '" + typeof part + "' given in "  + this.options.encodingName + " at chunk " + chunk[0]);
+            throw new Error("Incorrect type '" + typeof part + "' given in "  + this.encodingName + " at chunk " + chunk[0]);
     }
     if (curAddr > 0xFF)
-        throw new Error("Incorrect chunk in "  + this.options.encodingName + " at addr " + chunk[0] + ": too long" + curAddr);
+        throw new Error("Incorrect chunk in "  + this.encodingName + " at addr " + chunk[0] + ": too long" + curAddr);
 }
 
 // Encoder helpers

@@ -2,7 +2,7 @@
 
 // == UTF16-BE codec. ==========================================================
 
-exports.utf16be = function(options) {
+exports.utf16be = function() {
     return {
         encoder: utf16beEncoder,
         decoder: utf16beDecoder,
@@ -14,7 +14,7 @@ exports.utf16be = function(options) {
 
 // -- Encoding
 
-function utf16beEncoder(options) {
+function utf16beEncoder() {
     return {
         write: utf16beEncoderWrite,
         end: function() {},
@@ -32,7 +32,7 @@ function utf16beEncoderWrite(str) {
 
 // -- Decoding
 
-function utf16beDecoder(options) {
+function utf16beDecoder() {
     return {
         write: utf16beDecoderWrite,
         end: function() {},
@@ -75,12 +75,12 @@ function utf16beDecoderWrite(buf) {
 // Endianness can be changed: iconv.encode(str, 'utf16', {use: 'utf-16le'});
 // BOM can be skipped: iconv.encode(str, 'utf16', {addBOM: false});
 
-exports.utf16 = function(options) {
+exports.utf16 = function(codecOptions, iconv) {
     return {
         encoder: utf16Encoder,
         decoder: utf16Decoder,
 
-        iconv: options.iconv,
+        iconv: iconv,
         // bomAware-ness is handled inside encoder/decoder functions
     };
 };

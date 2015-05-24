@@ -15,16 +15,16 @@ module.exports = {
     hex:    { type: "_internal", enc: "hex" },
 
     // Codec.
-    _internal: function(options) {
-        if (!options || !options.enc)
+    _internal: function(codecOptions) {
+        if (!codecOptions || !codecOptions.enc)
             throw new Error("Internal codec is called without encoding type.")
 
         return {
-            encoder: options.enc == "base64" ? encoderBase64 : encoderInternal,
+            encoder: codecOptions.enc == "base64" ? encoderBase64 : encoderInternal,
             decoder: decoderInternal,
 
-            enc: options.enc,
-            bomAware: options.bomAware,
+            enc: codecOptions.enc,
+            bomAware: codecOptions.bomAware,
         };
     },
 };
