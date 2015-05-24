@@ -1,4 +1,16 @@
 
+# 0.4.9 / 2015-05-24
+
+ * Streamlined BOM handling: strip BOM by default, add BOM when encoding if 
+   addBOM: true. Added docs to Readme.
+ * UTF16 now uses UTF16-LE by default.
+ * Fixed minor issue with big5 encoding.
+ * Added io.js testing on Travis; updated node-iconv version to test against.
+   Now we just skip testing SBCS encodings that node-iconv doesn't support.
+ * (internal refactoring) Updated codec interface to use classes.
+ * Use strict mode in all files.
+
+
 # 0.4.8 / 2015-04-14
  
  * added alias UNICODE-1-1-UTF-7 for UTF-7 encoding (#94)
