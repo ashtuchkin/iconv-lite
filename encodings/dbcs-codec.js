@@ -70,9 +70,12 @@ function DBCSCodec(codecOptions, iconv) {
     var skipEncodeChars = {};
     if (codecOptions.encodeSkipVals)
         for (var i = 0; i < codecOptions.encodeSkipVals.length; i++) {
-            var range = codecOptions.encodeSkipVals[i];
-            for (var j = range.from; j <= range.to; j++)
-                skipEncodeChars[j] = true;
+            var val = codecOptions.encodeSkipVals[i];
+            if (typeof val === 'number')
+                skipEncodeChars[val] = true;
+            else
+                for (var j = val.from; j <= val.to; j++)
+                    skipEncodeChars[j] = true;
         }
         
     // Use decode trie to recursively fill out encode tables.

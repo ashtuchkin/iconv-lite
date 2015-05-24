@@ -49,4 +49,8 @@ describe("Big5 tests", function() {
         assert.strictEqual(iconv.decode(new Buffer('8866', 'hex'), "big5"), "\u00CA");
         assert.strictEqual(iconv.decode(new Buffer('8866fa40', 'hex'), "big5"), "\u00CA𠕇");
     });
+
+    it("Big5 correctly encodes 十", function() {
+        assert.strictEqual(iconv.encode("十", "big5").toString('hex'), "a451");
+    });
 });
