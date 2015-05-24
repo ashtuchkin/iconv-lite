@@ -7,7 +7,7 @@ exports.utf16be = function(options) {
         encoder: utf16beEncoder,
         decoder: utf16beDecoder,
 
-        bom: new Buffer([0xFE, 0xFF]),
+        bomAware: true,
     };
 };
 
@@ -71,15 +71,17 @@ function utf16beDecoderWrite(buf) {
 // http://en.wikipedia.org/wiki/UTF-16 and http://encoding.spec.whatwg.org/#utf-16le
 // Decoder default can be changed: iconv.decode(buf, 'utf16', {default: 'utf-16le'});
 
-// Encoder prepends BOM and uses UTF-16BE.
-// Endianness can also be changed: iconv.encode(str, 'utf16', {use: 'utf-16le'});
+// Encoder by default uses UTF-16BE and prepends BOM.
+// Endianness can be changed: iconv.encode(str, 'utf16', {use: 'utf-16le'});
+// BOM can be skipped: iconv.encode(str, 'utf16', {addBOM: false});
 
 exports.utf16 = function(options) {
     return {
         encoder: utf16Encoder,
         decoder: utf16Decoder,
 
-        getCodec: options.iconv.getCodec,
+        iconv: options.iconv,
+        // bomAware-ness is handled inside encoder/decoder functions
     };
 };
 
@@ -87,34 +89,10 @@ exports.utf16 = function(options) {
 
 function utf16Encoder(options) {
     options = options || {};
-    var codec = this.getCodec(options.use || 'utf-16be');
-    if (!codec.bom)
-        throw new Error("iconv-lite: in UTF-16 encoder, 'use' parameter should be either UTF-16BE or UTF16-LE.");
-
-    return {
-        write: utf16EncoderWrite,
-        end: utf16EncoderEnd,
-
-        bom: codec.bom,
-        internalEncoder: codec.encoder(options),
-    };
+    if (options.addBOM === undefined)
+        options.addBOM = true;
+    return this.iconv.getEncoder(options.use || 'utf-16be', options);
 }
-
-function utf16EncoderWrite(str) {
-    var buf = this.internalEncoder.write(str);
-
-    if (this.bom) {
-        buf = Buffer.concat([this.bom, buf]);
-        this.bom = null;
-    }
-
-    return buf;
-}
-
-function utf16EncoderEnd() {
-    return this.internalEncoder.end();
-}
-
 
 // -- Decoding
 
@@ -128,7 +106,7 @@ function utf16Decoder(options) {
         initialBytesLen: 0,
 
         options: options || {},
-        getCodec: this.getCodec,
+        iconv: this.iconv,
     };
 }
 
@@ -171,12 +149,10 @@ function utf16DecoderDecideEndianness() {
     var enc = this.options.default || 'utf-16be';
 
     // Check BOM.
-    if (buf[0] == 0xFE && buf[1] == 0xFF) { // UTF-16BE BOM
-        enc = 'utf-16be'; buf = buf.slice(2);
-    }
-    else if (buf[0] == 0xFF && buf[1] == 0xFE) { // UTF-16LE BOM
-        enc = 'utf-16le'; buf = buf.slice(2);
-    }
+    if (buf[0] == 0xFE && buf[1] == 0xFF) // UTF-16BE BOM
+        enc = 'utf-16be';
+    else if (buf[0] == 0xFF && buf[1] == 0xFE) // UTF-16LE BOM
+        enc = 'utf-16le';
     else {
         // No BOM found. Try to deduce encoding from initial content.
         // Most of the time, the content has spaces (U+0020), but the opposite (U+2000) is very uncommon.
@@ -195,7 +171,7 @@ function utf16DecoderDecideEndianness() {
             enc = 'utf-16le';
     }
 
-    this.internalDecoder = this.getCodec(enc).decoder(this.options);
+    this.internalDecoder = this.iconv.getDecoder(enc, this.options);
     return this.internalDecoder.write(buf);
 }
 

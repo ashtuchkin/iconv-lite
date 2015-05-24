@@ -1,15 +1,15 @@
 
 // Export Node.js internal encodings.
 
-var utf16lebom = new Buffer([0xFF, 0xFE]);
-
 module.exports = {
     // Encodings
-    utf8:   { type: "_internal", enc: "utf8" },
-    cesu8:  { type: "_internal", enc: "utf8" },
-    unicode11utf8: { type: "_internal", enc: "utf8" },
-    ucs2:   { type: "_internal", enc: "ucs2", bom: utf16lebom },
-    utf16le:{ type: "_internal", enc: "ucs2", bom: utf16lebom },
+    utf8:   { type: "_internal", enc: "utf8", bomAware: true},
+    cesu8:  "utf8",
+    unicode11utf8: "utf8",
+
+    utf16le:{ type: "_internal", enc: "ucs2", bomAware: true},
+    ucs2:   "utf16le",
+
     binary: { type: "_internal", enc: "binary" },
     base64: { type: "_internal", enc: "base64" },
     hex:    { type: "_internal", enc: "hex" },
@@ -24,7 +24,7 @@ module.exports = {
             decoder: decoderInternal,
 
             enc: options.enc,
-            bom: options.bom,
+            bomAware: options.bomAware,
         };
     },
 };

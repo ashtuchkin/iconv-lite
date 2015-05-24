@@ -22,6 +22,7 @@ exports.utf7 = function(options) {
                 base64Accum: '',
             };
         },
+        bomAware: true,
     };
 };
 

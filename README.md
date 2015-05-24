@@ -1,6 +1,4 @@
-## Pure JS character encoding conversion
-
-<!-- [![Build Status](https://secure.travis-ci.org/ashtuchkin/iconv-lite.png?branch=master)](http://travis-ci.org/ashtuchkin/iconv-lite) -->
+## Pure JS character encoding conversion [![Build Status](https://travis-ci.org/ashtuchkin/iconv-lite.svg?branch=master)](https://travis-ci.org/ashtuchkin/iconv-lite)
 
  * Doesn't need native code compilation. Works on Windows and in sandboxed environments like [Cloud9](http://c9.io).
  * Used in popular projects like [Express.js (body_parser)](https://github.com/expressjs/body-parser), 
@@ -115,12 +113,17 @@ Note: your results may vary, so please always check on your hardware.
     encode('win1251')     ~96 Mb/s      ~320 Mb/s
     decode('win1251')     ~95 Mb/s      ~246 Mb/s
 
+## BOM handling
 
-## Notes
+ * Decoding: BOM is stripped by default, unless overridden by passing `stripBOM: false` in options
+   (f.ex. `iconv.decode(buf, enc, {stripBOM: false})`).
+   A callback might also be given as a `stripBOM` parameter - it'll be called if BOM character was actually found.
+ * Encoding: No BOM added, unless overridden by `addBOM: true` option.
+
+## Other notes
 
 When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things usually happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).  
 Untranslatable characters are set to � or ?. No transliteration is currently supported.  
-Uses BOM to determine endianness, but doesn't remove it. Use ['strip-bom' module](https://github.com/sindresorhus/strip-bom).  
 Node versions 0.10.31 and 0.11.13 are buggy, don't use them (see #65, #77).  
 
 ## Testing
