@@ -8,10 +8,6 @@ function convertWithDefault(converter, buf, def) {
     return res.length > 0 ? res : def;
 }
 
-var skipEncodings = { // Not supported by iconv.
-    maccenteuro: true,
-    cp808: true,
-}; 
 var aliases = {
     armscii8: "ARMSCII-8",
     georgianacademy: "GEORGIAN-ACADEMY",
@@ -56,10 +52,16 @@ iconv.encode('', 'utf8'); // Load all encodings.
 var sbcsEncodingTests = {};
 describe("Full SBCS encoding tests", function() {
     for (var enc in iconv.encodings)
-        if (iconv.encodings[enc].type === '_sbcs' && !skipEncodings[enc]) (function(enc) {
+        if (iconv.encodings[enc].type === '_sbcs') (function(enc) {
+            var iconvName = iconvAlias(enc),
+                testEncName = enc + ((enc !== iconvName) ? " (" + iconvName + ")" : "");
 
-            it("Decode SBCS encoding '" + enc + "'", function() {
-                var conv = new Iconv(iconvAlias(enc), "utf-8//IGNORE");
+            it("Decode SBCS encoding " + testEncName, function() {
+                try {
+                    var conv = new Iconv(iconvName, "utf-8//IGNORE");
+                } catch (e) {
+                    this.skip();
+                }
                 var errors = [];
                 for (var i = 0; i < 0x100; i++) {
                     var buf = new Buffer([i]);
@@ -77,8 +79,12 @@ describe("Full SBCS encoding tests", function() {
                     }).join("\n") + "\n       ");
             });
 
-            it("Encode SBCS encoding '" + enc + "'", function() {
-                var conv = new Iconv("utf-8", iconvAlias(enc) + "//IGNORE");
+            it("Encode SBCS encoding " + testEncName, function() {
+                try {
+                    var conv = new Iconv("utf-8", iconvName + "//IGNORE");
+                } catch (e) {
+                    this.skip();
+                }
                 var errors = [];
 
                 for (var i = 0; i < 0xFFF0; i++) {
