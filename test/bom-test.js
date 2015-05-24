@@ -57,10 +57,10 @@ describe("BOM Handling", function() {
     });
 
     it("'UTF-16' encoding adds BOM by default, but can be overridden with addBOM=false", function() {
-        var body = Buffer.concat([utf16beBOM, iconv.encode(sampleStr, 'utf16be')]).toString('hex');
+        var body = Buffer.concat([utf16leBOM, iconv.encode(sampleStr, 'utf16le')]).toString('hex');
         assert.equal(iconv.encode(sampleStr, 'utf16').toString('hex'), body);
 
-        var body = Buffer.concat([iconv.encode(sampleStr, 'utf16be')]).toString('hex');
+        var body = Buffer.concat([iconv.encode(sampleStr, 'utf16le')]).toString('hex');
         assert.equal(iconv.encode(sampleStr, 'utf16', {addBOM: false}).toString('hex'), body);
     });
 

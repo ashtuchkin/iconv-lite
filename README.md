@@ -120,6 +120,14 @@ Note: your results may vary, so please always check on your hardware.
    A callback might also be given as a `stripBOM` parameter - it'll be called if BOM character was actually found.
  * Encoding: No BOM added, unless overridden by `addBOM: true` option.
 
+## UTF-16 Encodings
+
+This library supports UTF-16LE, UTF-16BE and UTF-16 encodings. First two are straightforward, but UTF-16 is trying to be
+smart about endianness in the following ways:
+ * Decoding: uses BOM and 'spaces heuristic' to determine input endianness. Default is UTF-16LE, but can be 
+   overridden with `defaultEncoding: 'utf-16be'` option. Strips BOM unless `stripBOM: false`.
+ * Encoding: uses UTF-16LE and writes BOM by default. Use `addBOM: false` to override.
+
 ## Other notes
 
 When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things usually happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).  

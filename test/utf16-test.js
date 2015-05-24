@@ -23,8 +23,8 @@ describe("UTF-16BE codec", function() {
 });
 
 describe("UTF-16 encoder", function() {
-    it("uses UTF-16BE and adds BOM when encoding", function() {
-        assert.equal(iconv.encode(testStr, "utf-16").toString('hex'), utf16beBOM.toString('hex') + utf16beBuf.toString('hex'));
+    it("uses UTF-16LE and adds BOM when encoding", function() {
+        assert.equal(iconv.encode(testStr, "utf-16").toString('hex'), utf16leBOM.toString('hex') + utf16leBuf.toString('hex'));
     });
 
     it("can use other encodings, for example UTF-16LE, with BOM", function() {
@@ -49,8 +49,8 @@ describe("UTF-16 decoder", function() {
         assert.equal(iconv.decode(iconv.encode(sampleStr, 'utf-16be'), 'utf-16'), sampleStr);
     });
 
-    it("uses UTF-16BE if no BOM and heuristics failed", function() {
-        assert.equal(iconv.decode(utf16beBuf, 'utf-16'), testStr);
+    it("uses UTF-16LE if no BOM and heuristics failed", function() {
+        assert.equal(iconv.decode(utf16leBuf, 'utf-16'), testStr);
     });
 
     it("can be given a different default encoding", function() {

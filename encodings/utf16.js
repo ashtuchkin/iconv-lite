@@ -63,13 +63,11 @@ Utf16BEDecoder.prototype.end = function() {
 
 // == UTF-16 codec =============================================================
 // Decoder chooses automatically from UTF-16LE and UTF-16BE using BOM and space-based heuristic.
-// Defaults to UTF-16BE, according to RFC 2781, although it is against some industry practices, see
+// Defaults to UTF-16LE, as it's prevalent and default in Node.
 // http://en.wikipedia.org/wiki/UTF-16 and http://encoding.spec.whatwg.org/#utf-16le
-// Decoder default can be changed: iconv.decode(buf, 'utf16', {default: 'utf-16le'});
+// Decoder default can be changed: iconv.decode(buf, 'utf16', {defaultEncoding: 'utf-16be'});
 
-// Encoder by default uses UTF-16BE and prepends BOM.
-// Endianness can be changed: iconv.encode(str, 'utf16', {use: 'utf-16le'});
-// BOM can be skipped: iconv.encode(str, 'utf16', {addBOM: false});
+// Encoder uses UTF-16LE and prepends BOM (which can be overridden with addBOM: false).
 
 exports.utf16 = Utf16Codec;
 function Utf16Codec(codecOptions, iconv) {
@@ -86,7 +84,7 @@ function Utf16Encoder(options, codec) {
     options = options || {};
     if (options.addBOM === undefined)
         options.addBOM = true;
-    this.encoder = codec.iconv.getEncoder(options.use || 'utf-16be', options);
+    this.encoder = codec.iconv.getEncoder('utf-16le', options);
 }
 
 Utf16Encoder.prototype.write = function(str) {
@@ -119,10 +117,10 @@ Utf16Decoder.prototype.write = function(buf) {
             return '';
 
         // We have enough bytes -> detect endianness.
-        var buf = Buffer.concat(this.initialBytes);
+        var buf = Buffer.concat(this.initialBytes),
+            encoding = detectEncoding(buf, this.options.defaultEncoding);
+        this.decoder = this.iconv.getDecoder(encoding, this.options);
         this.initialBytes.length = this.initialBytesLen = 0;
-
-        this.decoder = this.detectDecoder(buf);
     }
 
     return this.decoder.write(buf);
@@ -130,8 +128,9 @@ Utf16Decoder.prototype.write = function(buf) {
 
 Utf16Decoder.prototype.end = function() {
     if (!this.decoder) {
-        var buf = Buffer.concat(this.initialBytes);
-        this.decoder = this.detectDecoder(buf);
+        var buf = Buffer.concat(this.initialBytes),
+            encoding = detectEncoding(buf, this.options.defaultEncoding);
+        this.decoder = this.iconv.getDecoder(encoding, this.options);
 
         var res = this.decoder.write(buf),
             trail = this.decoder.end();
@@ -141,9 +140,8 @@ Utf16Decoder.prototype.end = function() {
     return this.decoder.end();
 }
 
-Utf16Decoder.prototype.detectDecoder = function(buf) {
-    // Default encoding.
-    var enc = this.options.default || 'utf-16be';
+function detectEncoding(buf, defaultEncoding) {
+    var enc = defaultEncoding || 'utf-16le';
 
     if (buf.length >= 2) {
         // Check BOM.
@@ -170,7 +168,7 @@ Utf16Decoder.prototype.detectDecoder = function(buf) {
         }
     }
 
-    return this.iconv.getDecoder(enc, this.options);
+    return enc;
 }
 
 
