@@ -3,7 +3,8 @@
 // Single-byte codec. Needs a 'chars' string parameter that contains 256 or 128 chars that
 // correspond to encoded bytes (if 128 - then lower half is ASCII). 
 
-exports._sbcs = function(codecOptions, iconv) {
+exports._sbcs = SBCSCodec;
+function SBCSCodec(codecOptions, iconv) {
     if (!codecOptions)
         throw new Error("SBCS codec is called without the data.")
     
@@ -18,7 +19,7 @@ exports._sbcs = function(codecOptions, iconv) {
         codecOptions.chars = asciiString + codecOptions.chars;
     }
 
-    var decodeBuf = new Buffer(codecOptions.chars, 'ucs2');
+    this.decodeBuf = new Buffer(codecOptions.chars, 'ucs2');
     
     // Encoding buffer.
     var encodeBuf = new Buffer(65536);
@@ -27,25 +28,18 @@ exports._sbcs = function(codecOptions, iconv) {
     for (var i = 0; i < codecOptions.chars.length; i++)
         encodeBuf[codecOptions.chars.charCodeAt(i)] = i;
 
-    return {
-        encoder: encoderSBCS,
-        decoder: decoderSBCS,
-
-        encodeBuf: encodeBuf,
-        decodeBuf: decodeBuf,
-    };
+    this.encodeBuf = encodeBuf;
 }
 
-function encoderSBCS() {
-    return {
-        write: encoderSBCSWrite,
-        end: function() {},
+SBCSCodec.prototype.encoder = SBCSEncoder;
+SBCSCodec.prototype.decoder = SBCSDecoder;
 
-        encodeBuf: this.encodeBuf,
-    };
+
+function SBCSEncoder(options, codec) {
+    this.encodeBuf = codec.encodeBuf;
 }
 
-function encoderSBCSWrite(str) {
+SBCSEncoder.prototype.write = function(str) {
     var buf = new Buffer(str.length);
     for (var i = 0; i < str.length; i++)
         buf[i] = this.encodeBuf[str.charCodeAt(i)];
@@ -53,25 +47,26 @@ function encoderSBCSWrite(str) {
     return buf;
 }
 
-
-function decoderSBCS() {
-    return {
-        write: decoderSBCSWrite,
-        end: function() {},
-        
-        decodeBuf: this.decodeBuf,
-    };
+SBCSEncoder.prototype.end = function() {
 }
 
-function decoderSBCSWrite(buf) {
+
+function SBCSDecoder(options, codec) {
+    this.decodeBuf = codec.decodeBuf;
+}
+
+SBCSDecoder.prototype.write = function(buf) {
     // Strings are immutable in JS -> we use ucs2 buffer to speed up computations.
     var decodeBuf = this.decodeBuf;
     var newBuf = new Buffer(buf.length*2);
     var idx1 = 0, idx2 = 0;
-    for (var i = 0, _len = buf.length; i < _len; i++) {
+    for (var i = 0; i < buf.length; i++) {
         idx1 = buf[i]*2; idx2 = i*2;
         newBuf[idx2] = decodeBuf[idx1];
         newBuf[idx2+1] = decodeBuf[idx1+1];
     }
     return newBuf.toString('ucs2');
+}
+
+SBCSDecoder.prototype.end = function() {
 }

@@ -40,7 +40,7 @@ describe("GBK tests", function() {
             return table.length - 1;
         }
 
-        var codec = iconv.getCodec('gb18030').encoder();
+        var codec = iconv.getEncoder('gb18030');
 
         for (var i = 0; i < 0x100; i++)
             assert.strictEqual(codec.findIdx(codec.gb18030.uChars, i), findIdxAlternative(codec.gb18030.uChars, i), i);

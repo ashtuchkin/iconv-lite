@@ -4,9 +4,7 @@
 // Our codec supports UTF-16 surrogates, extensions for GB18030 and unicode sequences.
 // To save memory and loading time, we read table files only when requested.
 
-exports._dbcs = function(codecOptions, iconv) {
-    return new DBCSCodec(codecOptions, iconv);
-}
+exports._dbcs = DBCSCodec;
 
 var UNASSIGNED = -1,
     GB18030_CODE = -2,
@@ -116,48 +114,8 @@ function DBCSCodec(codecOptions, iconv) {
     }        
 }
 
-// Public interface: create encoder and decoder objects. 
-// The methods (write, end) are simple functions to not inhibit optimizations.
-DBCSCodec.prototype.encoder = function encoderDBCS() {
-    return {
-        // Methods
-        write: encoderDBCSWrite,
-        end: encoderDBCSEnd,
-
-        // Encoder state
-        leadSurrogate: -1,
-        seqObj: undefined,
-        
-        // Static data
-        encodeTable: this.encodeTable,
-        encodeTableSeq: this.encodeTableSeq,
-        defaultCharSingleByte: this.defCharSB,
-        gb18030: this.gb18030,
-
-        // Export for testing
-        findIdx: findIdx,
-    }
-}
-
-DBCSCodec.prototype.decoder = function decoderDBCS() {
-    return {
-        // Methods
-        write: decoderDBCSWrite,
-        end: decoderDBCSEnd,
-
-        // Decoder state
-        nodeIdx: 0,
-        prevBuf: new Buffer(0),
-
-        // Static data
-        decodeTables: this.decodeTables,
-        decodeTableSeq: this.decodeTableSeq,
-        defaultCharUnicode: this.defaultCharUnicode,
-        gb18030: this.gb18030,
-    }
-}
-
-
+DBCSCodec.prototype.encoder = DBCSEncoder;
+DBCSCodec.prototype.decoder = DBCSDecoder;
 
 // Decoder helpers
 DBCSCodec.prototype._getDecodeTrieNode = function(addr) {
@@ -304,10 +262,21 @@ DBCSCodec.prototype._fillEncodeTable = function(nodeIdx, prefix, skipEncodeChars
 
 
 
-// == Actual Encoding ==========================================================
+// == Encoder ==================================================================
 
+function DBCSEncoder(options, codec) {
+    // Encoder state
+    this.leadSurrogate = -1;
+    this.seqObj = undefined;
+    
+    // Static data
+    this.encodeTable = codec.encodeTable;
+    this.encodeTableSeq = codec.encodeTableSeq;
+    this.defaultCharSingleByte = codec.defCharSB;
+    this.gb18030 = codec.gb18030;
+}
 
-function encoderDBCSWrite(str) {
+DBCSEncoder.prototype.write = function(str) {
     var newBuf = new Buffer(str.length * (this.gb18030 ? 4 : 3)), 
         leadSurrogate = this.leadSurrogate,
         seqObj = this.seqObj, nextChar = -1,
@@ -427,7 +396,7 @@ function encoderDBCSWrite(str) {
     return newBuf.slice(0, j);
 }
 
-function encoderDBCSEnd() {
+DBCSEncoder.prototype.end = function() {
     if (this.leadSurrogate === -1 && this.seqObj === undefined)
         return; // All clean. Most often case.
 
@@ -458,11 +427,25 @@ function encoderDBCSEnd() {
     return newBuf.slice(0, j);
 }
 
+// Export for testing
+DBCSEncoder.prototype.findIdx = findIdx;
 
-// == Actual Decoding ==========================================================
 
+// == Decoder ==================================================================
 
-function decoderDBCSWrite(buf) {
+function DBCSDecoder(options, codec) {
+    // Decoder state
+    this.nodeIdx = 0;
+    this.prevBuf = new Buffer(0);
+
+    // Static data
+    this.decodeTables = codec.decodeTables;
+    this.decodeTableSeq = codec.decodeTableSeq;
+    this.defaultCharUnicode = codec.defaultCharUnicode;
+    this.gb18030 = codec.gb18030;
+}
+
+DBCSDecoder.prototype.write = function(buf) {
     var newBuf = new Buffer(buf.length*2),
         nodeIdx = this.nodeIdx, 
         prevBuf = this.prevBuf, prevBufOffset = this.prevBuf.length,
@@ -530,7 +513,7 @@ function decoderDBCSWrite(buf) {
     return newBuf.slice(0, j).toString('ucs2');
 }
 
-function decoderDBCSEnd() {
+DBCSDecoder.prototype.end = function() {
     var ret = '';
 
     // Try to parse all remaining chars.
@@ -543,7 +526,7 @@ function decoderDBCSEnd() {
         this.prevBuf = new Buffer(0);
         this.nodeIdx = 0;
         if (buf.length > 0)
-            ret += decoderDBCSWrite.call(this, buf);
+            ret += this.write(buf);
     }
 
     this.nodeIdx = 0;

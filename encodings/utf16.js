@@ -2,22 +2,21 @@
 
 // == UTF16-BE codec. ==========================================================
 
-exports.utf16be = function() {
-    return {
-        encoder: function() { return new Utf16beEncoder() },
-        decoder: function() { return new Utf16beDecoder() },
+exports.utf16be = Utf16BECodec;
+function Utf16BECodec() {
+}
 
-        bomAware: true,
-    };
-};
+Utf16BECodec.prototype.encoder = Utf16BEEncoder;
+Utf16BECodec.prototype.decoder = Utf16BEDecoder;
+Utf16BECodec.prototype.bomAware = true;
 
 
 // -- Encoding
 
-function Utf16beEncoder() {
+function Utf16BEEncoder() {
 }
 
-Utf16beEncoder.prototype.write = function(str) {
+Utf16BEEncoder.prototype.write = function(str) {
     var buf = new Buffer(str, 'ucs2');
     for (var i = 0; i < buf.length; i += 2) {
         var tmp = buf[i]; buf[i] = buf[i+1]; buf[i+1] = tmp;
@@ -25,17 +24,17 @@ Utf16beEncoder.prototype.write = function(str) {
     return buf;
 }
 
-Utf16beEncoder.prototype.end = function() {
+Utf16BEEncoder.prototype.end = function() {
 }
 
 
 // -- Decoding
 
-function Utf16beDecoder() {
+function Utf16BEDecoder() {
     this.overflowByte = -1;
 }
 
-Utf16beDecoder.prototype.write = function(buf) {
+Utf16BEDecoder.prototype.write = function(buf) {
     if (buf.length == 0)
         return '';
 
@@ -58,7 +57,7 @@ Utf16beDecoder.prototype.write = function(buf) {
     return buf2.slice(0, j).toString('ucs2');
 }
 
-Utf16beDecoder.prototype.end = function() {
+Utf16BEDecoder.prototype.end = function() {
 }
 
 
@@ -72,34 +71,42 @@ Utf16beDecoder.prototype.end = function() {
 // Endianness can be changed: iconv.encode(str, 'utf16', {use: 'utf-16le'});
 // BOM can be skipped: iconv.encode(str, 'utf16', {addBOM: false});
 
-exports.utf16 = function(codecOptions, iconv) {
-    return {
-        encoder: utf16Encoder,
-        decoder: function(options) { return new Utf16Decoder(options, this.iconv) },
+exports.utf16 = Utf16Codec;
+function Utf16Codec(codecOptions, iconv) {
+    this.iconv = iconv;
+}
 
-        iconv: iconv,
-        // bomAware-ness is handled inside encoder/decoder functions
-    };
-};
+Utf16Codec.prototype.encoder = Utf16Encoder;
+Utf16Codec.prototype.decoder = Utf16Decoder;
 
-// -- Encoding
 
-function utf16Encoder(options) {
+// -- Encoding (pass-through)
+
+function Utf16Encoder(options, codec) {
     options = options || {};
     if (options.addBOM === undefined)
         options.addBOM = true;
-    return this.iconv.getEncoder(options.use || 'utf-16be', options);
+    this.encoder = codec.iconv.getEncoder(options.use || 'utf-16be', options);
 }
+
+Utf16Encoder.prototype.write = function(str) {
+    return this.encoder.write(str);
+}
+
+Utf16Encoder.prototype.end = function() {
+    return this.encoder.end();
+}
+
 
 // -- Decoding
 
-function Utf16Decoder(options, iconv) {
+function Utf16Decoder(options, codec) {
     this.decoder = null;
     this.initialBytes = [];
     this.initialBytesLen = 0;
 
     this.options = options || {};
-    this.iconv = iconv;
+    this.iconv = codec.iconv;
 }
 
 Utf16Decoder.prototype.write = function(buf) {

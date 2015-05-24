@@ -4,31 +4,35 @@
 
 module.exports = {
     // Encodings
-    utf8:   { type: "_internal", enc: "utf8", bomAware: true},
+    utf8:   { type: "_internal", bomAware: true},
     cesu8:  "utf8",
     unicode11utf8: "utf8",
 
-    utf16le:{ type: "_internal", enc: "ucs2", bomAware: true},
-    ucs2:   "utf16le",
+    ucs2:   { type: "_internal", bomAware: true},
+    utf16le: "ucs2",
 
-    binary: { type: "_internal", enc: "binary" },
-    base64: { type: "_internal", enc: "base64" },
-    hex:    { type: "_internal", enc: "hex" },
+    binary: { type: "_internal" },
+    base64: { type: "_internal" },
+    hex:    { type: "_internal" },
 
     // Codec.
-    _internal: function(codecOptions) {
-        if (!codecOptions || !codecOptions.enc)
-            throw new Error("Internal codec is called without encoding type.")
-
-        return {
-            encoder: codecOptions.enc == "base64" ? encoderBase64 : encoderInternal,
-            decoder: decoderInternal,
-
-            enc: codecOptions.enc,
-            bomAware: codecOptions.bomAware,
-        };
-    },
+    _internal: InternalCodec,
 };
+
+//------------------------------------------------------------------------------
+
+function InternalCodec(codecOptions) {
+    this.enc = codecOptions.encodingName;
+    this.bomAware = codecOptions.bomAware;
+
+    if (this.enc === "base64")
+        this.encoder = InternalEncoderBase64;
+}
+
+InternalCodec.prototype.encoder = InternalEncoder;
+InternalCodec.prototype.decoder = InternalDecoder;
+
+//------------------------------------------------------------------------------
 
 // We use node.js internal decoder. It's signature is the same as ours.
 var StringDecoder = require('string_decoder').StringDecoder;
@@ -36,38 +40,37 @@ var StringDecoder = require('string_decoder').StringDecoder;
 if (!StringDecoder.prototype.end) // Node v0.8 doesn't have this method.
     StringDecoder.prototype.end = function() {};
 
-function decoderInternal() {
-    return new StringDecoder(this.enc);
+
+function InternalDecoder(options, codec) {
+    StringDecoder.call(this, codec.enc);
 }
 
+InternalDecoder.prototype = StringDecoder.prototype;
+
+
+//------------------------------------------------------------------------------
 // Encoder is mostly trivial
 
-function encoderInternal() {
-    return {
-        write: encodeInternal,
-        end: function() {},
-        
-        enc: this.enc,
-    }
+function InternalEncoder(options, codec) {
+    this.enc = codec.enc;
 }
 
-function encodeInternal(str) {
+InternalEncoder.prototype.write = function(str) {
     return new Buffer(str, this.enc);
 }
 
-
-// Except base64 encoder, which must keep its state.
-
-function encoderBase64() {
-    return {
-        write: encodeBase64Write,
-        end: encodeBase64End,
-
-        prevStr: '',
-    };
+InternalEncoder.prototype.end = function() {
 }
 
-function encodeBase64Write(str) {
+
+//------------------------------------------------------------------------------
+// Except base64 encoder, which must keep its state.
+
+function InternalEncoderBase64(options, codec) {
+    this.prevStr = '';
+}
+
+InternalEncoderBase64.prototype.write = function(str) {
     str = this.prevStr + str;
     var completeQuads = str.length - (str.length % 4);
     this.prevStr = str.slice(completeQuads);
@@ -76,7 +79,7 @@ function encodeBase64Write(str) {
     return new Buffer(str, "base64");
 }
 
-function encodeBase64End() {
+InternalEncoderBase64.prototype.end = function() {
     return new Buffer(this.prevStr, "base64");
 }
 
