@@ -1,4 +1,10 @@
 
+# 0.4.10 / 2015-05-26
+
+ * Changed UTF-16 endianness heuristic to take into account any ASCII chars, not
+   just spaces. This should minimize the importance of "default" endianness.
+
+
 # 0.4.9 / 2015-05-24
 
  * Streamlined BOM handling: strip BOM by default, add BOM when encoding if 
