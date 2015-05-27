@@ -151,19 +151,19 @@ function detectEncoding(buf, defaultEncoding) {
             enc = 'utf-16le';
         else {
             // No BOM found. Try to deduce encoding from initial content.
-            // Most of the time, the content has spaces (U+0020), but the opposite (U+2000) is very uncommon.
-            // So, we count spaces as if it was LE or BE, and decide from that.
-            var spacesLE = 0, spacesBE = 0, // Counts of space chars in both positions
+            // Most of the time, the content has ASCII chars (U+00**), but the opposite (U+**00) is uncommon.
+            // So, we count ASCII as if it was LE or BE, and decide from that.
+            var asciiCharsLE = 0, asciiCharsBE = 0, // Counts of chars in both positions
                 _len = Math.min(buf.length - (buf.length % 2), 64); // Len is always even.
 
             for (var i = 0; i < _len; i += 2) {
-                if (buf[i] == 0x00 && buf[i+1] == 0x20) spacesBE++;
-                if (buf[i] == 0x20 && buf[i+1] == 0x00) spacesLE++;
+                if (buf[i] === 0 && buf[i+1] !== 0) asciiCharsBE++;
+                if (buf[i] !== 0 && buf[i+1] === 0) asciiCharsLE++;
             }
 
-            if (spacesBE > 0 && spacesLE == 0)
+            if (asciiCharsBE > asciiCharsLE)
                 enc = 'utf-16be';
-            else if (spacesBE == 0 && spacesLE > 0)
+            else if (asciiCharsBE < asciiCharsLE)
                 enc = 'utf-16le';
         }
     }
