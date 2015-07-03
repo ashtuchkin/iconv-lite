@@ -5,7 +5,7 @@
 module.exports = {
     // Encodings
     utf8:   { type: "_internal", bomAware: true},
-    cesu8:  "utf8",
+    cesu8:  { type: "_internal", bomAware: true},
     unicode11utf8: "utf8",
 
     ucs2:   { type: "_internal", bomAware: true},
@@ -27,6 +27,10 @@ function InternalCodec(codecOptions) {
 
     if (this.enc === "base64")
         this.encoder = InternalEncoderBase64;
+    else if (this.enc === "cesu8") {
+        this.enc = "utf8"; // Use utf8 for decoding.
+        this.encoder = InternalEncoderCesu8;
+    }
 }
 
 InternalCodec.prototype.encoder = InternalEncoder;
@@ -83,3 +87,33 @@ InternalEncoderBase64.prototype.end = function() {
     return new Buffer(this.prevStr, "base64");
 }
 
+
+//------------------------------------------------------------------------------
+// CESU-8 encoder is also special.
+
+function InternalEncoderCesu8(options, codec) {
+}
+
+InternalEncoderCesu8.prototype.write = function(str) {
+    var buf = new Buffer(str.length * 3), bufIdx = 0;
+    for (var i = 0; i < str.length; i++) {
+        var charCode = str.charCodeAt(i);
+        // Naive implementation, but it works because CESU-8 is especially easy
+        // to convert from UTF-16 (which all JS strings are encoded in).
+        if (charCode < 0x80)
+            buf[bufIdx++] = charCode;
+        else if (charCode < 0x800) {
+            buf[bufIdx++] = 0xC0 + (charCode >>> 6);
+            buf[bufIdx++] = 0x80 + (charCode & 0x3f);
+        }
+        else { // charCode will always be < 0x10000 in javascript.
+            buf[bufIdx++] = 0xE0 + (charCode >>> 12);
+            buf[bufIdx++] = 0x80 + ((charCode >>> 6) & 0x3f);
+            buf[bufIdx++] = 0x80 + (charCode & 0x3f);
+        }
+    }
+    return buf.slice(0, bufIdx);
+}
+
+InternalEncoderCesu8.prototype.end = function() {
+}
