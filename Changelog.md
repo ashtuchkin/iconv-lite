@@ -1,4 +1,9 @@
 
+# 0.4.11 / 2015-07-03
+
+ * Added CESU-8 encoding.
+
+
 # 0.4.10 / 2015-05-26
 
  * Changed UTF-16 endianness heuristic to take into account any ASCII chars, not
