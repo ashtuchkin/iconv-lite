@@ -3,6 +3,10 @@ var assert = require('assert'),
     fs = require('fs');
 
 describe("Extend Node native encodings", function() {
+
+    if (!iconv.supportsNodeEncodingsExtension)
+        return;
+
     before(function() {
         assert.throws(function() { new Buffer().toString("windows-1251"); });
         if (Buffer.isEncoding) // Node v0.8 doesn't have this method.
