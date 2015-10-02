@@ -1,4 +1,9 @@
 
+# 0.4.13 / 2015-10-01
+
+ * Fix silly mistake in deprecation notice.
+
+
 # 0.4.12 / 2015-09-26
 
  * Node v4 support:
