@@ -120,6 +120,7 @@ Note: your results may vary, so please always check on your hardware.
  * Decoding: BOM is stripped by default, unless overridden by passing `stripBOM: false` in options
    (f.ex. `iconv.decode(buf, enc, {stripBOM: false})`).
    A callback might also be given as a `stripBOM` parameter - it'll be called if BOM character was actually found.
+ * If you want to detect UTF-8 BOM when decoding other encodings, use [node-autodetect-decoder-stream](https://github.com/danielgindi/node-autodetect-decoder-stream) module.
  * Encoding: No BOM added, unless overridden by `addBOM: true` option.
 
 ## UTF-16 Encodings
