@@ -45,7 +45,7 @@
         "request": "2.47",
         "unorm": "*",
         "errto": "*",
-        "async": "*",
+        "async": "1.5.2",
         "istanbul": "*",
         "iconv": "2.1"
     }
