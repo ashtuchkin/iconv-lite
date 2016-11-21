@@ -6,12 +6,12 @@ var testString = "中国abc",//unicode contains GBK-code and ascii
     testStringGBKBuffer = new Buffer([0xd6,0xd0,0xb9,0xfa,0x61,0x62,0x63]);
 
 describe("GBK tests", function() {
-    it("GBK correctly encoded/decoded", function() {    
+    it("GBK correctly encoded/decoded", function() {
         assert.strictEqual(iconv.encode(testString, "GBK").toString('binary'), testStringGBKBuffer.toString('binary'));
         assert.strictEqual(iconv.decode(testStringGBKBuffer, "GBK"), testString);
     });
 
-    it("GB2312 correctly encoded/decoded", function() {    
+    it("GB2312 correctly encoded/decoded", function() {
         assert.strictEqual(iconv.encode(testString, "GB2312").toString('binary'), testStringGBKBuffer.toString('binary'));
         assert.strictEqual(iconv.decode(testStringGBKBuffer, "GB2312"), testString);
     });
@@ -90,5 +90,56 @@ describe("GBK tests", function() {
             assert.strictEqual(strToHex(iconv.decode(gbkBuf, "GB18030")), strToHex(uChar));
         }
     });
-
 });
+
+describe('testing the cp936/gbk euro dollor symbol', function () {
+  it('test cp936 decode Euro dollor symbol', function () {
+    // Convert from an encoded buffer to js string.
+    var str = ''
+    str = iconv.decode(new Buffer([0x80]), 'gb2312')
+    assert.equal(str, '€')
+
+    str = iconv.decode(new Buffer([0x80]), 'cp936')
+    assert.equal(str, '€')
+
+    str = iconv.decode(new Buffer([0x80]), 'gbk')
+    assert.equal(str, '€')
+
+    str = iconv.decode(new Buffer([0x80]), 'gb18030')
+    assert.equal(str, '€')
+
+    // Decode a2e3
+    str = iconv.decode(new Buffer([0xa2, 0xe3]), 'gb2312')
+    assert.equal(str.charCodeAt(0), 0xfffD)
+
+    str = iconv.decode(new Buffer([0xa2, 0xe3]), 'cp936')
+    assert.equal(str.charCodeAt(0), 0xfffD)
+
+    str = iconv.decode(new Buffer([0xa2, 0xe3]), 'gbk')
+    assert.equal(str, '€')
+
+    str = iconv.decode(new Buffer([0xa2, 0xe3]), 'gb18030')
+    assert.equal(str, '€')
+  })
+
+  it('test cp936 encode Euro dollor symbol', function () {
+    var buffer = new Buffer([])
+
+    buffer = iconv.encode('€', 'gb2312')
+    assert.equal(buffer.toString('hex'), '80')
+
+    buffer = iconv.encode('€', 'cp936')
+    assert.equal(buffer.toString('hex'), '80')
+
+    // encodeEuro default is false
+    buffer = iconv.encode('€', 'gbk', {encodeEuro: false})
+    assert.equal(buffer.toString('hex'), '80')
+
+    buffer = iconv.encode('€', 'gbk', {encodeEuro: true})
+    assert.equal(buffer.toString('hex'), 'a2e3')
+
+    // https://en.wikipedia.org/wiki/GB_18030
+    buffer = iconv.encode('€', 'gb18030')
+    assert.equal(buffer.toString('hex'), 'a2e3')
+  })
+})
