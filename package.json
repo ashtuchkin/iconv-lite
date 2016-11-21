@@ -48,6 +48,6 @@
         "errto": "*",
         "async": "*",
         "istanbul": "*",
-        "iconv": "2.1"
+        "iconv": "*"
     }
 }

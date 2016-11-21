@@ -51,6 +51,8 @@ iconv.encode('', 'utf8'); // Load all encodings.
 
 var sbcsEncodingTests = {};
 describe("Full SBCS encoding tests", function() {
+    this.timeout(10000);
+
     for (var enc in iconv.encodings)
         if (iconv.encodings[enc].type === '_sbcs') (function(enc) {
             var iconvName = iconvAlias(enc),
