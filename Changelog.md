@@ -1,4 +1,9 @@
 
+# 0.4.15 / 2016-11-21
+
+ * Fixed typescript type definition (#137)
+
+
 # 0.4.14 / 2016-11-20
 
  * Preparation for v1.0
