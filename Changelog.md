@@ -1,4 +1,14 @@
 
+# 0.4.14 / 2016-11-20
+
+ * Preparation for v1.0
+ * Added Node v6 and latest Node versions to Travis CI test rig
+ * Deprecated Node v0.8 support
+ * Typescript typings (@larssn)
+ * Fix encoding of Euro character in GB 18030 (inspired by @lygstate)
+ * Add ms prefix to dbcs windows encodings (@rokoroku)
+
+
 # 0.4.13 / 2015-10-01
 
  * Fix silly mistake in deprecation notice.

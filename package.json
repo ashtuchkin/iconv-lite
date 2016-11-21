@@ -1,7 +1,7 @@
 {
     "name": "iconv-lite",
     "description": "Convert character encodings in pure javascript.",
-    "version": "0.4.13",
+    "version": "0.4.14",
     "license": "MIT",
     
     "keywords": ["iconv", "convert", "charset", "icu"],
@@ -30,7 +30,7 @@
         "url": "git://github.com/ashtuchkin/iconv-lite.git"
     },
     "engines": {
-        "node": ">=0.8.0"
+        "node": ">=0.10.0"
     },
     "scripts": {
       "coverage": "istanbul cover _mocha -- --grep .",
@@ -43,7 +43,7 @@
     },
     "devDependencies": {
         "mocha": "*",
-        "request": "2.47",
+        "request": "*",
         "unorm": "*",
         "errto": "*",
         "async": "*",
