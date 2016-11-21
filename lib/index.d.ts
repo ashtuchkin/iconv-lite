@@ -3,8 +3,6 @@
 // Definitions by: Martin Poelstra <https://github.com/poelstra>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-/// <reference types="node" />
-
 import stream = require("stream");
 
 export interface Options {
@@ -28,5 +26,6 @@ export class EncodeStream extends stream.Transform {
 export function decodeStream(encoding: string, options?: Options): DecodeStream;
 export function encodeStream(encoding: string, options?: Options): EncodeStream;
 
+// NOTE: These are deprecated.
 export function extendNodeEncodings(): void;
 export function undoExtendNodeEncodings(): void;
