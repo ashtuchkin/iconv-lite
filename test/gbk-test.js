@@ -32,6 +32,24 @@ describe("GBK tests", function() {
         assert.strictEqual(iconv.decode(gbkChars, "GBK"), chars)
     });
 
+    it("GBK and GB18030 correctly decodes and encodes Euro character", function() {
+        // Euro character (U+20AC) has two encodings in GBK family: 0x80 and 0xA2 0xE3
+        // According to W3C's technical recommendation (https://www.w3.org/TR/encoding/#gbk-encoder),
+        // Both GBK and GB18030 decoders should accept both encodings.
+        var gbkEuroEncoding1 = new Buffer([0x80]),
+            gbkEuroEncoding2 = new Buffer([0xA2, 0xE3]),
+            strEuro = "€";
+
+        assert.strictEqual(iconv.decode(gbkEuroEncoding1, "GBK"), strEuro);
+        assert.strictEqual(iconv.decode(gbkEuroEncoding2, "GBK"), strEuro);
+        assert.strictEqual(iconv.decode(gbkEuroEncoding1, "GB18030"), strEuro);
+        assert.strictEqual(iconv.decode(gbkEuroEncoding2, "GB18030"), strEuro);
+
+        // But when decoding, GBK should produce 0x80, but GB18030 - 0xA2 0xE3.
+        assert.strictEqual(iconv.encode(strEuro, "GBK").toString('hex'), gbkEuroEncoding1.toString('hex'));
+        assert.strictEqual(iconv.encode(strEuro, "GB18030").toString('hex'), gbkEuroEncoding2.toString('hex'));
+    });
+
     it("GB18030 findIdx works correctly", function() {
         function findIdxAlternative(table, val) {
             for (var i = 0; i < table.length; i++)
