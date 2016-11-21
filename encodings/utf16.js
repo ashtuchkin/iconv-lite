@@ -1,5 +1,7 @@
 "use strict"
 
+// Note: UTF16-LE (or UCS2) codec is Node.js native. See encodings/internal.js
+
 // == UTF16-BE codec. ==========================================================
 
 exports.utf16be = Utf16BECodec;
