@@ -1,4 +1,5 @@
 var assert = require('assert'),
+    semver = require('semver'),
     iconv = require(__dirname+'/../');
 
 if (!iconv.supportsStreams)
@@ -213,7 +214,7 @@ describe("Streaming mode", function() {
         input: [[0x3D], [0xD8, 0x3B], [0xDE]], // U+1F63B, 😻, SMILING CAT FACE WITH HEART-SHAPED EYES
         outputType: false, // Don't concat
         checkOutput: function(res) {
-            if (process.version < "v6.2.1") {
+            if (semver.lt(process.version, "v6.2.1")) {
                 assert.deepEqual(res, ["\uD83D\uDE3B"]); // We should have only 1 chunk.
             } else {
                 // After a string_decoder rewrite in https://github.com/nodejs/node/pull/6777, which

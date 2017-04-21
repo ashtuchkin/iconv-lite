@@ -48,6 +48,7 @@
         "errto": "*",
         "async": "*",
         "istanbul": "*",
+        "semver": "*",
         "iconv": "*"
     }
 }

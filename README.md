@@ -9,7 +9,7 @@
  * [Deprecated] Can extend Node.js primitives (buffers, streams) to support all iconv-lite encodings.
  * In-browser usage via [Browserify](https://github.com/substack/node-browserify) (~180k gzip compressed with Buffer shim included).
  * Typescript [type definition file](https://github.com/ashtuchkin/iconv-lite/blob/master/lib/index.d.ts) included.
- * React Native is supported (need to explicitly `npm install` two more modules: `buffer` and `streams`).
+ * React Native is supported (need to explicitly `npm install` two more modules: `buffer` and `stream`).
  * License: MIT.
 
 [![NPM Stats](https://nodei.co/npm/iconv-lite.png?downloads=true&downloadRank=true)](https://npmjs.org/packages/iconv-lite/)
