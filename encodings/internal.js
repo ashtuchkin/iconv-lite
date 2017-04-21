@@ -1,4 +1,5 @@
-"use strict"
+"use strict";
+var Buffer = require("buffer").Buffer;
 
 // Export Node.js internal encodings.
 
