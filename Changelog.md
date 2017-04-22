@@ -1,4 +1,13 @@
 
+# 0.4.16 / 2017-04-22
+
+ * Added support for React Native (#150)
+ * Changed iso8859-1 encoding to usine internal 'binary' encoding, as it's the same thing (#147 by @mscdex)
+ * Fixed typo in Readme (#138 by @jiangzhuo)
+ * Fixed build for Node v6.10+ by making correct version comparison
+ * Added a warning if iconv-lite is loaded not as utf-8 (see #142)
+
+
 # 0.4.15 / 2016-11-21
 
  * Fixed typescript type definition (#137)
