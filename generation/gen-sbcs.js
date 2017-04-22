@@ -19,7 +19,8 @@ var encodingFamilies = [
     },
     {
         // ISO-8859 code pages http://www.unicode.org/Public/MAPPINGS/ISO8859/
-        encodings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16],
+        // NOTE: For ISO-8859-1 we use internal encoding "binary" 
+        encodings: [/*1,*/ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16],
         convert: function(i) {
             return {
                 name: "iso-8859-"+i,
