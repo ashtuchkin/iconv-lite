@@ -46,7 +46,7 @@
         "request": "*",
         "unorm": "*",
         "errto": "*",
-        "async": "*",
+        "async": "1.5.2",
         "istanbul": "*",
         "semver": "*",
         "iconv": "*"
