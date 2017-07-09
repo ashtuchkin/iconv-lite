@@ -36,6 +36,10 @@ Utf7Encoder.prototype.write = function(str) {
 Utf7Encoder.prototype.end = function() {
 }
 
+Utf7Encoder.prototype.byteLength = function(str) {
+    return this.write(str).length;
+}
+
 
 // -- Decoding
 

@@ -30,6 +30,10 @@ Utf16BEEncoder.prototype.write = function(str) {
 Utf16BEEncoder.prototype.end = function() {
 }
 
+Utf16BEEncoder.prototype.byteLength = function(str) {
+    return Buffer.byteLength(str, 'ucs2');
+}
+
 
 // -- Decoding
 
@@ -96,6 +100,10 @@ Utf16Encoder.prototype.write = function(str) {
 
 Utf16Encoder.prototype.end = function() {
     return this.encoder.end();
+}
+
+Utf16Encoder.prototype.byteLength = function(str) {
+    return Buffer.byteLength(str, 'ucs2');
 }
 
 

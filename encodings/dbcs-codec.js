@@ -431,6 +431,13 @@ DBCSEncoder.prototype.end = function() {
     return newBuf.slice(0, j);
 }
 
+DBCSEncoder.prototype.byteLength = function(str) {
+    var res = this.write(str);
+    var trail = this.end();
+    
+    return res.length + ((trail === undefined) ? 0 : trail.length);
+}
+
 // Export for testing
 DBCSEncoder.prototype.findIdx = findIdx;
 

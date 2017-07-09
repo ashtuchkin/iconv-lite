@@ -27,6 +27,9 @@ buf = iconv.encode("Sample input string", 'win1251');
 
 // Check if encoding is supported
 iconv.encodingExists("us-ascii")
+
+// Calculate actual length in bytes.
+len = iconv.byteLength('hello, world!', 'win1251')
 ```
 
 ### Streaming API (Node v0.10+)

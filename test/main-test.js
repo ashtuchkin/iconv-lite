@@ -78,4 +78,12 @@ describe("Generic UTF8-UCS2 tests", function() {
         delete Object.prototype.permits;
         delete Array.prototype.sample2;
     });
+    
+    it('Internal encodings has correct length in bytes', function() {
+        assert.equal(iconv.byteLength(testStringLatin1, 'utf8'), Buffer.byteLength(testStringLatin1, 'utf8'));
+        assert.equal(iconv.byteLength(testStringLatin1, 'ucs2'), Buffer.byteLength(testStringLatin1, 'ucs2'));
+        assert.equal(iconv.byteLength(testStringLatin1, 'binary'), Buffer.byteLength(testStringLatin1, 'binary'));
+        assert.equal(iconv.byteLength(testStringBase64, 'base64'), Buffer.byteLength(testStringBase64, 'base64'));
+        assert.equal(iconv.byteLength(testStringHex, 'hex'), Buffer.byteLength(testStringHex, 'hex'));
+    });
 });

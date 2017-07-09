@@ -243,5 +243,17 @@ describe("Full DBCS encoding tests", function() {
             });
         })(enc);
     }
-});
+    
+    it('correct length in bytes', function() {
+        var testStringLatin1 = 'hello';
 
+        for (var enc in iconv.encodings) {
+            if (iconv.encodings[enc].type === '_dbcs') {
+                assert.equal(iconv.byteLength(testStringLatin1, enc), testStringLatin1.length);
+                return;
+            }
+        }
+
+        this.skip();
+    });
+});

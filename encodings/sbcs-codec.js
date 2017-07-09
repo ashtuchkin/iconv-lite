@@ -48,6 +48,10 @@ SBCSEncoder.prototype.write = function(str) {
     return buf;
 }
 
+SBCSEncoder.prototype.byteLength = function(str) {
+    return str.length;
+}
+
 SBCSEncoder.prototype.end = function() {
 }
 
