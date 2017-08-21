@@ -20,6 +20,10 @@ describe("UTF-16BE codec", function() {
     it("decodes uneven length buffers with no error", function() {
         assert.equal(iconv.decode(new Buffer([0, 0x61, 0]), 'UTF16-BE'), "a");
     });
+    
+    it('has correct length in bytes', function() {
+        assert.equal(iconv.byteLength(testStr, 'UTF16-BE'), utf16beBuf.length);
+    });
 });
 
 describe("UTF-16 encoder", function() {
@@ -30,6 +34,10 @@ describe("UTF-16 encoder", function() {
     it("can use other encodings, for example UTF-16LE, with BOM", function() {
         assert.equal(iconv.encode(testStr, "utf-16", {use: 'UTF-16LE'}).toString('hex'), 
             utf16leBOM.toString('hex') + new Buffer(testStr, 'ucs2').toString('hex'));
+    });
+    
+    it('has correct length in bytes', function() {
+        assert.equal(iconv.byteLength(testStr, 'utf-16'), utf16leBuf.length);
     });
 });
 

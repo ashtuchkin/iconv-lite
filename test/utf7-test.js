@@ -85,6 +85,10 @@ describe("UTF-7 codec", function() {
         assert.equal(iconv.decode(new Buffer("+AMAA4A!Next"), 'utf-7'), "\u00c0\u00e0!Next");
 
     });
+    
+    it('has correct length in bytes', function() {
+        assert.equal(iconv.byteLength('A\u2262\u0391.', 'utf-7'), 'A+ImIDkQ-.'.length);
+    });
 });
 
 describe("UTF-7-IMAP codec", function() {

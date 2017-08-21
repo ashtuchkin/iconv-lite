@@ -75,6 +75,10 @@ InternalEncoder.prototype.write = function(str) {
 InternalEncoder.prototype.end = function() {
 }
 
+InternalEncoder.prototype.byteLength = function(str) {
+    return Buffer.byteLength(str, this.enc)
+}
+
 
 //------------------------------------------------------------------------------
 // Except base64 encoder, which must keep its state.
@@ -94,6 +98,10 @@ InternalEncoderBase64.prototype.write = function(str) {
 
 InternalEncoderBase64.prototype.end = function() {
     return new Buffer(this.prevStr, "base64");
+}
+
+InternalEncoderBase64.prototype.byteLength = function(str) {
+    return Buffer.byteLength(str, "base64");
 }
 
 
@@ -125,6 +133,10 @@ InternalEncoderCesu8.prototype.write = function(str) {
 }
 
 InternalEncoderCesu8.prototype.end = function() {
+}
+
+InternalEncoderCesu8.prototype.byteLength = function(str) {
+    return this.write(str).length;
 }
 
 //------------------------------------------------------------------------------

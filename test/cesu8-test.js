@@ -20,4 +20,7 @@ describe("CESU-8 codec", function() {
         assert.equal(iconv.decode(new Buffer("eda081edb080", 'hex'), "cesu8"), "𐐀");
         assert.equal(iconv.decode(new Buffer("eda0bdedb8b1", 'hex'), "cesu8"), "😱");
     });
+    it('has correct length in bytes', function() {
+        assert.equal(iconv.byteLength("😱", "cesu8"), Buffer.byteLength('eda0bdedb8b1', 'hex'));
+    });
 });
