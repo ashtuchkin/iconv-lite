@@ -3,8 +3,12 @@
     "description": "Convert character encodings in pure javascript.",
     "version": "0.4.18",
     "license": "MIT",
-    
-    "keywords": ["iconv", "convert", "charset", "icu"],
+    "keywords": [
+        "iconv",
+        "convert",
+        "charset",
+        "icu"
+    ],
     "author": "Alexander Shtuchkin <ashtuchkin@gmail.com>",
     "contributors": [
         "Jinwu Zhan (https://github.com/jenkinv)",
@@ -20,7 +24,6 @@
         "Mithgol (https://github.com/Mithgol)",
         "Nazar Leush (https://github.com/nleush)"
     ],
-    
     "main": "./lib/index.js",
     "typings": "./lib/index.d.ts",
     "homepage": "https://github.com/ashtuchkin/iconv-lite",
@@ -33,9 +36,9 @@
         "node": ">=0.10.0"
     },
     "scripts": {
-      "coverage": "istanbul cover _mocha -- --grep .",
-      "coverage-open": "open coverage/lcov-report/index.html",
-      "test": "mocha --reporter spec --grep ."
+        "coverage": "istanbul cover _mocha -- --grep .",
+        "coverage-open": "open coverage/lcov-report/index.html",
+        "test": "mocha --reporter spec --grep ."
     },
     "browser": {
         "./extend-node": false,
