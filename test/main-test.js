@@ -78,4 +78,9 @@ describe("Generic UTF8-UCS2 tests", function() {
         delete Object.prototype.permits;
         delete Array.prototype.sample2;
     });
+
+    it("handles encoding untranslatable characters correctly", function() {
+        // Regression #162
+        assert.strictEqual(iconv.encode("外国人", "latin1").toString(), "???");
+    });
 });
