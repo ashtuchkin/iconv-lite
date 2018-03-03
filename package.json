@@ -41,8 +41,8 @@
         "test": "mocha --reporter spec --grep ."
     },
     "browser": {
-        "./extend-node": false,
-        "./streams": false
+        "./lib/extend-node": false,
+        "./lib/streams": false
     },
     "devDependencies": {
         "mocha": "^3.1.0",
