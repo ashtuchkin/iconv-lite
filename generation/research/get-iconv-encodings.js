@@ -5,6 +5,7 @@
 
 var iconv = require('iconv'),
     crypto = require('crypto');
+var Buffer = require("safer-buffer").Buffer;
 
 
 var skipEncodings = {};
@@ -20,7 +21,7 @@ process.stdin.on("end", function() {
     encodings = input.split(" ").map(function(s) {return s.trim();}).filter(Boolean);
     encodings = encodings.filter(function(enc) {
         try {
-            new iconv.Iconv("utf-8", enc).convert(new Buffer("hello!"));
+            new iconv.Iconv("utf-8", enc).convert(Buffer.from("hello!"));
             if (skipEncodings[enc]) {
                 console.log("Encoding skipped: ", enc);
                 return false;
@@ -38,7 +39,7 @@ process.stdin.on("end", function() {
         process.stderr.write("Checking "+enc+": ");
         var hash = crypto.createHash("sha1");
 
-        var converter = new iconv.Iconv(enc, "utf-8"), buf = new Buffer(10);
+        var converter = new iconv.Iconv(enc, "utf-8"), buf = Buffer.alloc(10);
         var res = {
             enc: [enc],
             isDBCS: true,
