@@ -53,5 +53,8 @@
         "istanbul": "*",
         "semver": "*",
         "iconv": "*"
+    },
+    "dependencies": {
+        "safer-buffer": "^2.1.0"
     }
 }
