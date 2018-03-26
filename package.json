@@ -45,8 +45,8 @@
         "./streams": false
     },
     "devDependencies": {
-        "mocha": "*",
-        "request": "*",
+        "mocha": "^3.1.0",
+        "request": "~2.81.0",
         "unorm": "*",
         "errto": "*",
         "async": "*",
