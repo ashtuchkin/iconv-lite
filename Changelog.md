@@ -1,4 +1,11 @@
 
+# 0.4.21 / 2018-04-06
+
+  * Fix encoding canonicalization (#156)
+  * Fix the paths in the "browser" field in package.json (#174 by @LMLB)
+  * Removed "contributors" section in package.json - see Git history instead.
+
+
 # 0.4.20 / 2018-04-06
 
   * Updated `new Buffer()` usages with recommended replacements as it's being deprecated in Node v10 (#176, #178 by @ChALkeR)
