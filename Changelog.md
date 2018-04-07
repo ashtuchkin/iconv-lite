@@ -1,4 +1,9 @@
 
+# 0.4.20 / 2018-04-06
+
+  * Updated `new Buffer()` usages with recommended replacements as it's being deprecated in Node v10 (#176, #178 by @ChALkeR)
+
+
 # 0.4.19 / 2017-09-09
 
   * Fixed iso8859-1 codec regression in handling untranslatable characters (#162, caused by #147)
