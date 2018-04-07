@@ -154,7 +154,3 @@ $ # To view test coverage:
 $ npm run coverage
 $ open coverage/lcov-report/index.html
 ```
-
-## Adoption
-[![NPM](https://nodei.co/npm-dl/iconv-lite.png)](https://nodei.co/npm/iconv-lite/)
-[![Codeship Status for ashtuchkin/iconv-lite](https://www.codeship.com/projects/81670840-fa72-0131-4520-4a01a6c01acc/status)](https://www.codeship.com/projects/29053)
