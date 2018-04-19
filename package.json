@@ -41,6 +41,6 @@
         "iconv": "*"
     },
     "dependencies": {
-        "safer-buffer": "^2.1.0"
+        "safer-buffer": ">= 2.1.2 < 3"
     }
 }
