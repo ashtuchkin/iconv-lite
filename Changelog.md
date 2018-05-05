@@ -1,4 +1,10 @@
 
+# 0.4.22 / 2018-05-05
+
+  * Use older semver style for dependencies to be compatible with Node version 0.10 (#182, by @dougwilson)
+  * Fix tests to accomodate fixes in Node v10 (#182, by @dougwilson)
+
+
 # 0.4.21 / 2018-04-06
 
   * Fix encoding canonicalization (#156)
