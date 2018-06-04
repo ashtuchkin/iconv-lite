@@ -5,15 +5,15 @@
  *  Install with `npm install @types/node --save-dev`
  *--------------------------------------------------------------------------------------------*/
 
-export declare function decode(buffer: NodeBuffer, encoding: string, options?: Options): string;
+export function decode(buffer: Buffer, encoding: string, options?: Options): string;
 
-export declare function encode(content: string, encoding: string, options?: Options): NodeBuffer;
+export function encode(content: string, encoding: string, options?: Options): Buffer;
 
-export declare function encodingExists(encoding: string): boolean;
+export function encodingExists(encoding: string): boolean;
 
-export declare function decodeStream(encoding: string, options?: Options): NodeJS.ReadWriteStream;
+export function decodeStream(encoding: string, options?: Options): NodeJS.ReadWriteStream;
 
-export declare function encodeStream(encoding: string, options?: Options): NodeJS.ReadWriteStream;
+export function encodeStream(encoding: string, options?: Options): NodeJS.ReadWriteStream;
 
 export interface Options {
     stripBOM?: boolean;

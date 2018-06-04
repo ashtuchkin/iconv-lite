@@ -1,6 +1,7 @@
 var fs  = require("fs");
 var path = require("path");
 var Iconv  = require("iconv").Iconv;
+var Buffer = require("safer-buffer").Buffer;
 
 // Generate encoding families using original iconv.
 var destFileName = "encodings/sbcs-data-generated.js";
@@ -91,12 +92,12 @@ function generateCharsString(encoding) {
 
     for (var b = 0x0; b < 0x100; b++) {
         try {
-            var convertedChar = iconvToUtf8.convert(new Buffer([b])).toString();
+            var convertedChar = iconvToUtf8.convert(Buffer.from([b])).toString();
             
             if (convertedChar.length != 1)
                 throw new Error("Single-byte encoding error: Must return single char.");
 
-            var convertedBackBuf = iconvFromUtf8.convert(new Buffer(convertedChar));
+            var convertedBackBuf = iconvFromUtf8.convert(Buffer.from(convertedChar));
             if (convertedBackBuf.length != 1)
                 throw new Error("Single-byte encoding error: Cannot decode back.");
 

@@ -214,13 +214,14 @@ describe("Streaming mode", function() {
         input: [[0x3D], [0xD8, 0x3B], [0xDE]], // U+1F63B, 😻, SMILING CAT FACE WITH HEART-SHAPED EYES
         outputType: false, // Don't concat
         checkOutput: function(res) {
-            if (semver.lt(process.version, "v6.2.1")) {
-                assert.deepEqual(res, ["\uD83D\uDE3B"]); // We should have only 1 chunk.
-            } else {
+            if (semver.satisfies(process.version, '>= 6.2.1 < 10.0.0')) {
                 // After a string_decoder rewrite in https://github.com/nodejs/node/pull/6777, which
                 // was merged in Node v6.2.1, we don't merge chunks anymore.
                 // Not really correct, but it seems we cannot do anything with it.
+                // Though it has been fixed again in Node v10.0.0
                 assert.deepEqual(res, ["\uD83D", "\uDE3B"]);
+            } else {
+                assert.deepEqual(res, ["\uD83D\uDE3B"]); // We should have only 1 chunk.
             }
         },
     }));

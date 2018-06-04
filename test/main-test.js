@@ -84,3 +84,13 @@ describe("Generic UTF8-UCS2 tests", function() {
         assert.strictEqual(iconv.encode("外国人", "latin1").toString(), "???");
     });
 });
+
+describe("Canonicalize encoding function", function() {
+    it("works with numbers directly", function() {
+        assert.equal(iconv._canonicalizeEncoding(955), "955");
+    });
+    
+    it("correctly strips year and non-alpha chars", function() {
+        assert.equal(iconv._canonicalizeEncoding("ISO_8859-5:1988"), "iso88595");
+    });
+});
