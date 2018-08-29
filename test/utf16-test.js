@@ -1,11 +1,12 @@
 var assert = require('assert'),
+    Buffer = require('safer-buffer').Buffer,
     iconv = require(__dirname+'/../');
 
 var testStr = "1aя中文☃💩";
-    utf16beBuf = new Buffer([0, 0x31, 0, 0x61, 0x04, 0x4f, 0x4e, 0x2d, 0x65, 0x87, 0x26, 0x03, 0xd8, 0x3d, 0xdc, 0xa9]),
-    utf16leBuf = new Buffer(testStr, 'ucs2'),
-    utf16beBOM = new Buffer([0xFE, 0xFF]),
-    utf16leBOM = new Buffer([0xFF, 0xFE]),
+    utf16beBuf = Buffer.from([0, 0x31, 0, 0x61, 0x04, 0x4f, 0x4e, 0x2d, 0x65, 0x87, 0x26, 0x03, 0xd8, 0x3d, 0xdc, 0xa9]),
+    utf16leBuf = Buffer.from(testStr, 'ucs2'),
+    utf16beBOM = Buffer.from([0xFE, 0xFF]),
+    utf16leBOM = Buffer.from([0xFF, 0xFE]),
     sampleStr = '<?xml version="1.0" encoding="UTF-8"?>\n<俄语>данные</俄语>';
 
 describe("UTF-16BE codec", function() {
@@ -18,7 +19,7 @@ describe("UTF-16BE codec", function() {
     });
 
     it("decodes uneven length buffers with no error", function() {
-        assert.equal(iconv.decode(new Buffer([0, 0x61, 0]), 'UTF16-BE'), "a");
+        assert.equal(iconv.decode(Buffer.from([0, 0x61, 0]), 'UTF16-BE'), "a");
     });
 });
 
@@ -29,7 +30,7 @@ describe("UTF-16 encoder", function() {
 
     it("can use other encodings, for example UTF-16LE, with BOM", function() {
         assert.equal(iconv.encode(testStr, "utf-16", {use: 'UTF-16LE'}).toString('hex'), 
-            utf16leBOM.toString('hex') + new Buffer(testStr, 'ucs2').toString('hex'));
+            utf16leBOM.toString('hex') + Buffer.from(testStr, 'ucs2').toString('hex'));
     });
 });
 
@@ -40,8 +41,8 @@ describe("UTF-16 decoder", function() {
     });
 
     it("handles very short buffers nice", function() {
-        assert.equal(iconv.decode(new Buffer([]), 'utf-16'), '');
-        assert.equal(iconv.decode(new Buffer([0x61]), 'utf-16'), '');
+        assert.equal(iconv.decode(Buffer.from([]), 'utf-16'), '');
+        assert.equal(iconv.decode(Buffer.from([0x61]), 'utf-16'), '');
     });
 
     it("uses spaces when there is no BOM to determine encoding", function() {

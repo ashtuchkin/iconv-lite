@@ -1,10 +1,11 @@
 var assert  = require('assert'),
+    Buffer  = require('safer-buffer').Buffer,
     iconv   = require(__dirname + '/../');
 
 var testString = "中文abc", //unicode contains Big5-code and ascii
-    testStringBig5Buffer = new Buffer([0xa4,0xa4,0xa4,0xe5,0x61,0x62,0x63]),
+    testStringBig5Buffer = Buffer.from([0xa4,0xa4,0xa4,0xe5,0x61,0x62,0x63]),
     testString2 = '測試',
-    testStringBig5Buffer2 = new Buffer([0xb4, 0xfa, 0xb8, 0xd5]);
+    testStringBig5Buffer2 = Buffer.from([0xb4, 0xfa, 0xb8, 0xd5]);
 
 describe("Big5 tests", function() {
     it("Big5 correctly encoded/decoded", function() {    
@@ -20,7 +21,7 @@ describe("Big5 tests", function() {
     });
 
     it("Big5 file read decoded,compare with iconv result", function() {
-        var contentBuffer = new Buffer('PEhUTUw+DQo8SEVBRD4gICAgDQoJPFRJVExFPiBtZXRhILzQxdKquqjPpc6hR6SkpOW69K22IDwvVElUTEU+DQoJPG1ldGEgSFRUUC1FUVVJVj0iQ29udGVudC1UeXBlIiBDT05URU5UPSJ0ZXh0L2h0bWw7IGNoYXJzZXQ9YmlnNSI+DQo8L0hFQUQ+DQo8Qk9EWT4NCg0Ks2+sT6RArdPBY8XppKSk5br0rbahSTxicj4NCihUaGlzIHBhZ2UgdXNlcyBiaWc1IGNoYXJhY3RlciBzZXQuKTxicj4NCmNoYXJzZXQ9YmlnNQ0KDQo8L0JPRFk+DQo8L0hUTUw+', 'base64');
+        var contentBuffer = Buffer.from('PEhUTUw+DQo8SEVBRD4gICAgDQoJPFRJVExFPiBtZXRhILzQxdKquqjPpc6hR6SkpOW69K22IDwvVElUTEU+DQoJPG1ldGEgSFRUUC1FUVVJVj0iQ29udGVudC1UeXBlIiBDT05URU5UPSJ0ZXh0L2h0bWw7IGNoYXJzZXQ9YmlnNSI+DQo8L0hFQUQ+DQo8Qk9EWT4NCg0Ks2+sT6RArdPBY8XppKSk5br0rbahSTxicj4NCihUaGlzIHBhZ2UgdXNlcyBiaWc1IGNoYXJhY3RlciBzZXQuKTxicj4NCmNoYXJzZXQ9YmlnNQ0KDQo8L0JPRFk+DQo8L0hUTUw+', 'base64');
         var str = iconv.decode(contentBuffer, "big5");
         var iconvc = new (require('iconv').Iconv)('big5','utf8');
         assert.strictEqual(iconvc.convert(contentBuffer).toString(), str);
@@ -30,7 +31,7 @@ describe("Big5 tests", function() {
         // https://github.com/ashtuchkin/iconv-lite/issues/13
         // Reference: http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP950.TXT
         var chars = "·×";
-        var big5Chars = new Buffer([0xA1, 0x50, 0xA1, 0xD1]);
+        var big5Chars = Buffer.from([0xA1, 0x50, 0xA1, 0xD1]);
         assert.strictEqual(iconv.encode(chars, "big5").toString('hex'), big5Chars.toString('hex'));
         assert.strictEqual(iconv.decode(big5Chars, "big5"), chars)
     });
@@ -45,9 +46,9 @@ describe("Big5 tests", function() {
         assert.strictEqual(iconv.encode("\u00CA\uD841\uDD47", "big5").toString('hex'), "8866fa40"); // Finished surrogate ('𠕇').
         assert.strictEqual(iconv.encode("\u00CA𠕇", "big5").toString('hex'), "8866fa40");            // Finished surrogate ('𠕇').
 
-        assert.strictEqual(iconv.decode(new Buffer('8862', 'hex'), "big5"), "\u00CA\u0304");
-        assert.strictEqual(iconv.decode(new Buffer('8866', 'hex'), "big5"), "\u00CA");
-        assert.strictEqual(iconv.decode(new Buffer('8866fa40', 'hex'), "big5"), "\u00CA𠕇");
+        assert.strictEqual(iconv.decode(Buffer.from('8862', 'hex'), "big5"), "\u00CA\u0304");
+        assert.strictEqual(iconv.decode(Buffer.from('8866', 'hex'), "big5"), "\u00CA");
+        assert.strictEqual(iconv.decode(Buffer.from('8866fa40', 'hex'), "big5"), "\u00CA𠕇");
     });
 
     it("Big5 correctly encodes 十", function() {

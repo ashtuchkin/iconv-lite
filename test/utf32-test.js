@@ -1,19 +1,20 @@
 var assert = require('assert'),
+    Buffer = require('safer-buffer').Buffer,
     iconv = require(__dirname+'/../'),
     Iconv = require('iconv').Iconv;
 
 var testStr = '1aя中文☃💩',
     testStr2 = '❝Stray high \uD977😱 and low\uDDDD☔ surrogate values.❞',
-    utf32leBuf = new Buffer([0x31, 0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x00, 0x4F, 0x04, 0x00, 0x00,
+    utf32leBuf = Buffer.from([0x31, 0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x00, 0x4F, 0x04, 0x00, 0x00,
         0x2D, 0x4E, 0x00, 0x00, 0x87, 0x65, 0x00, 0x00, 0x03, 0x26, 0x00, 0x00, 0xA9, 0xF4, 0x01, 0x00]),
-    utf32beBuf = new Buffer([0x00, 0x00, 0x00, 0x31, 0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x04, 0x4F,
+    utf32beBuf = Buffer.from([0x00, 0x00, 0x00, 0x31, 0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x04, 0x4F,
         0x00, 0x00, 0x4E, 0x2D, 0x00, 0x00, 0x65, 0x87, 0x00, 0x00, 0x26, 0x03, 0x00, 0x01, 0xF4, 0xA9]),
-    utf32leBOM = new Buffer([0xFF, 0xFE, 0x00, 0x00]),
-    utf32beBOM = new Buffer([0x00, 0x00, 0xFE, 0xFF]),
+    utf32leBOM = Buffer.from([0xFF, 0xFE, 0x00, 0x00]),
+    utf32beBOM = Buffer.from([0x00, 0x00, 0xFE, 0xFF]),
     utf32leBufWithBOM = Buffer.concat([utf32leBOM, utf32leBuf]),
     utf32beBufWithBOM = Buffer.concat([utf32beBOM, utf32beBuf]),
-    utf32leBufWithInvalidChar = Buffer.concat([utf32leBuf, new Buffer([0x12, 0x34, 0x56, 0x78])]),
-    utf32beBufWithInvalidChar = Buffer.concat([utf32beBuf, new Buffer([0x12, 0x34, 0x56, 0x78])]),
+    utf32leBufWithInvalidChar = Buffer.concat([utf32leBuf, Buffer.from([0x12, 0x34, 0x56, 0x78])]),
+    utf32beBufWithInvalidChar = Buffer.concat([utf32beBuf, Buffer.from([0x12, 0x34, 0x56, 0x78])]),
     sampleStr = '<?xml version="1.0" encoding="UTF-8"?>\n<俄语>данные</俄语>';
 
 var fromCodePoint = String.fromCodePoint;
@@ -31,8 +32,8 @@ if (!fromCodePoint) {
 }
 
 var allCharsStr = '';
-var allCharsLEBuf = new Buffer(0x10F800 * 4);
-var allCharsBEBuf = new Buffer(0x10F800 * 4);
+var allCharsLEBuf = Buffer.alloc(0x10F800 * 4);
+var allCharsBEBuf = Buffer.alloc(0x10F800 * 4);
 var skip = 0;
 
 for (var i = 0; i <= 0x10F7FF; ++i) {
@@ -55,7 +56,7 @@ describe('UTF-32LE codec', function() {
     });
 
     it('decodes uneven length buffers with no error', function() {
-        assert.equal(iconv.decode(new Buffer([0x61, 0, 0, 0, 0]), 'UTF32-LE'), 'a');
+        assert.equal(iconv.decode(Buffer.from([0x61, 0, 0, 0, 0]), 'UTF32-LE'), 'a');
     });
 
     it('handles invalid surrogates gracefully', function() {
@@ -92,7 +93,7 @@ describe('UTF-32BE codec', function() {
     });
 
     it('decodes uneven length buffers with no error', function() {
-        assert.equal(iconv.decode(new Buffer([0, 0, 0, 0x61, 0]), 'UTF32-BE'), 'a');
+        assert.equal(iconv.decode(Buffer.from([0, 0, 0, 0x61, 0]), 'UTF32-BE'), 'a');
     });
 
     it('handles invalid surrogates gracefully', function() {
