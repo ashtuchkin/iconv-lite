@@ -8,7 +8,7 @@ var fs      = require('fs'),
 // fn(valid, input, output)
 function forAllChars(converter, fn, origbuf, len) {
     if (!origbuf) {
-        origbuf = new Buffer(10);
+        origbuf = Buffer.alloc(10);
         len = 1;
     }
     if (!converter.chars) converter.chars = 1;
@@ -45,7 +45,7 @@ function convertWithDefault(converter, buf) {
         if (e.code != "EILSEQ")
             throw e;
     }
-    return new Buffer(iconv.defaultCharSingleByte);
+    return Buffer.from(iconv.defaultCharSingleByte);
 }
 
 var aliases = {
@@ -145,7 +145,7 @@ var iconvCannotDecode = { // Characters that we can decode, but iconv cannot. En
 function swapBytes(buf) { for (var i = 0; i < buf.length; i+=2) buf.writeUInt16LE(buf.readUInt16BE(i), i); return buf; }
 function spacify2(str) { return str.replace(/(..)/g, "$1 ").trim(); }
 function spacify4(str) { return str.replace(/(....)/g, "$1 ").trim(); }
-function strToHex(str) { return spacify4(swapBytes(new Buffer(str, 'ucs2')).toString('hex')); }
+function strToHex(str) { return spacify4(swapBytes(Buffer.from(str, 'ucs2')).toString('hex')); }
 
 // Generate tests for all DBCS encodings.
 iconv.encode('', 'utf8'); // Load all encodings.

@@ -8,7 +8,7 @@ describe("Extend Node native encodings", function() {
         return;
 
     before(function() {
-        assert.throws(function() { new Buffer().toString("windows-1251"); });
+        assert.throws(function() { Buffer.alloc().toString("windows-1251"); });
         if (Buffer.isEncoding) // Node v0.8 doesn't have this method.
             assert(!Buffer.isEncoding("windows-1251"));
 
@@ -21,7 +21,7 @@ describe("Extend Node native encodings", function() {
     after(function() {
         iconv.undoExtendNodeEncodings();
         
-        assert.throws(function() { new Buffer().toString("windows-1251"); });
+        assert.throws(function() { Buffer.alloc().toString("windows-1251"); });
         if (Buffer.isEncoding)
             assert(!Buffer.isEncoding("windows-1251"));
     })
@@ -47,7 +47,7 @@ describe("Extend Node native encodings", function() {
     });
 
     it("Buffer is supported", function() {
-        var buf = new Buffer("abcdeabcde", "windows-1251");
+        var buf = Buffer.from("abcdeabcde", "windows-1251");
         assert.equal(buf.toString(), "abcdeabcde");
 
         assert.equal(buf.write("hello world", "windows-1251"), 10);
@@ -110,7 +110,7 @@ describe("Extend Node native encodings", function() {
                 });
 
             }).listen(port, function() {
-                var body = new Buffer(testStr, 'win1251');
+                var body = Buffer.from(testStr, 'win1251');
                 assert.notEqual(body.toString(), testStr);
                 request({
                     url: "http://localhost:"+port,

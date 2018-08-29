@@ -65,7 +65,7 @@ http.createServer(function(req, res) {
 iconv.extendNodeEncodings();
 
 // Examples:
-buf = new Buffer(str, 'win1251');
+buf = Buffer.from(str, 'win1251');
 buf.write(str, 'gbk');
 str = buf.toString('latin1');
 assert(Buffer.isEncoding('iso-8859-15'));

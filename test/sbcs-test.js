@@ -43,7 +43,7 @@ var iconvEquivChars = {
 function swapBytes(buf) { for (var i = 0; i < buf.length; i+=2) buf.writeUInt16LE(buf.readUInt16BE(i), i); return buf; }
 function spacify2(str) { return str.replace(/(..)/g, "$1 ").trim(); }
 function spacify4(str) { return str.replace(/(....)/g, "$1 ").trim(); }
-function strToHex(str) { return spacify4(swapBytes(new Buffer(str, 'ucs2')).toString('hex')); }
+function strToHex(str) { return spacify4(swapBytes(Buffer.from(str, 'ucs2')).toString('hex')); }
 
 // Generate tests for all SBCS encodings.
 iconv.encode('', 'utf8'); // Load all encodings.
@@ -66,7 +66,7 @@ describe("Full SBCS encoding tests", function() {
                 }
                 var errors = [];
                 for (var i = 0; i < 0x100; i++) {
-                    var buf = new Buffer([i]);
+                    var buf = Buffer.from([i]);
                     var strActual   = iconv.decode(buf, enc);
                     var strExpected = convertWithDefault(conv, buf, iconv.defaultCharUnicode).toString();
 
@@ -93,7 +93,7 @@ describe("Full SBCS encoding tests", function() {
                     if (i == 0xD800) i = 0xF900; // Skip surrogates & private use
 
                     var str = String.fromCharCode(i);
-                    var strExpected = convertWithDefault(conv, str, new Buffer(iconv.defaultCharSingleByte)).toString('hex');
+                    var strExpected = convertWithDefault(conv, str, Buffer.from(iconv.defaultCharSingleByte)).toString('hex');
                     var strActual = iconv.encode(str, enc).toString('hex');
 
                     if (strExpected == strActual)
@@ -148,13 +148,13 @@ describe("Full SBCS encoding tests", function() {
             // TODO: Implement unicode composition. After that, this test will be meaningful.
 
             // Create a large random text.
-            var buf2 = new Buffer(100);
+            var buf2 = Buffer.alloc(100);
             for (var i = 0; i < buf2.length; i++)
                 buf2[i] = buf[(Math.random()*buf.length) | 0];
 
             // Check both encoding and decoding.
             assert.strictEqual(JSON.stringify(iconv.decode(buf2, enc)), JSON.stringify(str = conv.convert(buf2).toString()));
-            assert.strictEqual(iconv.encode(str, enc).toString('hex'), convBack.convert(new Buffer(str)).toString('hex'));
+            assert.strictEqual(iconv.encode(str, enc).toString('hex'), convBack.convert(Buffer.from(str)).toString('hex'));
             */
         })(enc);
 });

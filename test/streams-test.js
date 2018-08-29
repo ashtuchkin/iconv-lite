@@ -22,7 +22,7 @@ function feeder(chunks) {
             if (chunks.length > 0) {
                 var chunk = chunks.shift();
                 if (Array.isArray(chunk))
-                    chunk = new Buffer(chunk);
+                    chunk = Buffer.from(chunk);
                 stream.push(chunk, opts.encoding);
             } else {
                 stream.push(null);
@@ -156,25 +156,25 @@ describe("Streaming mode", function() {
     it("Simple stream encoding", checkEncodeStream({
         encoding: "us-ascii",
         input: ["hello ", "world!"],
-        output: new Buffer("hello world!"),
+        output: Buffer.from("hello world!"),
     }));
 
     it("Simple stream decoding", checkDecodeStream({
         encoding: "us-ascii",
-        input: [new Buffer("hello "), new Buffer("world!")],
+        input: [Buffer.from("hello "), Buffer.from("world!")],
         output: "hello world!",
     }));
 
     it("Stream encoder should error when fed with buffers", checkEncodeStream({
         encoding: "us-ascii",
-        input: [new Buffer("hello "), new Buffer("world!")],
+        input: [Buffer.from("hello "), Buffer.from("world!")],
         checkError: /Iconv encoding stream needs strings as its input/,
     }));
 
     it("Stream decoder should be ok when fed with strings", checkDecodeStream({
         encoding: "us-ascii",
         input: ["hello ", "world!"],
-        output: new Buffer("hello world!"),
+        output: Buffer.from("hello world!"),
     }));
 
     it("Stream decoder should be error when fed with strings and 'decodeStrings: false' option is given", checkDecodeStream({
@@ -277,24 +277,24 @@ describe("Streaming mode", function() {
     it("Encoding base64 between chunks", checkEncodeStream({
         encoding: "base64",
         input: ['aGV', 'sbG8gd2', '9ybGQ='],
-        output: new Buffer('hello world').toString('hex')
+        output: Buffer.from('hello world').toString('hex')
     }));
 
     it("Decoding of UTF-7 with base64 between chunks", checkDecodeStream({
         encoding: "UTF-7",
-        input: [new Buffer('+T2'), new Buffer('BZf'), new Buffer('Q hei+AN8-t')],
+        input: [Buffer.from('+T2'), Buffer.from('BZf'), Buffer.from('Q hei+AN8-t')],
         output: '\u4F60\u597D heißt'
     }));
 
     it("Encoding of UTF-7-IMAP with base64 between chunks", checkEncodeStream({
         encoding: "UTF-7-IMAP",
         input: ['\uffff','\uedca','\u9876','\u5432','\u1fed'],
-        output: new Buffer('&,,,typh2VDIf7Q-').toString('hex')
+        output: Buffer.from('&,,,typh2VDIf7Q-').toString('hex')
     }));
 
     it("Decoding of UTF-7-IMAP with base64 between chunks", checkDecodeStream({
         encoding: "UTF-7-IMAP",
-        input: [new Buffer('&T2'), new Buffer('BZf'), new Buffer('Q hei&AN8-t')],
+        input: [Buffer.from('&T2'), Buffer.from('BZf'), Buffer.from('Q hei&AN8-t')],
         output: '\u4F60\u597D heißt'
     }));
 });
