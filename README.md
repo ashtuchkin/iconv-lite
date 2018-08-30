@@ -1,4 +1,4 @@
-## Pure JS character encoding conversion [![Build Status](https://travis-ci.org/ashtuchkin/iconv-lite.svg?branch=master)](https://travis-ci.org/ashtuchkin/iconv-lite)
+## Pure JS character encoding conversion [![Build Status](https://travis-ci.org/ashtuchkin/iconv-lite.svg?branch=master)](https://travis-ci.org/ashtuchkin/iconv-lite) [![Backers on Open Collective](https://opencollective.com/iconv-lite/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/iconv-lite/sponsors/badge.svg)](#sponsors) 
 
  * Doesn't need native code compilation. Works on Windows and in sandboxed environments like [Cloud9](http://c9.io).
  * Used in popular projects like [Express.js (body_parser)](https://github.com/expressjs/body-parser), 
@@ -154,3 +154,33 @@ $ # To view test coverage:
 $ npm run coverage
 $ open coverage/lcov-report/index.html
 ```
+
+## Contributors
+
+This project exists thanks to all the people who contribute. 
+<a href="graphs/contributors"><img src="https://opencollective.com/iconv-lite/contributors.svg?width=890&button=false" /></a>
+
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/iconv-lite#backer)]
+
+<a href="https://opencollective.com/iconv-lite#backers" target="_blank"><img src="https://opencollective.com/iconv-lite/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/iconv-lite#sponsor)]
+
+<a href="https://opencollective.com/iconv-lite/sponsor/0/website" target="_blank"><img src="https://opencollective.com/iconv-lite/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/iconv-lite/sponsor/1/website" target="_blank"><img src="https://opencollective.com/iconv-lite/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/iconv-lite/sponsor/2/website" target="_blank"><img src="https://opencollective.com/iconv-lite/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/iconv-lite/sponsor/3/website" target="_blank"><img src="https://opencollective.com/iconv-lite/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/iconv-lite/sponsor/4/website" target="_blank"><img src="https://opencollective.com/iconv-lite/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/iconv-lite/sponsor/5/website" target="_blank"><img src="https://opencollective.com/iconv-lite/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/iconv-lite/sponsor/6/website" target="_blank"><img src="https://opencollective.com/iconv-lite/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/iconv-lite/sponsor/7/website" target="_blank"><img src="https://opencollective.com/iconv-lite/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/iconv-lite/sponsor/8/website" target="_blank"><img src="https://opencollective.com/iconv-lite/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/iconv-lite/sponsor/9/website" target="_blank"><img src="https://opencollective.com/iconv-lite/sponsor/9/avatar.svg"></a>
+
+
