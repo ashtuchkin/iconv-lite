@@ -24,7 +24,8 @@
     "scripts": {
         "coverage": "istanbul cover _mocha -- --grep .",
         "coverage-open": "open coverage/lcov-report/index.html",
-        "test": "mocha --reporter spec --grep ."
+        "test": "mocha --reporter spec --grep .",
+        "postinstall": "opencollective-postinstall"
     },
     "browser": {
         "./lib/extend-node": false,
@@ -41,6 +42,11 @@
         "iconv": "*"
     },
     "dependencies": {
+        "opencollective": "^1.0.3",
         "safer-buffer": ">= 2.1.2 < 3"
+    },
+    "collective": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/iconv-lite"
     }
 }
