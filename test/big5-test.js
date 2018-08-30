@@ -1,4 +1,5 @@
 var assert  = require('assert'),
+    Buffer  = require('safer-buffer').Buffer,
     iconv   = require(__dirname + '/../');
 
 var testString = "中文abc", //unicode contains Big5-code and ascii

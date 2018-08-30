@@ -1,4 +1,5 @@
 var assert = require('assert'),
+    Buffer = require('safer-buffer').Buffer,
     iconv = require(__dirname+'/../');
 
 var testString = "Hello123!";
@@ -9,7 +10,7 @@ var testStringHex = "48656c6c6f31323321";
 describe("Generic UTF8-UCS2 tests", function() {
     
     it("Return values are of correct types", function() {
-        assert.ok(iconv.encode(testString, "utf8") instanceof Buffer);
+        assert.ok(iconv.encode(testString, "utf8") instanceof Buffer.alloc(0).constructor);
         
         var s = iconv.decode(Buffer.from(testString), "utf8");
         assert.strictEqual(Object.prototype.toString.call(s), "[object String]");
@@ -39,7 +40,7 @@ describe("Generic UTF8-UCS2 tests", function() {
     
     it("Convert to string, not buffer (utf8 used)", function() {
         var res = iconv.encode(Buffer.from(testStringLatin1, "utf8"), "utf8");
-        assert.ok(res instanceof Buffer);
+        assert.ok(res instanceof Buffer.alloc(0).constructor);
         assert.strictEqual(res.toString("utf8"), testStringLatin1);
     });
     

@@ -1,4 +1,5 @@
 var assert = require('assert'),
+    Buffer = require('safer-buffer').Buffer,
     iconv = require(__dirname+'/../'),
     fs = require('fs');
 
@@ -8,6 +9,7 @@ describe("Extend Node native encodings", function() {
         return;
 
     before(function() {
+        var Buffer = require('buffer').Buffer;
         assert.throws(function() { Buffer.alloc().toString("windows-1251"); });
         if (Buffer.isEncoding) // Node v0.8 doesn't have this method.
             assert(!Buffer.isEncoding("windows-1251"));
@@ -47,7 +49,8 @@ describe("Extend Node native encodings", function() {
     });
 
     it("Buffer is supported", function() {
-        var buf = Buffer.from("abcdeabcde", "windows-1251");
+        var Buffer = require('buffer').Buffer;
+        var buf = new Buffer("abcdeabcde", "windows-1251");
         assert.equal(buf.toString(), "abcdeabcde");
 
         assert.equal(buf.write("hello world", "windows-1251"), 10);

@@ -1,4 +1,5 @@
 var assert = require('assert'),
+    Buffer = require('safer-buffer').Buffer,
     iconv = require(__dirname+'/../');
 
 var testStr = "1aя中文☃💩";

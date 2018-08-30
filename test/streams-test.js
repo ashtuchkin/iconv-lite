@@ -1,4 +1,5 @@
 var assert = require('assert'),
+    Buffer = require('safer-buffer').Buffer,
     semver = require('semver'),
     iconv = require(__dirname+'/../');
 
@@ -56,7 +57,7 @@ function checkStreamOutput(options) {
                 while ((chunk = stream.read()) != null) {
                     if (options.outputType)
                         if (/^buffer/.test(options.outputType))
-                            assert(chunk instanceof Buffer);
+                            assert(chunk instanceof Buffer.alloc(0).constructor);
                         else
                             assert.strictEqual(typeof chunk, options.outputType);
                     res.push(chunk);
@@ -315,7 +316,7 @@ describe("Streaming sugar", function() {
             .pipe(iconv.encodeStream('windows-1251'))
             .collect(function(err, outp) {
                 assert.ifError(err);
-                assert(outp instanceof Buffer);
+                assert(outp instanceof Buffer.alloc(0).constructor);
                 assert.equal(outp.toString('hex'), "e0e1e2e3e4e5");
                 done();
             });
