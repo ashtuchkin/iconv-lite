@@ -1,11 +1,11 @@
 'use strict';
 
 var Buffer = require('safer-buffer').Buffer;
-var BOMChar = '\uFEFF';
 
 // == UTF32-LE codec. ==========================================================
 
 exports.utf32le = Utf32LECodec;
+exports.ucs4le = Utf32LECodec;
 
 function Utf32LECodec(options, iconv) {
     this.iconv = iconv;
@@ -17,17 +17,11 @@ Utf32LECodec.prototype.bomAware = true;
 
 // -- Encoding
 
-function Utf32LEEncoder(options) {
-    this.addBOM = options && options.addBOM;
+function Utf32LEEncoder() {
     this.highSurrogate = null;
 }
 
 Utf32LEEncoder.prototype.write = function(str) {
-    if (this.addBOM) {
-        str = BOMChar + str;
-        this.addBOM = false;
-    }
-
     var src = Buffer.from(str, 'ucs2');
     var dst = Buffer.alloc(src.length * 2);
     var offset = 0;
@@ -153,6 +147,7 @@ Utf32LEDecoder.prototype.end = function() {
 // == UTF32-BE codec. ==========================================================
 
 exports.utf32be = Utf32BECodec;
+exports.ucs4be = Utf32BECodec;
 
 function Utf32BECodec(options, iconv) {
     this.iconv = iconv;
@@ -164,17 +159,11 @@ Utf32BECodec.prototype.bomAware = true;
 
 // -- Encoding
 
-function Utf32BEEncoder(options) {
-    this.addBOM = options && options.addBOM;
+function Utf32BEEncoder() {
     this.highSurrogate = null;
 }
 
 Utf32BEEncoder.prototype.write = function(str) {
-    if (this.addBOM) {
-        str = BOMChar + str;
-        this.addBOM = false;
-    }
-
     var src = Buffer.from(str, 'ucs2');
     var dst = Buffer.alloc(src.length * 2);
     var offset = 0;
@@ -301,13 +290,14 @@ Utf32BEDecoder.prototype.end = function() {
 // == UTF-32 codec =============================================================
 // Decoder chooses automatically from UTF-32LE and UTF-32BE using BOM and space-based heuristic.
 // Defaults to UTF-32LE. http://en.wikipedia.org/wiki/UTF-32
-// Decoder default can be changed: iconv.decode(buf, 'utf36', {defaultEncoding: 'utf-32be'});
+// Encoder/decoder default can be changed: iconv.decode(buf, 'utf32', {defaultEncoding: 'utf-32be'});
 
-// Encoder prepends BOM (which can be overridden with addBOM: false).
+// Encoder prepends BOM (which can be overridden with (addBOM: false}).
 
 exports.utf32 = Utf32Codec;
+exports.ucs4 = Utf32Codec;
 
-function Utf32Codec(codecOptions, iconv) {
+function Utf32Codec(options, iconv) {
     this.iconv = iconv;
 }
 
@@ -322,7 +312,7 @@ function Utf32Encoder(options, codec) {
     if (options.addBOM === undefined)
         options.addBOM = true;
 
-    this.encoder = codec.iconv.getEncoder('utf-32le', options);
+    this.encoder = codec.iconv.getEncoder(options.defaultEncoding || 'utf-32le', options);
 }
 
 Utf32Encoder.prototype.write = function(str) {
@@ -375,6 +365,7 @@ Utf32Decoder.prototype.end = function() {
 
         return trail ? (res + trail) : res;
     }
+
     return this.decoder.end();
 };
 
@@ -389,16 +380,29 @@ function detectEncoding(buf, defaultEncoding) {
             enc = 'utf-32le';
         else {
             // No BOM found. Try to deduce encoding from initial content.
-            // Most of the time, the content has ASCII chars (U+00**), but the opposite (U+**00) is uncommon.
+            // Using the wrong endian-ism for UTF-32 will very often result in codepoints that are beyond
+            // the valid Unicode limit of 0x10FFFF. That will be used as the primary determinant.
+            //
+            // Further, we can suppose the content is mostly plain ASCII chars (U+00**).
             // So, we count ASCII as if it was LE or BE, and decide from that.
+            var invalidLE = 0, invalidBE = 0;
             var asciiCharsLE = 0, asciiCharsBE = 0, // Counts of chars in both positions
                 _len = Math.min(buf.length - (buf.length % 4), 128); // Len is always even.
 
             for (var i = 0; i < _len; i += 4) {
-                if (buf[i] === 0 && buf[i + 1] === 0 && buf[i + 2] === 0 && buf[i + 3] !== 0) asciiCharsBE++;
-                if (buf[i] !== 0 && buf[i + 1] === 0 && buf[i + 2] === 0 && buf[i + 3] === 0) asciiCharsLE++;
+                var b0 = buf[i], b1  = buf[i + 1], b2 = buf[i + 2], b3 = buf[i + 3];
+
+                if (b0 !== 0 || b1 > 0x10) ++invalidBE;
+                if (b3 !== 0 || b2 > 0x10) ++invalidLE;
+
+                if (b0 === 0 && b1 === 0 && b2 === 0 && b3 !== 0) asciiCharsBE++;
+                if (b0 !== 0 && b1 === 0 && b2 === 0 && b3 === 0) asciiCharsLE++;
             }
 
+            if (invalidBE < invalidLE)
+                enc = 'utf-32be';
+            else if (invalidLE < invalidBE)
+                enc = 'utf-32le';
             if (asciiCharsBE > asciiCharsLE)
                 enc = 'utf-32be';
             else if (asciiCharsBE < asciiCharsLE)
