@@ -61,7 +61,7 @@ describe('UTF-32BE codec', function() {
     });
 });
 
-describe('UTF-32 general encoder', function() {
+describe('UTF-32 general codec', function() {
     it('Adds BOM when encoding, defaults to UTF-32LE', function() {
         assert.equal(iconv.encode(testStr, 'utf-32').toString('hex'), utf32leBOM.toString('hex') + utf32leBuf.toString('hex'));
     });
