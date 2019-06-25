@@ -233,9 +233,9 @@ function detectEncoding(buf, defaultEncoding) {
 
     if (buf.length >= 4) {
         // Check BOM.
-        if (buf.readUInt32BE() === 0xFEFF) // UTF-32LE BOM
+        if (buf.readUInt32BE(0) === 0xFEFF) // UTF-32LE BOM
             enc = 'utf-32be';
-        else if (buf.readUInt32LE() === 0xFEFF) // UTF-32LE BOM
+        else if (buf.readUInt32LE(0) === 0xFEFF) // UTF-32LE BOM
             enc = 'utf-32le';
         else {
             // No BOM found. Try to deduce encoding from initial content.

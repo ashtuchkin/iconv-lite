@@ -15,24 +15,33 @@ var testStr = '1aя中文☃💩',
     utf32beBufWithInvalidChar = Buffer.concat([utf32beBuf, new Buffer([0x12, 0x34, 0x56, 0x78])]),
     sampleStr = '<?xml version="1.0" encoding="UTF-8"?>\n<俄语>данные</俄语>';
 
-var doBigTest =false;
+var fromCodePoint = String.fromCodePoint;
 
-if (String.fromCodePoint) {
-    var allCharsStr = '';
-    var allCharsLEBuf = new Buffer(0x10F800 * 4);
-    var allCharsBEBuf = new Buffer(0x10F800 * 4);
-    var skip = 0;
+if (!fromCodePoint) {
+    fromCodePoint = function(cp) {
+        if (cp < 0x10000)
+            return String.fromCharCode(cp);
 
-    for (var i = 0; i <= 0x10F7FF; ++i) {
-        if (i === 0xD800)
-            skip = 0x800;
+        cp -= 0x10000;
 
-        allCharsStr += String.fromCodePoint(i + skip);
-        allCharsLEBuf.writeUInt32LE(i + skip, i * 4);
-        allCharsBEBuf.writeUInt32BE(i + skip, i * 4);
+        return String.fromCharCode(0xD800 | (cp >> 10)) +
+               String.fromCharCode(0xDC00 + (cp & 0x3FF));
     }
+}
 
-    doBigTest = true;
+var allCharsStr = '';
+var allCharsLEBuf = new Buffer(0x10F800 * 4);
+var allCharsBEBuf = new Buffer(0x10F800 * 4);
+var skip = 0;
+
+for (var i = 0; i <= 0x10F7FF; ++i) {
+    if (i === 0xD800)
+        skip = 0x800;
+
+    var cp = i + skip;
+    allCharsStr += fromCodePoint(cp);
+    allCharsLEBuf.writeUInt32LE(cp, i * 4);
+    allCharsBEBuf.writeUInt32BE(cp, i * 4);
 }
 
 describe('UTF-32LE codec', function() {
@@ -57,15 +66,13 @@ describe('UTF-32LE codec', function() {
         assert.equal(iconv.decode(utf32leBufWithInvalidChar, 'utf-32le'), testStr + '�');
     });
 
-    if (doBigTest) {
-        it('handles encoding all valid codepoints', function() {
-            assert.deepEqual(iconv.encode(allCharsStr, 'utf-32le'), allCharsLEBuf);
-        });
+    it('handles encoding all valid codepoints', function() {
+        assert.deepEqual(iconv.encode(allCharsStr, 'utf-32le'), allCharsLEBuf);
+    });
 
-        it('handles decoding all valid codepoints', function() {
-            assert.equal(iconv.decode(allCharsLEBuf, 'utf-32le'), allCharsStr);
-        });
-    }
+    it('handles decoding all valid codepoints', function() {
+        assert.equal(iconv.decode(allCharsLEBuf, 'utf-32le'), allCharsStr);
+    });
 });
 
 describe('UTF-32BE codec', function() {
@@ -90,15 +97,13 @@ describe('UTF-32BE codec', function() {
         assert.equal(iconv.decode(utf32beBufWithInvalidChar, 'utf-32be'), testStr + '�');
     });
 
-    if (doBigTest) {
-        it('handles encoding all valid codepoints', function() {
-            assert.deepEqual(iconv.encode(allCharsStr, 'utf-32be'), allCharsBEBuf);
-        });
+    it('handles encoding all valid codepoints', function() {
+        assert.deepEqual(iconv.encode(allCharsStr, 'utf-32be'), allCharsBEBuf);
+    });
 
-        it('handles decoding all valid codepoints', function() {
-            assert.equal(iconv.decode(allCharsBEBuf, 'utf-32be'), allCharsStr);
-        });
-    }
+    it('handles decoding all valid codepoints', function() {
+        assert.equal(iconv.decode(allCharsBEBuf, 'utf-32be'), allCharsStr);
+    });
 });
 
 describe('UTF-32 general codec', function() {
@@ -138,7 +143,10 @@ function escape(s) {
             sb.push(s.charAt(i));
         else {
             var h = s.charCodeAt(i).toString(16).toUpperCase();
-            sb.push('\\u' + '0'.repeat(4 - h.length) + h);
+            while (h.length < 4) // No String.repeat in old versions of Node!
+                h = '0' + h;
+
+            sb.push('\\u' + h);
         }
     }
 
