@@ -15,6 +15,20 @@ var testStr = '1aя中文☃💩',
     utf32beBufWithInvalidChar = Buffer.concat([utf32beBuf, new Buffer([0x12, 0x34, 0x56, 0x78])]),
     sampleStr = '<?xml version="1.0" encoding="UTF-8"?>\n<俄语>данные</俄语>';
 
+var allCharsStr = '';
+var allCharsLEBuf = new Buffer(0x10F800 * 4);
+var allCharsBEBuf = new Buffer(0x10F800 * 4);
+var skip = 0;
+
+for (var i = 0; i <= 0x10F7FF; ++i) {
+    if (i === 0xD800)
+        skip = 0x800;
+
+    allCharsStr += String.fromCodePoint(i + skip);
+    allCharsLEBuf.writeUInt32LE(i + skip, i * 4);
+    allCharsBEBuf.writeUInt32BE(i + skip, i * 4);
+}
+
 describe('UTF-32LE codec', function() {
     it('encodes basic strings correctly', function() {
         assert.equal(iconv.encode(testStr, 'UTF32-LE').toString('hex'), utf32leBuf.toString('hex'));
@@ -34,7 +48,15 @@ describe('UTF-32LE codec', function() {
     });
 
     it('handles invalid Unicode codepoints gracefully', function() {
-        assert.equal(iconv.decode(utf32leBufWithInvalidChar, 'utf-32'), testStr + '�');
+        assert.equal(iconv.decode(utf32leBufWithInvalidChar, 'utf-32le'), testStr + '�');
+    });
+
+    it('handles encoding all valid codepoints', function() {
+        assert.deepEqual(iconv.encode(allCharsStr, 'utf-32le'), allCharsLEBuf);
+    });
+
+    it('handles decoding all valid codepoints', function() {
+        assert.equal(iconv.decode(allCharsLEBuf, 'utf-32le'), allCharsStr);
     });
 });
 
@@ -57,7 +79,15 @@ describe('UTF-32BE codec', function() {
     });
 
     it('handles invalid Unicode codepoints gracefully', function() {
-        assert.equal(iconv.decode(utf32beBufWithInvalidChar, 'utf-32'), testStr + '�');
+        assert.equal(iconv.decode(utf32beBufWithInvalidChar, 'utf-32be'), testStr + '�');
+    });
+
+    it('handles encoding all valid codepoints', function() {
+        assert.deepEqual(iconv.encode(allCharsStr, 'utf-32be'), allCharsBEBuf);
+    });
+
+    it('handles decoding all valid codepoints', function() {
+        assert.equal(iconv.decode(allCharsBEBuf, 'utf-32be'), allCharsStr);
     });
 });
 
