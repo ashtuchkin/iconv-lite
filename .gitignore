@@ -4,3 +4,4 @@ wiki
 *sublime-*
 coverage
 /.idea
+package-lock.json

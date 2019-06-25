@@ -30,7 +30,7 @@ describe('UTF-32LE codec', function() {
 
     it('handles invalid surrogates gracefully', function() {
         var encoded = iconv.encode(testStr2, 'UTF32-LE');
-        assert.equal(iconv.decode(encoded, 'UTF32-LE'), testStr2);
+        assert.equal(escape(iconv.decode(encoded, 'UTF32-LE')), escape(testStr2));
     });
 
     it('handles invalid Unicode codepoints gracefully', function() {
@@ -53,7 +53,7 @@ describe('UTF-32BE codec', function() {
 
     it('handles invalid surrogates gracefully', function() {
         var encoded = iconv.encode(testStr2, 'UTF32-BE');
-        assert.equal(iconv.decode(encoded, 'UTF32-BE'), testStr2);
+        assert.equal(escape(iconv.decode(encoded, 'UTF32-BE')), escape(testStr2));
     });
 
     it('handles invalid Unicode codepoints gracefully', function() {
@@ -62,27 +62,45 @@ describe('UTF-32BE codec', function() {
 });
 
 describe('UTF-32 general codec', function() {
-    it('Adds BOM when encoding, defaults to UTF-32LE', function() {
+    it('adds BOM when encoding, defaults to UTF-32LE', function() {
         assert.equal(iconv.encode(testStr, 'utf-32').toString('hex'), utf32leBOM.toString('hex') + utf32leBuf.toString('hex'));
     });
 
-    it('Doesn\'t add BOM and uses UTF-32BE when specified', function() {
+    it('doesn\'t add BOM and uses UTF-32BE when specified', function() {
         assert.equal(iconv.encode(testStr, 'ucs4', {addBOM: false, defaultEncoding: 'ucs4be'}).toString('hex'), utf32beBuf.toString('hex'));
     });
 
-    it('Correctly decodes UTF-32LE using BOM', function() {
+    it('correctly decodes UTF-32LE using BOM', function() {
         assert.equal(iconv.decode(utf32leBufWithBOM, 'utf-32'), testStr);
     });
 
-    it('Correctly decodes UTF-32LE without BOM', function() {
+    it('correctly decodes UTF-32LE without BOM', function() {
         assert.equal(iconv.decode(iconv.encode(sampleStr, 'utf-32-le'), 'utf-32'), sampleStr);
     });
 
-    it('Correctly decodes UTF-32BE using BOM', function() {
+    it('correctly decodes UTF-32BE using BOM', function() {
         assert.equal(iconv.decode(utf32beBufWithBOM, 'utf-32', { stripBOM: false }), '\uFEFF' + testStr);
     });
 
-    it('Correctly decodes UTF-32BE without BOM', function() {
+    it('correctly decodes UTF-32BE without BOM', function() {
         assert.equal(iconv.decode(iconv.encode(sampleStr, 'utf-32-be'), 'utf-32'), sampleStr);
     });
 });
+
+// Utility function to make bad matches easier to visualize.
+function escape(s) {
+    var sb = [];
+
+    for (var i = 0; i < s.length; ++i) {
+        var cc = s.charCodeAt(i);
+
+        if (32 <= cc && cc < 127 && cc !== 0x5C)
+            sb.push(s.charAt(i));
+        else {
+            var h = s.charCodeAt(i).toString(16).toUpperCase();
+            sb.push('\\u' + '0'.repeat(4 - h.length) + h);
+        }
+    }
+
+    return sb.join('');
+}

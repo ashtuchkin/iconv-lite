@@ -2,304 +2,22 @@
 
 var Buffer = require('safer-buffer').Buffer;
 
-// == UTF32-LE codec. ==========================================================
+// == UTF32-LE/BE codec. ==========================================================
 
-exports.utf32le = Utf32LECodec;
-exports.ucs4le = Utf32LECodec;
+exports._utf32 = Utf32Codec;
 
-function Utf32LECodec(options, iconv) {
+function Utf32Codec(codecOptions, iconv) {
     this.iconv = iconv;
+    this.bomAware = true;
+    this.isLE = codecOptions.isLE;
 }
 
-Utf32LECodec.prototype.encoder = Utf32LEEncoder;
-Utf32LECodec.prototype.decoder = Utf32LEDecoder;
-Utf32LECodec.prototype.bomAware = true;
+exports.utf32le = { type: '_utf32', isLE: true };
+exports.utf32be = { type: '_utf32', isLE: false };
 
-// -- Encoding
-
-function Utf32LEEncoder() {
-    this.highSurrogate = null;
-}
-
-Utf32LEEncoder.prototype.write = function(str) {
-    var src = Buffer.from(str, 'ucs2');
-    var dst = Buffer.alloc(src.length * 2);
-    var offset = 0;
-
-    for (var i = 0; i < src.length; i += 2) {
-        var lowByte = src[i];
-        var highByte = src[i + 1];
-        var isHighSurrogate = (0xD8 <= highByte && highByte < 0xDC);
-        var isLowSurrogate = (0xDC <= highByte && highByte < 0xE0);
-
-        if (this.highSurrogate) {
-            if (isHighSurrogate || !isLowSurrogate) {
-                // There shouldn't be two high surrogates in a row, nor a high surrogate which isn't followed by a low
-                // surrogate. If this happens, keep the pending high surrogate as a stand-alone semi-invalid character
-                // (technically wrong, but expected by some applications, like Windows file names).
-                dst[offset++] = this.highSurrogate[0]; dst[offset++] = this.highSurrogate[1]; dst[offset++] = 0; dst[offset++] = 0;
-            }
-            else {
-                // Create 32-bit value from high and low surrogates;
-                var codepoint = (((this.highSurrogate[1] - 0xD8) << 18) | (this.highSurrogate[0] << 10) |
-                    ((highByte - 0xDC) << 8) | lowByte) + 0x10000;
-
-                dst[offset++] =  codepoint & 0x000000FF;
-                dst[offset++] = (codepoint & 0x0000FF00) >> 8;
-                dst[offset++] = (codepoint & 0x00FF0000) >> 16;
-                dst[offset++] = (codepoint & 0xFF000000) >> 24;
-                this.highSurrogate = null;
-
-                continue;
-            }
-        }
-
-        if (isHighSurrogate)
-            this.highSurrogate = [lowByte, highByte];
-        else {
-            // Even if the current character is a low surrogate, with no previous high surrogate, we'll
-            // encode it as a semi-invalid stand-alone character for the same reasons expressed above for
-            // unpaired high surrogates.
-            dst[offset++] = lowByte; dst[offset++] = highByte; dst[offset++] = 0; dst[offset++] = 0;
-            this.highSurrogate = null;
-        }
-    }
-
-    if (offset < dst.length)
-        dst = dst.slice(0, offset);
-
-    return dst;
-};
-
-Utf32LEEncoder.prototype.end = function() {
-    // Treat any leftover high surrogate as a semi-valid independent character.
-    if (!this.highSurrogate)
-        return;
-
-    var buf = Buffer.alloc(4);
-
-    buf[0] = this.highSurrogate[0]; buf[1] = this.highSurrogate[1]; buf[2] = 0; buf[3] = 0;
-    this.highSurrogate = null;
-
-    return buf;
-};
-
-// -- Decoding
-
-function Utf32LEDecoder(options, codec) {
-    this.badChar = Buffer.from(codec.iconv.defaultCharUnicode, 'ucs2');
-    this.overflow = null;
-}
-
-Utf32LEDecoder.prototype.write = function(src) {
-    if (src.length === 0)
-        return '';
-    else if (this.overflow) {
-        src = Buffer.concat([this.overflow, src]);
-    }
-
-    var goodLength = src.length - src.length % 4;
-
-    if (src.length !== goodLength) {
-        this.overflow = src.slice(goodLength);
-        src = src.slice(0, goodLength);
-    }
-    else
-        this.overflow = null;
-
-    var dst = Buffer.alloc(goodLength);
-    var offset = 0;
-
-    for (var i = 0; i < goodLength; i += 4) {
-        var b0 = src[i];
-        var b1 = src[i + 1];
-        var b2 = src[i + 2];
-        var b3 = src[i + 3];
-
-        if (b3 === 0 && b2 === 0) {
-            // Simple 16-bit character
-            dst[offset++] = b0; dst[offset++] = b1;
-        }
-        else {
-            var codepoint = b3 * 0x1000000 + b2 * 0x10000 + b1 * 0x100 + b0;
-
-            if (codepoint > 0x10FFFF) {
-                // Not a valid Unicode codepoint
-                dst[offset++] = this.badChar[0]; dst[offset++] = this.badChar[1];
-            }
-            else {
-                codepoint -= 0x10000;
-                var high = 0xD800 | (codepoint >> 10);
-                var low = 0xDC00 + (codepoint & 0x3FF);
-                dst[offset++] = high & 0xFF; dst[offset++] = high >> 8;
-                dst[offset++] = low & 0xFF; dst[offset++] = low >> 8;
-            }
-        }
-    }
-
-    return dst.slice(0, offset).toString('ucs2');
-};
-
-Utf32LEDecoder.prototype.end = function() {
-    this.overflow = null;
-};
-
-// == UTF32-BE codec. ==========================================================
-
-exports.utf32be = Utf32BECodec;
-exports.ucs4be = Utf32BECodec;
-
-function Utf32BECodec(options, iconv) {
-    this.iconv = iconv;
-}
-
-Utf32BECodec.prototype.encoder = Utf32BEEncoder;
-Utf32BECodec.prototype.decoder = Utf32BEDecoder;
-Utf32BECodec.prototype.bomAware = true;
-
-// -- Encoding
-
-function Utf32BEEncoder() {
-    this.highSurrogate = null;
-}
-
-Utf32BEEncoder.prototype.write = function(str) {
-    var src = Buffer.from(str, 'ucs2');
-    var dst = Buffer.alloc(src.length * 2);
-    var offset = 0;
-
-    for (var i = 0; i < src.length; i += 2) {
-        var lowByte = src[i];
-        var highByte = src[i + 1];
-        var isHighSurrogate = (0xD8 <= highByte && highByte < 0xDC);
-        var isLowSurrogate = (0xDC <= highByte && highByte < 0xE0);
-
-        if (this.highSurrogate) {
-            if (isHighSurrogate || !isLowSurrogate) {
-                // There shouldn't be two high surrogates in a row, nor a high surrogate which isn't followed by a low
-                // surrogate. If this happens, keep the pending high surrogate as a stand-alone semi-invalid character
-                // (technically wrong, but expected by some applications, like Windows file names).
-                dst[offset++] = 0; dst[offset++] = 0; dst[offset++] = this.highSurrogate[1]; dst[offset++] = this.highSurrogate[0];
-            }
-            else {
-                // Create 32-bit value from high and low surrogates;
-                var codepoint = (((this.highSurrogate[1] - 0xD8) << 18) | (this.highSurrogate[0] << 10) |
-                    ((highByte - 0xDC) << 8) | lowByte) + 0x10000;
-
-                dst[offset++] = (codepoint & 0xFF000000) >> 24;
-                dst[offset++] = (codepoint & 0x00FF0000) >> 16;
-                dst[offset++] = (codepoint & 0x0000FF00) >> 8;
-                dst[offset++] =  codepoint & 0x000000FF;
-                this.highSurrogate = null;
-
-                continue;
-            }
-        }
-
-        if (isHighSurrogate)
-            this.highSurrogate = [lowByte, highByte];
-        else {
-            // Even if the current character is a low surrogate, with no previous high surrogate, we'll
-            // encode it as a semi-invalid stand-alone character for the same reasons expressed above for
-            // unpaired high surrogates.
-            dst[offset++] = 0; dst[offset++] = 0; dst[offset++] = highByte; dst[offset++] = lowByte;
-            this.highSurrogate = null;
-        }
-    }
-
-    if (offset < dst.length)
-        dst = dst.slice(0, offset);
-
-    return dst;
-};
-
-Utf32BEEncoder.prototype.end = function() {
-    // Treat any leftover high surrogate as a semi-invalid independent character.
-    if (!this.highSurrogate)
-        return;
-
-    var buf = Buffer.alloc(4);
-
-    buf[0] = 0; buf[1] = 0; buf[2] = this.highSurrogate[1]; buf[3] = this.highSurrogate[0];
-    this.highSurrogate = null;
-
-    return buf;
-};
-
-
-// -- Decoding
-
-function Utf32BEDecoder(options, codec) {
-    this.badChar = Buffer.from(codec.iconv.defaultCharUnicode, 'ucs2');
-    this.overflow = null;
-}
-
-Utf32BEDecoder.prototype.write = function(src) {
-    if (src.length === 0)
-        return '';
-    else if (this.overflow) {
-        src = Buffer.concat([this.overflow, src]);
-    }
-
-    var goodLength = src.length - src.length % 4;
-
-    if (src.length !== goodLength) {
-        this.overflow = src.slice(goodLength);
-        src = src.slice(0, goodLength);
-    }
-    else
-        this.overflow = null;
-
-    var dst = Buffer.alloc(goodLength);
-    var offset = 0;
-
-    for (var i = 0; i < goodLength; i += 4) {
-        var b3 = src[i];
-        var b2 = src[i + 1];
-        var b1 = src[i + 2];
-        var b0 = src[i + 3];
-
-        if (b3 === 0 && b2 === 0) {
-            // Simple 16-bit character
-            dst[offset++] = b0; dst[offset++] = b1;
-        }
-        else {
-            var codepoint = b3 * 0x1000000 + b2 * 0x10000 + b1 * 0x100 + b0;
-
-            if (codepoint > 0x10FFFF) {
-                // Not a valid Unicode codepoint
-                dst[offset++] = this.badChar[0]; dst[offset++] = this.badChar[1];
-            }
-            else {
-                codepoint -= 0x10000;
-                var high = 0xD800 | (codepoint >> 10);
-                var low = 0xDC00 + (codepoint & 0x3FF);
-                dst[offset++] = high & 0xFF; dst[offset++] = high >> 8;
-                dst[offset++] = low & 0xFF; dst[offset++] = low >> 8;
-            }
-        }
-    }
-
-    return dst.slice(0, offset).toString('ucs2');
-};
-
-Utf32BEDecoder.prototype.end = function() {
-    this.overflow = null;
-};
-
-// == UTF-32 codec =============================================================
-// Decoder chooses automatically from UTF-32LE and UTF-32BE using BOM and space-based heuristic.
-// Defaults to UTF-32LE. http://en.wikipedia.org/wiki/UTF-32
-// Encoder/decoder default can be changed: iconv.decode(buf, 'utf32', {defaultEncoding: 'utf-32be'});
-
-// Encoder prepends BOM (which can be overridden with (addBOM: false}).
-
-exports.utf32 = Utf32Codec;
-exports.ucs4 = Utf32Codec;
-
-function Utf32Codec(options, iconv) {
-    this.iconv = iconv;
-}
+// Aliases
+exports.ucs4le = 'utf32le';
+exports.ucs4be = 'utf32be';
 
 Utf32Codec.prototype.encoder = Utf32Encoder;
 Utf32Codec.prototype.decoder = Utf32Decoder;
@@ -307,6 +25,149 @@ Utf32Codec.prototype.decoder = Utf32Decoder;
 // -- Encoding
 
 function Utf32Encoder(options, codec) {
+    this.isLE = codec.isLE;
+    this.highSurrogate = 0;
+}
+
+Utf32Encoder.prototype.write = function(str) {
+    var src = Buffer.from(str, 'ucs2');
+    var dst = Buffer.alloc(src.length * 2);
+    var offset = 0;
+
+    for (var i = 0; i < src.length; i += 2) {
+        var code = src.readUInt16LE(i);
+        var isHighSurrogate = (0xD800 <= code && code < 0xDC00);
+        var isLowSurrogate = (0xDC00 <= code && code < 0xE000);
+
+        if (this.highSurrogate) {
+            if (isHighSurrogate || !isLowSurrogate) {
+                // There shouldn't be two high surrogates in a row, nor a high surrogate which isn't followed by a low
+                // surrogate. If this happens, keep the pending high surrogate as a stand-alone semi-invalid character
+                // (technically wrong, but expected by some applications, like Windows file names).
+                offset = write32(dst, this.isLE, this.highSurrogate, offset);
+            }
+            else {
+                // Create 32-bit value from high and low surrogates;
+                var codepoint = (((this.highSurrogate - 0xD800) << 10) | (code - 0xDC00)) + 0x10000;
+
+                offset = write32(dst, this.isLE, codepoint, offset);
+                this.highSurrogate = 0;
+
+                continue;
+            }
+        }
+
+        if (isHighSurrogate)
+            this.highSurrogate = code;
+        else {
+            // Even if the current character is a low surrogate, with no previous high surrogate, we'll
+            // encode it as a semi-invalid stand-alone character for the same reasons expressed above for
+            // unpaired high surrogates.
+            offset = write32(dst, this.isLE, code, offset);
+            this.highSurrogate = 0;
+        }
+    }
+
+    if (offset < dst.length)
+        dst = dst.slice(0, offset);
+
+    return dst;
+};
+
+Utf32Encoder.prototype.end = function() {
+    // Treat any leftover high surrogate as a semi-valid independent character.
+    if (!this.highSurrogate)
+        return;
+
+    var buf = Buffer.alloc(4);
+
+    write32(buf, this.isLE, this.highSurrogate, 0);
+    this.highSurrogate = 0;
+
+    return buf;
+};
+
+// -- Decoding
+
+function Utf32Decoder(options, codec) {
+    this.isLE = codec.isLE;
+    this.badChar = codec.iconv.defaultCharUnicode.charCodeAt(0);
+    this.overflow = null;
+}
+
+Utf32Decoder.prototype.write = function(src) {
+    if (src.length === 0)
+        return '';
+
+    if (this.overflow)
+        src = Buffer.concat([this.overflow, src]);
+
+    var goodLength = src.length - src.length % 4;
+
+    if (src.length !== goodLength) {
+        this.overflow = src.slice(goodLength);
+        src = src.slice(0, goodLength);
+    }
+    else
+        this.overflow = null;
+
+    var dst = Buffer.alloc(goodLength);
+    var offset = 0;
+
+    for (var i = 0; i < goodLength; i += 4) {
+        var codepoint = this.isLE ? src.readUInt32LE(i) : src.readUInt32BE(i);
+
+        if (codepoint < 0x10000) {
+            // Simple 16-bit character
+            dst.writeUInt16LE(codepoint, offset);
+            offset += 2;
+        }
+        else {
+            if (codepoint > 0x10FFFF) {
+                // Not a valid Unicode codepoint
+                dst.writeUInt16LE(this.badChar, offset);
+                offset += 2;
+            }
+            else {
+                // Create high and low surrogates.
+                codepoint -= 0x10000;
+                var high = 0xD800 | (codepoint >> 10);
+                var low = 0xDC00 + (codepoint & 0x3FF);
+                dst.writeUInt16LE(high, offset);
+                offset += 2;
+                dst.writeUInt16LE(low, offset);
+                offset += 2;
+            }
+        }
+    }
+
+    return dst.slice(0, offset).toString('ucs2');
+};
+
+Utf32Decoder.prototype.end = function() {
+    this.overflow = null;
+};
+
+// == UTF-32 Auto codec =============================================================
+// Decoder chooses automatically from UTF-32LE and UTF-32BE using BOM and space-based heuristic.
+// Defaults to UTF-32LE. http://en.wikipedia.org/wiki/UTF-32
+// Encoder/decoder default can be changed: iconv.decode(buf, 'utf32', {defaultEncoding: 'utf-32be'});
+
+// Encoder prepends BOM (which can be overridden with (addBOM: false}).
+
+exports.utf32 = Utf32AutoCodec;
+exports.ucs4 = Utf32AutoCodec;
+
+function Utf32AutoCodec(options, iconv) {
+    this.iconv = iconv;
+}
+
+Utf32AutoCodec.prototype.encoder = Utf32AutoEncoder;
+Utf32AutoCodec.prototype.decoder = Utf32AutoDecoder;
+
+// -- Encoding
+
+function Utf32AutoEncoder(options, codec) {
     options = options || {};
 
     if (options.addBOM === undefined)
@@ -315,18 +176,17 @@ function Utf32Encoder(options, codec) {
     this.encoder = codec.iconv.getEncoder(options.defaultEncoding || 'utf-32le', options);
 }
 
-Utf32Encoder.prototype.write = function(str) {
+Utf32AutoEncoder.prototype.write = function(str) {
     return this.encoder.write(str);
 };
 
-Utf32Encoder.prototype.end = function() {
+Utf32AutoEncoder.prototype.end = function() {
     return this.encoder.end();
 };
 
-
 // -- Decoding
 
-function Utf32Decoder(options, codec) {
+function Utf32AutoDecoder(options, codec) {
     this.decoder = null;
     this.initialBytes = [];
     this.initialBytesLen = 0;
@@ -334,7 +194,7 @@ function Utf32Decoder(options, codec) {
     this.iconv = codec.iconv;
 }
 
-Utf32Decoder.prototype.write = function(buf) {
+Utf32AutoDecoder.prototype.write = function(buf) {
     if (!this.decoder) {
         // Codec is not chosen yet. Accumulate initial bytes.
         this.initialBytes.push(buf);
@@ -353,8 +213,7 @@ Utf32Decoder.prototype.write = function(buf) {
     return this.decoder.write(buf);
 };
 
-
-Utf32Decoder.prototype.end = function() {
+Utf32AutoDecoder.prototype.end = function() {
     if (!this.decoder) {
         var buf = Buffer.concat(this.initialBytes),
             encoding = detectEncoding(buf, this.options.defaultEncoding);
@@ -411,4 +270,13 @@ function detectEncoding(buf, defaultEncoding) {
     }
 
     return enc;
+}
+
+function write32(buf, isLE, value, offset) {
+    if (isLE)
+        buf.writeUInt32LE(value, offset);
+    else
+        buf.writeUInt32BE(value, offset);
+
+    return offset + 4;
 }
