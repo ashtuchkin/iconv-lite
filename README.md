@@ -12,7 +12,7 @@
  * React Native is supported (need to explicitly `npm install` two more modules: `buffer` and `stream`).
  * License: MIT.
 
-[![NPM Stats](https://nodei.co/npm/iconv-lite.png?downloads=true&downloadRank=true)](https://npmjs.org/packages/iconv-lite/)
+[![NPM Stats](https://nodei.co/npm/iconv-lite.png?downloads=true&downloadRank=true)](https://npmjs.org/package/iconv-lite/)
 
 ## Usage
 ### Basic API
