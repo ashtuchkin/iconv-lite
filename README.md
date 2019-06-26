@@ -1,4 +1,4 @@
-## Pure JS character encoding conversion [![Build Status](https://travis-ci.org/ashtuchkin/iconv-lite.svg?branch=master)](https://travis-ci.org/ashtuchkin/iconv-lite)
+## Pure JS character encoding conversion
 
  * Doesn't need native code compilation. Works on Windows and in sandboxed environments like [Cloud9](http://c9.io).
  * Used in popular projects like [Express.js (body_parser)](https://github.com/expressjs/body-parser), 
@@ -12,7 +12,10 @@
  * React Native is supported (need to explicitly `npm install` two more modules: `buffer` and `stream`).
  * License: MIT.
 
-[![NPM Stats](https://nodei.co/npm/iconv-lite.png?downloads=true&downloadRank=true)](https://npmjs.org/package/iconv-lite/)
+[![NPM Stats](https://nodei.co/npm/iconv-lite.png)](https://npmjs.org/package/iconv-lite/)  
+[![Build Status](https://travis-ci.org/ashtuchkin/iconv-lite.svg?branch=master)](https://travis-ci.org/ashtuchkin/iconv-lite)
+[![npm downloads](https://img.shields.io/npm/dw/iconv-lite.svg)](https://npmjs.org/package/iconv-lite/)
+![npm bundle size](https://img.shields.io/bundlephobia/min/iconv-lite.svg)
 
 ## Usage
 ### Basic API
