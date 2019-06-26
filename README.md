@@ -14,8 +14,9 @@
 
 [![NPM Stats](https://nodei.co/npm/iconv-lite.png)](https://npmjs.org/package/iconv-lite/)  
 [![Build Status](https://travis-ci.org/ashtuchkin/iconv-lite.svg?branch=master)](https://travis-ci.org/ashtuchkin/iconv-lite)
-[![npm downloads](https://img.shields.io/npm/dw/iconv-lite.svg)](https://npmjs.org/package/iconv-lite/)
-![npm bundle size](https://img.shields.io/bundlephobia/min/iconv-lite.svg)
+[![npm](https://img.shields.io/npm/v/iconv-lite.svg)](https://npmjs.org/package/iconv-lite/)
+[![npm downloads](https://img.shields.io/npm/dm/iconv-lite.svg)](https://npmjs.org/package/iconv-lite/)
+[![npm bundle size](https://img.shields.io/bundlephobia/min/iconv-lite.svg)](https://npmjs.org/package/iconv-lite/)
 
 ## Usage
 ### Basic API
