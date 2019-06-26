@@ -1,5 +1,6 @@
 var assert = require('assert'),
-    iconv = require(__dirname+'/../');
+    iconv = require(__dirname+'/../'),
+    Iconv = require('iconv').Iconv;
 
 var testStr = '1aя中文☃💩',
     testStr2 = '❝Stray high \uD977😱 and low\uDDDD☔ surrogate values.❞',
@@ -68,10 +69,16 @@ describe('UTF-32LE codec', function() {
 
     it('handles encoding all valid codepoints', function() {
         assert.deepEqual(iconv.encode(allCharsStr, 'utf-32le'), allCharsLEBuf);
+        var nodeIconv = new Iconv('UTF-8', 'UTF-32LE');
+        var nodeBuf = nodeIconv.convert(allCharsStr);
+        assert.deepEqual(nodeBuf, allCharsLEBuf);
     });
 
     it('handles decoding all valid codepoints', function() {
         assert.equal(iconv.decode(allCharsLEBuf, 'utf-32le'), allCharsStr);
+        var nodeIconv = new Iconv('UTF-32LE', 'UTF-8');
+        var nodeStr = nodeIconv.convert(allCharsLEBuf).toString('utf8');
+        assert.equal(nodeStr, allCharsStr);
     });
 });
 
@@ -99,10 +106,16 @@ describe('UTF-32BE codec', function() {
 
     it('handles encoding all valid codepoints', function() {
         assert.deepEqual(iconv.encode(allCharsStr, 'utf-32be'), allCharsBEBuf);
+        var nodeIconv = new Iconv('UTF-8', 'UTF-32BE');
+        var nodeBuf = nodeIconv.convert(allCharsStr);
+        assert.deepEqual(nodeBuf, allCharsBEBuf);
     });
 
     it('handles decoding all valid codepoints', function() {
         assert.equal(iconv.decode(allCharsBEBuf, 'utf-32be'), allCharsStr);
+        var nodeIconv = new Iconv('UTF-32BE', 'UTF-8');
+        var nodeStr = nodeIconv.convert(allCharsBEBuf).toString('utf8');
+        assert.equal(nodeStr, allCharsStr);
     });
 });
 

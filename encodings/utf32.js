@@ -32,6 +32,7 @@ function Utf32Encoder(options, codec) {
 Utf32Encoder.prototype.write = function(str) {
     var src = Buffer.from(str, 'ucs2');
     var dst = Buffer.alloc(src.length * 2);
+    var write32 = this.isLE ? dst.writeUInt32LE : dst.writeUInt32BE;
     var offset = 0;
 
     for (var i = 0; i < src.length; i += 2) {
@@ -44,13 +45,15 @@ Utf32Encoder.prototype.write = function(str) {
                 // There shouldn't be two high surrogates in a row, nor a high surrogate which isn't followed by a low
                 // surrogate. If this happens, keep the pending high surrogate as a stand-alone semi-invalid character
                 // (technically wrong, but expected by some applications, like Windows file names).
-                offset = write32(dst, this.isLE, this.highSurrogate, offset);
+                write32.call(dst, this.highSurrogate, offset);
+                offset += 4;
             }
             else {
                 // Create 32-bit value from high and low surrogates;
                 var codepoint = (((this.highSurrogate - 0xD800) << 10) | (code - 0xDC00)) + 0x10000;
 
-                offset = write32(dst, this.isLE, codepoint, offset);
+                write32.call(dst, codepoint, offset);
+                offset += 4;
                 this.highSurrogate = 0;
 
                 continue;
@@ -63,7 +66,8 @@ Utf32Encoder.prototype.write = function(str) {
             // Even if the current character is a low surrogate, with no previous high surrogate, we'll
             // encode it as a semi-invalid stand-alone character for the same reasons expressed above for
             // unpaired high surrogates.
-            offset = write32(dst, this.isLE, code, offset);
+            write32.call(dst, code, offset);
+            offset += 4;
             this.highSurrogate = 0;
         }
     }
@@ -81,7 +85,11 @@ Utf32Encoder.prototype.end = function() {
 
     var buf = Buffer.alloc(4);
 
-    write32(buf, this.isLE, this.highSurrogate, 0);
+    if (this.isLE)
+        buf.writeUInt32LE(this.highSurrogate, 0);
+    else
+        buf.writeUInt32BE(this.highSurrogate, 0);
+
     this.highSurrogate = 0;
 
     return buf;
@@ -270,13 +278,4 @@ function detectEncoding(buf, defaultEncoding) {
     }
 
     return enc;
-}
-
-function write32(buf, isLE, value, offset) {
-    if (isLE)
-        buf.writeUInt32LE(value, offset);
-    else
-        buf.writeUInt32BE(value, offset);
-
-    return offset + 4;
 }
