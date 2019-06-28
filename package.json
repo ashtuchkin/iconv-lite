@@ -25,7 +25,8 @@
         "coverage": "istanbul cover _mocha -- --grep .",
         "coverage-open": "open coverage/lcov-report/index.html",
         "test": "mocha --reporter spec --grep .",
-        "translit": "node generation/gen-transliteration.js"
+        "translit": "node generation/gen-transliteration.js",
+        "test-translit": "node generation/test-translit.js"
     },
     "browser": {
         "./lib/extend-node": false,

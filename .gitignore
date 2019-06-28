@@ -4,4 +4,6 @@ wiki
 *sublime-*
 coverage
 /.idea
-package-lock.json
+/package-lock.json
+/.npmrc
+/.vscode/settings.json
