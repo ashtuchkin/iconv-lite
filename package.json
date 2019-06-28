@@ -24,21 +24,23 @@
     "scripts": {
         "coverage": "istanbul cover _mocha -- --grep .",
         "coverage-open": "open coverage/lcov-report/index.html",
-        "test": "mocha --reporter spec --grep ."
+        "test": "mocha --reporter spec --grep .",
+        "translit": "node generation/gen-transliteration.js"
     },
     "browser": {
         "./lib/extend-node": false,
         "./lib/streams": false
     },
     "devDependencies": {
+        "async": "*",
+        "errto": "*",
+        "iconv": "*",
+        "istanbul": "*",
         "mocha": "^3.1.0",
         "request": "~2.87.0",
-        "unorm": "*",
-        "errto": "*",
-        "async": "*",
-        "istanbul": "*",
         "semver": "*",
-        "iconv": "*"
+        "unidecode": "^0.1.8",
+        "unorm": "*"
     },
     "dependencies": {
         "safer-buffer": ">= 2.1.2 < 3"
