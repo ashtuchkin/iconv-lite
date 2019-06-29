@@ -1,5 +1,5 @@
 var assert = require('assert'),
-    iconv = require(__dirname+'/../'),
+    iconv = require(__dirname + '/../'),
     Iconv = require('iconv').Iconv;
 
 var testStr = '1aя中文☃💩',
