@@ -10,6 +10,7 @@
  * In-browser usage via [Browserify](https://github.com/substack/node-browserify) (~180k gzip compressed with Buffer shim included).
  * Typescript [type definition file](https://github.com/ashtuchkin/iconv-lite/blob/master/lib/index.d.ts) included.
  * React Native is supported (need to explicitly `npm install` two more modules: `buffer` and `stream`).
+ * Transliteration option is available when the [unidecode](https://www.npmjs.com/package/unidecode) package is added to your project
  * License: MIT.
 
 [![NPM Stats](https://nodei.co/npm/iconv-lite.png)](https://npmjs.org/package/iconv-lite/)  
@@ -31,6 +32,9 @@ buf = iconv.encode("Sample input string", 'win1251');
 
 // Check if encoding is supported
 iconv.encodingExists("us-ascii")
+
+// Convert from js string to an encoded buffer, keeping accented characters like "é", but transliterating Chinese.
+buf2 = iconv.encode("Café 北京", 'iso-8859-1', { transliterate: true });
 ```
 
 ### Streaming API (Node v0.10+)
@@ -143,11 +147,32 @@ This library supports UTF-32LE, UTF-32BE and UTF-32 encodings. Like the UTF-16 e
  * The default of UTF-32LE can be overridden with the `defaultEncoding: 'utf-32be'` option. Strips BOM unless `stripBOM: false`.
  * Encoding: uses UTF-32LE and writes BOM by default. Use `addBOM: false` to override. (`defaultEncoding: 'utf-32be'` can also be used here to change encoding.)
 
+## Transliteration
+
+If the [unidecode](https://www.npmjs.com/package/unidecode) package is added to your project (`npm install unidecode`), the option will be available to transliterate characters which are not available in a particular encoding. The transliterations are always plain ASCII characters, but unlike using unidecode directly (which will convert *all* non-ASCII characters into transliterations), transliterations done using iconv will only transliterate characters which are not available in the target encoding.
+
+In this example:
+```
+buf = iconv.encode("Café 北京", 'iso-8859-1', { transliterate: true });
+```
+The output is `<Buffer 43 61 66 e9 20 42 65 69 20 4a 69 6e 67 20>`. Converted back into ISO-8859-1 text, this is "Café Bei Jing ", preserving the accented "é", and only transliterating the Chinese characters.
+
+Transliteration to a string instead of a buffer can also be done directly, like this:
+```
+str = iconv.transliterate("Café 北京", 'iso-8859-1');
+```
+When encoding to create a buffer, the node-iconv style of requesting transliteration can also be used:
+```
+buf = iconv.encode("Café 北京", 'iso-8859-1//translit');
+```
+
+Please take note that transliteration only affects encoding, not decoding.
+
 ## Other notes
 
-When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things usually happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).  
-Untranslatable characters are set to � or ?. No transliteration is currently supported.  
-Node versions 0.10.31 and 0.11.13 are buggy, don't use them (see #65, #77).  
+* When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things usually happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).
+* Untranslatable characters are set to � or ? unless using transliteration.
+* Node versions 0.10.31 and 0.11.13 are buggy, don't use them (see #65, #77).  
 
 ## Testing
 
