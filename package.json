@@ -7,7 +7,8 @@
         "iconv",
         "convert",
         "charset",
-        "icu"
+        "icu",
+        "transliterate"
     ],
     "author": "Alexander Shtuchkin <ashtuchkin@gmail.com>",
     "main": "./lib/index.js",
