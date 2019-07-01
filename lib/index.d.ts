@@ -15,10 +15,18 @@ declare module 'iconv-lite' {
 	export function decodeStream(encoding: string, options?: Options): NodeJS.ReadWriteStream;
 
 	export function encodeStream(encoding: string, options?: Options): NodeJS.ReadWriteStream;
+
+	export function transliterate(str: string, targetEncoding: string, options?: TransliterationOptions)
 }
 
-export interface Options {
-    stripBOM?: boolean;
+export interface TransliterationOptions {
+    german?: boolean;
+    smartSpacing?: boolean;
+}
+
+export interface Options extends TransliterationOptions {
     addBOM?: boolean;
     defaultEncoding?: string;
+    stripBOM?: boolean;
+    transliterate?: boolean;
 }

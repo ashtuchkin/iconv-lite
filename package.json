@@ -33,6 +33,7 @@
         "./lib/streams": false
     },
     "devDependencies": {
+        "@types/node": "^12.0.10",
         "async": "*",
         "errto": "*",
         "iconv": "*",
