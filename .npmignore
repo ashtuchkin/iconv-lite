@@ -5,4 +5,4 @@ test
 wiki
 coverage
 .travis.yml
-
+/.npmrc

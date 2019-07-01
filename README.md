@@ -10,7 +10,7 @@
  * In-browser usage via [Browserify](https://github.com/substack/node-browserify) (~180k gzip compressed with Buffer shim included).
  * Typescript [type definition file](https://github.com/ashtuchkin/iconv-lite/blob/master/lib/index.d.ts) included.
  * React Native is supported (need to explicitly `npm install` two more modules: `buffer` and `stream`).
- * Transliteration option is available when the [unidecode](https://www.npmjs.com/package/unidecode) package is added to your project
+ * Transliteration option is available when either [unidecode-plus](https://www.npmjs.com/package/unidecode-plus) or [unidecode](https://www.npmjs.com/package/unidecode) are added to your project
  * License: MIT.
 
 [![NPM Stats](https://nodei.co/npm/iconv-lite.png)](https://npmjs.org/package/iconv-lite/)  
@@ -149,7 +149,7 @@ This library supports UTF-32LE, UTF-32BE and UTF-32 encodings. Like the UTF-16 e
 
 ## Transliteration
 
-If the [unidecode](https://www.npmjs.com/package/unidecode) package is added to your project (`npm install unidecode`), the option will be available to transliterate characters which are not available in a particular encoding. The transliterations are always plain ASCII characters, but unlike using unidecode directly (which will convert *all* non-ASCII characters into transliterations), transliterations done using iconv will only transliterate characters which are not available in the target encoding.
+If either [unidecode-plus](https://www.npmjs.com/package/unidecode-plus) or [unidecode](https://www.npmjs.com/package/unidecode) are added to your project ("`npm install unidecode-plus`" or "`npm install unidecode`"), the option will be available to transliterate characters which are not available in a particular encoding. The transliterations are always plain ASCII characters, but unlike using unidecode directly (which will convert *all* non-ASCII characters into transliterations), transliterations done using iconv will only transliterate characters which are not available in the target character encoding.
 
 In this example:
 ```
@@ -165,6 +165,12 @@ When encoding to create a buffer, the node-iconv style of requesting translitera
 ```
 buf = iconv.encode("Café 北京", 'iso-8859-1//translit');
 ```
+
+If you use `unidecode-plus` instead of `unidecode`, you get two additional transliteration options: `german`, and `smartSpacing`.
+
+The `german` option transliterates `Ä`, `ä`, `Ö`, `ö`, `Ü`, and `ü` to `AE`, `ae`, `OE`, `oe`, `UE`, and `ue`, respectively, instead of just removing the umlauts.
+
+The `smartSpacing` options improves the formatting of transliterated text, removing some unnecessary spaces, and adding others for clarity. For example, "Café 北京, 鞋 size 10½" becomes "Cafe Bei Jing, Xie size 10 1/2" using `smartSpacing`. Without it, you get "Cafe Bei Jing , Xie  size 101/2". (See the [unidecode-plus site](https://github.com/kshetline/unidecode-plus/blob/master/README.md) for more detail.)
 
 Please take note that transliteration only affects encoding, not decoding.
 
