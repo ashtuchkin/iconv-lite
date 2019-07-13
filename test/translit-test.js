@@ -81,3 +81,21 @@ Zi Fu Bian Ma  Wen Zi kodo Κωδικοποίηση χαρακτήρων Kodirov
         });
     }
 });
+
+describe('Transliteration via stream', function() {
+    it('should handle inconvenient breaks in spacing and accented characters', function() {
+        var encoder = iconv.getEncoder('ascii', { transliterate: true, smartSpacing: true, german: true });
+        var buf = new Buffer([]);
+
+        buf = Buffer.concat([buf, encoder.write('😁北Schro')]);
+        buf = Buffer.concat([buf, encoder.write('\u0308dinger❜s cat 10')]);
+        buf = Buffer.concat([buf, encoder.write('½')]);
+
+        var end = encoder.end();
+
+        if (end)
+            buf = Buffer.concat([buf, end]);
+
+        assert.equal(iconv.decode(buf, 'ascii'), ':-D Bei Schroedinger\'s cat 10 1/2');
+    });
+});

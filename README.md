@@ -31,7 +31,7 @@ str = iconv.decode(Buffer.from([0x68, 0x65, 0x6c, 0x6c, 0x6f]), 'win1251');
 buf = iconv.encode("Sample input string", 'win1251');
 
 // Check if encoding is supported
-iconv.encodingExists("us-ascii")
+iconv.encodingExists("us-ascii");
 
 // Convert from js string to an encoded buffer, keeping accented characters like "é", but transliterating Chinese.
 buf2 = iconv.encode("Café 北京", 'iso-8859-1', { transliterate: true });

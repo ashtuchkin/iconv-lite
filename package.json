@@ -41,7 +41,7 @@
         "mocha": "^3.1.0",
         "request": "~2.87.0",
         "semver": "*",
-        "unidecode-plus": "^1.0.1",
+        "unidecode-plus": "^1.0.2",
         "unorm": "*"
     },
     "dependencies": {
