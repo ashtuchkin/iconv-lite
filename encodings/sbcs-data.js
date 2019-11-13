@@ -170,5 +170,8 @@ module.exports = {
 
     "mac": "macintosh",
     "csmacintosh": "macintosh",
+    
+    "iso88598e": "iso88598",
+    "iso88598i": "iso88598",
 };
 
