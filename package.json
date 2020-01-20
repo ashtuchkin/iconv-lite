@@ -37,7 +37,7 @@
         "errto": "*",
         "async": "*",
         "istanbul": "*",
-        "semver": "*",
+        "semver": "6.1.2",
         "iconv": "*"
     },
     "dependencies": {
