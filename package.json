@@ -1,7 +1,7 @@
 {
     "name": "iconv-lite",
     "description": "Convert character encodings in pure javascript.",
-    "version": "0.5.1",
+    "version": "0.6.0-pre",
     "license": "MIT",
     "keywords": [
         "iconv",
@@ -27,7 +27,6 @@
         "test": "mocha --reporter spec --grep ."
     },
     "browser": {
-        "./lib/extend-node": false,
         "./lib/streams": false
     },
     "devDependencies": {

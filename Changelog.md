@@ -1,3 +1,7 @@
+## 0.6.0 / not released yet
+  * Removed `extendNodeEncodings()` mechanism. It didn't work in Node v4+ and was deprecated 5 years ago in v0.4.12.
+
+
 ## 0.5.1 / 2020-01-18
 
   * Added cp720 encoding (#221, by @kr-deps)

@@ -51,9 +51,8 @@ describe("Full Browserify tests", function() {
             assert.equal(browserIconvLite.encode("中国", 'gbk').toString('hex'), "d6d0b9fa");
             assert.equal(browserIconvLite.decode(new browserBuffer("d6d0b9fa", 'hex'), 'gbk'), "中国");
 
-            // Test that streaming and extend-node API-s are not present.
+            // Test that streaming API-s are not present.
             assert(data.indexOf('encodeStream') == -1);
-            assert(data.indexOf('extendNodeEncodings') == -1);
 
             done();
         });
