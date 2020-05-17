@@ -6,7 +6,6 @@
  * Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
  * Intuitive encode/decode API
  * Streaming support for Node v0.10+
- * [Deprecated] Can extend Node.js primitives (buffers, streams) to support all iconv-lite encodings.
  * In-browser usage via [Browserify](https://github.com/substack/node-browserify) (~180k gzip compressed with Buffer shim included).
  * Typescript [type definition file](https://github.com/ashtuchkin/iconv-lite/blob/master/lib/index.d.ts) included.
  * React Native is supported (need to explicitly `npm install` two more modules: `buffer` and `stream`).
@@ -59,40 +58,6 @@ http.createServer(function(req, res) {
         console.log(body); // full request body string
     });
 });
-```
-
-### [Deprecated] Extend Node.js own encodings
-> NOTE: This doesn't work on latest Node versions. See [details](https://github.com/ashtuchkin/iconv-lite/wiki/Node-v4-compatibility).
-
-```javascript
-// After this call all Node basic primitives will understand iconv-lite encodings.
-iconv.extendNodeEncodings();
-
-// Examples:
-buf = new Buffer(str, 'win1251');
-buf.write(str, 'gbk');
-str = buf.toString('latin1');
-assert(Buffer.isEncoding('iso-8859-15'));
-Buffer.byteLength(str, 'us-ascii');
-
-http.createServer(function(req, res) {
-    req.setEncoding('big5');
-    req.collect(function(err, body) {
-        console.log(body);
-    });
-});
-
-fs.createReadStream("file.txt", "shift_jis");
-
-// External modules are also supported (if they use Node primitives, which they probably do).
-request = require('request');
-request({
-    url: "http://github.com/", 
-    encoding: "cp932"
-});
-
-// To remove extensions
-iconv.undoExtendNodeEncodings();
 ```
 
 ## Supported encodings
