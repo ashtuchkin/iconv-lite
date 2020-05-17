@@ -38,7 +38,7 @@
         "async": "*",
         "istanbul": "*",
         "semver": "6.1.2",
-        "iconv": "*"
+        "iconv": "2"
     },
     "dependencies": {
         "safer-buffer": ">= 2.1.2 < 3"
