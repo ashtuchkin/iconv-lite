@@ -1,14 +1,13 @@
-## Pure JS character encoding conversion
+## iconv-lite: Pure JS character encoding conversion
 
- * Doesn't need native code compilation. Works on Windows and in sandboxed environments like [Cloud9](http://c9.io).
+ * No need for native code compilation. Quick to install, works on Windows and in sandboxed environments like [Cloud9](http://c9.io).
  * Used in popular projects like [Express.js (body_parser)](https://github.com/expressjs/body-parser), 
    [Grunt](http://gruntjs.com/), [Nodemailer](http://www.nodemailer.com/), [Yeoman](http://yeoman.io/) and others.
  * Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
- * Intuitive encode/decode API
- * Streaming support for Node v0.10+
- * In-browser usage via [Browserify](https://github.com/substack/node-browserify) (~180k gzip compressed with Buffer shim included).
+ * Intuitive encode/decode API, including Streaming support.
+ * In-browser usage via [browserify](https://github.com/substack/node-browserify) or [webpack](https://webpack.js.org/) (~180kb gzip compressed with Buffer shim included).
  * Typescript [type definition file](https://github.com/ashtuchkin/iconv-lite/blob/master/lib/index.d.ts) included.
- * React Native is supported (need to explicitly `npm install` two more modules: `buffer` and `stream`).
+ * React Native is supported (need to install `stream` module to enable Streaming API).
  * License: MIT.
 
 [![NPM Stats](https://nodei.co/npm/iconv-lite.png)](https://npmjs.org/package/iconv-lite/)  
@@ -22,20 +21,20 @@
 ```javascript
 var iconv = require('iconv-lite');
 
-// Convert from an encoded buffer to js string.
+// Convert from an encoded buffer to a js string.
 str = iconv.decode(Buffer.from([0x68, 0x65, 0x6c, 0x6c, 0x6f]), 'win1251');
 
-// Convert from js string to an encoded buffer.
+// Convert from a js string to an encoded buffer.
 buf = iconv.encode("Sample input string", 'win1251');
 
 // Check if encoding is supported
 iconv.encodingExists("us-ascii")
 ```
 
-### Streaming API (Node v0.10+)
+### Streaming API
 ```javascript
 
-// Decode stream (from binary stream to js strings)
+// Decode stream (from binary data stream to js strings)
 http.createServer(function(req, res) {
     var converterStream = iconv.decodeStream('win1251');
     req.pipe(converterStream);

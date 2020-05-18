@@ -1,0 +1,20 @@
+{
+  "name": "webpack-test",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test": "karma start"
+  },
+  "devDependencies": {
+    "karma": "^5.0.9",
+    "karma-mocha": "^2.0.1",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "karma-webpack": "^4.0.2",
+    "mocha": "^7.2.0",
+    "phantomjs-prebuilt": "^2.1.16",
+    "webpack": "^4.43.0"
+  },
+  "dependencies": {
+    "iconv-lite": "file:../.."
+  }
+}
