@@ -27,7 +27,7 @@
         "test": "mocha --reporter spec --grep ."
     },
     "browser": {
-        "./lib/streams": false
+        "stream": false
     },
     "devDependencies": {
         "mocha": "^3.1.0",
