@@ -3,6 +3,7 @@
   * Reworked Streaming API behavior in browser environments to fix #204. Streaming API will be excluded by default in
     browser packs to save ~100Kb bundle size, unless enabled explicitly using `iconv.enableStreamingAPI(require('stream'));`.
   * Minor updates to README.
+  * Switch from instanbul to c8 for code coverage.
 
 ## 0.5.1 / 2020-01-18
 
