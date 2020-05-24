@@ -1,24 +1,19 @@
- sudo: false
- language: node_js
- node_js:
-   - "0.10"
-   - "0.11"
-   - "0.12"
-   - "iojs"
-   - "4"
-   - "6"
-   - "8"
-   - "10"
-   - "12"
-   - "node"
+language: node_js
+node_js:
+  - "0.10"
+  - "0.11"
+  - "0.12"
+  - "iojs"
+  - "4"
+  - "6"
+  - "8"
+  - "10"
+  - "12"
+  - "node"
 
- env:
-   - CXX=g++-4.8
- addons:
-   apt:
-     sources:
-       - ubuntu-toolchain-r-test
-     packages:
-       - gcc-4.8
-       - g++-4.8
-
+jobs:
+  include:
+    - name: webpack
+      node_js: "12"
+      install: cd test/webpack; npm install
+      script: cd test/webpack; npm test

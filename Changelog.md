@@ -2,6 +2,7 @@
   * Removed `extendNodeEncodings()` mechanism. It didn't work in Node v4+ and was deprecated 5 years ago in v0.4.12.
   * Reworked Streaming API behavior in browser environments to fix #204. Streaming API will be excluded by default in
     browser packs to save ~100Kb bundle size, unless enabled explicitly using `iconv.enableStreamingAPI(require('stream'));`.
+    * Added a test for this behavior as a separate package in ./test/webpack folder and added a job for it to Travis CI.
   * Minor updates to README.
   * Switch from instanbul to c8 for code coverage.
 

@@ -1,0 +1,20 @@
+{
+  "name": "webpack-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "karma start --single-run --browsers PhantomJS"
+  },
+  "author": "Alexander Shtuchkin <ashtuchkin@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "karma": "^5.0.9",
+    "karma-mocha": "^2.0.1",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "karma-webpack": "^4.0.2",
+    "mocha": "^7.2.0",
+    "phantomjs-prebuilt": "^2.1.16",
+    "webpack": "^4.43.0"
+  }
+}
