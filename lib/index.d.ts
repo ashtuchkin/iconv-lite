@@ -6,7 +6,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 declare module 'iconv-lite' {
-	export function decode(buffer: Buffer, encoding: string, options?: Options): string;
+	export function decode(buffer: Buffer | Int8Array | Uint8Array, encoding: string, options?: Options): string;
 
 	export function encode(content: string, encoding: string, options?: Options): Buffer;
 
