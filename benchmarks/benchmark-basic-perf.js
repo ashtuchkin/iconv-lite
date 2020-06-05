@@ -1,7 +1,3 @@
-
-if (module.parent) // Skip this file from testing.
-    return;
-
 var iconv = require('iconv');
 var iconv_lite = require("../");
 
