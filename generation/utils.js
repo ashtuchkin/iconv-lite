@@ -7,14 +7,18 @@ var request = require('request'),
 // Common utilities used in scripts.
 
 exports.getFile = function(url, cb) {
-    var fullpath = path.join(__dirname, "source-data", path.basename(url));
+    var sourceDataFolder = path.join(__dirname, "source-data");
+    var fullpath = path.join(sourceDataFolder, path.basename(url));
     fs.readFile(fullpath, "utf8", function(err, text) {
         if (!err) return cb(null, text);
         if (err.code != "ENOENT") return cb(err);
-        request(url, errTo(cb, function(res, text) {
-            fs.writeFile(fullpath, text, errTo(cb, function() {
-                cb(null, text);
-            }));
+        request(url, errTo(cb, function(res, buf) {
+            fs.mkdir(sourceDataFolder, function(err) {
+                if (err && err.code != "EEXIST") return cb(err);
+                fs.writeFile(fullpath, buf, errTo(cb, function() {
+                    cb(null, buf.toString());
+                }));
+            });
         }));
     });
 }
