@@ -126,18 +126,8 @@ async.parallel({
         eucKr[i] = i;
     for (var i = 0x8100; i < 0xFF00; i++) {
         var lead = i >> 8, byte = i & 0xFF, ptr = null, t;
-        if (lead <= 0xC6) {
-            t = (26+26+126)*(lead-0x81) + byte;
-            if (0x41 <= byte && byte <= 0x5A)
-                ptr = t - 0x41;
-            else if (0x61 <= byte && byte <= 0x7A)
-                ptr = t + 26 - 0x61;
-            else if (0x81 <= byte && byte <= 0xFE)
-                ptr = t + 26 + 26 - 0x81; 
-        } else {
-            if (0xA1 <= byte && byte <= 0xFE)
-                ptr = (26+26+126)*(0xC7-0x81) + (lead-0xC7)*94+(byte-0xA1);
-        }
+        if (0x41 <= byte && byte <= 0xFE)
+            ptr = (lead-0x81) * 190 + (byte-0x41);
         if (ptr !== null)
             eucKr[i] = data.$eucKr[ptr];
 
