@@ -68,7 +68,10 @@ async.parallel({
             gbkadd[i] = gbChar;
     }
 
-    utils.writeTable("gbk-added", utils.generateTable(gbkadd));
+    // GB18030:2005 addition
+    gbk2005add = [['8135f437', '']];
+
+    utils.writeTable("gbk-added", utils.generateTable(gbkadd).concat(gbk2005add));
 
     // Write GB18030 ranges
     var ranges = { uChars: [], gbChars: [] };

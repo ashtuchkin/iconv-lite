@@ -137,6 +137,9 @@ var iconvCannotDecode = { // Characters that we can decode, but iconv cannot. En
         // Encoding Standard stands on the side of WebKit, so we are too.
         // See discussion in https://www.w3.org/Bugs/Public/show_bug.cgi?id=25396 and http://goo.gl/ocjnDR
         "a3a0": "\u3000",
+
+        // Align with GB18030-2005 standard (see https://github.com/whatwg/encoding/issues/22)
+        "a8bc": "ḿ",
     },
     gb18030: {
         "80": "€", "a3a0": "\u3000",

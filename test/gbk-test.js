@@ -110,4 +110,11 @@ describe("GBK tests", function() {
         }
     });
 
+    it("GB18030:2005 changes are applied", function() {
+        // See https://github.com/whatwg/encoding/issues/22
+        var chars = "\u1E3F\u0000\uE7C7";  // Use \u0000 as separator
+        var gbkChars = Buffer.from([0xA8, 0xBC, 0x00, 0x81, 0x35, 0xF4, 0x37]);
+        assert.strictEqual(iconv.decode(gbkChars, "GB18030"), chars);
+        assert.strictEqual(iconv.encode(chars, "GB18030").toString('hex'), gbkChars.toString('hex'));
+    });
 });
