@@ -17,3 +17,7 @@ jobs:
       node_js: "12"
       install: cd test/webpack; npm install
       script: npm test
+    - name: preload
+      node_js: "12"
+      install: cd test/preload; npm install
+      script: npm test

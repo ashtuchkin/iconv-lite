@@ -1,0 +1,19 @@
+{
+  "name": "preload-test",
+  "private": true,
+  "version": "1.0.0",
+  "description": "This package tests a case when iconv-lite sources are not available after initial require() happens, thus necessitating using preloadCodecsAndData() function",
+  "scripts": {
+    "!note1": "NOTE: We do `npm pack` of the main iconv-lite package followed by installing it to create a copy of the package (not symlink).",
+    "!note2": "This is needed because we can't reproduce the problematic case with just symlinks because node uses fully resolved file names to cache modules.",
+    "preinstall": "mv $(npm pack -pq ../../) iconv-lite.tgz",
+    "postinstall": "rm iconv-lite.tgz",
+    "test": "mocha preload-test.js"
+  },
+  "devDependencies": {
+    "mocha": "^7.2.0"
+  },
+  "dependencies": {
+    "iconv-lite": "file:iconv-lite.tgz"
+  }
+}

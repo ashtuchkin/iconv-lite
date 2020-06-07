@@ -41,8 +41,11 @@ setTimeout(function() {
     mem.push(process.memoryUsage());
     start = millis();
 
-    // Load base iconv-lite
+    // Load base iconv-lite, optionally applying the new preloading logic.
     var iconv = require("../");
+    if (process.env.ICONV_PRELOAD) {
+        iconv.preloadCodecsAndData();
+    }
 
     addtime();
     garbage_collect();
