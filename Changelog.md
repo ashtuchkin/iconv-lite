@@ -1,3 +1,17 @@
+## 0.6.0 / 2020-06-08
+  * Updated 'gb18030' encoding to :2005 edition (see https://github.com/whatwg/encoding/issues/22).
+  * Removed `iconv.extendNodeEncodings()` mechanism. It was deprecated 5 years ago and didn't work 
+    in recent Node versions.
+  * Reworked Streaming API behavior in browser environments to fix #204. Streaming API will be 
+    excluded by default in browser packs, saving ~100Kb bundle size, unless enabled explicitly using 
+    `iconv.enableStreamingAPI(require('stream'))`.
+  * Updates to development environment & tests:
+    * Added ./test/webpack and ./test/preload internal packages to test complex new use cases that need 
+      custom environment. They are tested as separate jobs in Travis CI.
+    * Updated generation code for the new EUC-KR index file format from Encoding Standard.
+    * Removed Buffer() constructor in tests (#197 by @gabrielschulhof).
+
+
 ## 0.5.2 / 2020-06-08
   * Added `iconv.getEncoder()` and `iconv.getDecoder()` methods to typescript definitions (#229).
   * Fixed semver version to 6.1.2 to support Node 8.x (by @tanandara).
