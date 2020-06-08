@@ -1,3 +1,10 @@
+## 0.5.2 / 2020-06-08
+  * Added `iconv.getEncoder()` and `iconv.getDecoder()` methods to typescript definitions (#229).
+  * Fixed semver version to 6.1.2 to support Node 8.x (by @tanandara).
+  * Capped iconv version to 2.x as 3.x has dropped support for older Node versions.
+  * Switched from instanbul to c8 for code coverage.
+
+
 ## 0.5.1 / 2020-01-18
 
   * Added cp720 encoding (#221, by @kr-deps)
