@@ -29,16 +29,16 @@
         "stream": false
     },
     "devDependencies": {
-        "async": "*",
-        "c8": "*",
-        "errto": "*",
+        "async": "^3.2.0",
+        "c8": "^7.2.0",
+        "errto": "^0.2.1",
         "iconv": "^2.3.5",
         "mocha": "^3.5.3",
-        "request": "~2.87.0",
-        "semver": "~6.1.2",
-        "unorm": "*"
+        "request": "^2.88.2",
+        "semver": "^6.3.0",
+        "unorm": "^1.6.0"
     },
     "dependencies": {
-        "safer-buffer": ">= 2.1.2 < 3"
+        "safer-buffer": ">= 2.1.2 < 3.0.0"
     }
 }
