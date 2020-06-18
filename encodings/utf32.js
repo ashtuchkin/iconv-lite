@@ -1,7 +1,5 @@
 'use strict';
 
-var Buffer = require('safer-buffer').Buffer;
-
 // == UTF32-LE/BE codec. ==========================================================
 
 exports._utf32 = Utf32Codec;
@@ -25,13 +23,14 @@ Utf32Codec.prototype.decoder = Utf32Decoder;
 // -- Encoding
 
 function Utf32Encoder(options, codec) {
+    this.iconv = codec.iconv;
     this.isLE = codec.isLE;
     this.highSurrogate = 0;
 }
 
 Utf32Encoder.prototype.write = function(str) {
-    var src = Buffer.from(str, 'ucs2');
-    var dst = Buffer.alloc(src.length * 2);
+    var src = this.iconv.Buffer.from(str, 'ucs2');
+    var dst = this.iconv.Buffer.alloc(src.length * 2);
     var write32 = this.isLE ? dst.writeUInt32LE : dst.writeUInt32BE;
     var offset = 0;
 
@@ -83,7 +82,7 @@ Utf32Encoder.prototype.end = function() {
     if (!this.highSurrogate)
         return;
 
-    var buf = Buffer.alloc(4);
+    var buf = this.iconv.Buffer.alloc(4);
 
     if (this.isLE)
         buf.writeUInt32LE(this.highSurrogate, 0);
@@ -98,6 +97,7 @@ Utf32Encoder.prototype.end = function() {
 // -- Decoding
 
 function Utf32Decoder(options, codec) {
+    this.iconv = codec.iconv;
     this.isLE = codec.isLE;
     this.badChar = codec.iconv.defaultCharUnicode.charCodeAt(0);
     this.overflow = null;
@@ -108,7 +108,7 @@ Utf32Decoder.prototype.write = function(src) {
         return '';
 
     if (this.overflow)
-        src = Buffer.concat([this.overflow, src]);
+        src = this.iconv.Buffer.concat([this.overflow, src]);
 
     var goodLength = src.length - src.length % 4;
 
@@ -119,7 +119,7 @@ Utf32Decoder.prototype.write = function(src) {
     else
         this.overflow = null;
 
-    var dst = Buffer.alloc(goodLength);
+    var dst = this.iconv.Buffer.alloc(goodLength);
     var offset = 0;
 
     for (var i = 0; i < goodLength; i += 4) {
@@ -212,7 +212,7 @@ Utf32AutoDecoder.prototype.write = function(buf) {
             return '';
 
         // We have enough bytes -> detect endianness.
-        var buf2 = Buffer.concat(this.initialBytes),
+        var buf2 = this.iconv.Buffer.concat(this.initialBytes),
             encoding = detectEncoding(buf2, this.options.defaultEncoding);
         this.decoder = this.iconv.getDecoder(encoding, this.options);
         this.initialBytes.length = this.initialBytesLen = 0;
@@ -223,7 +223,7 @@ Utf32AutoDecoder.prototype.write = function(buf) {
 
 Utf32AutoDecoder.prototype.end = function() {
     if (!this.decoder) {
-        var buf = Buffer.concat(this.initialBytes),
+        var buf = this.iconv.Buffer.concat(this.initialBytes),
             encoding = detectEncoding(buf, this.options.defaultEncoding);
         this.decoder = this.iconv.getDecoder(encoding, this.options);
 

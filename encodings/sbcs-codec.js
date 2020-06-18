@@ -1,5 +1,4 @@
 "use strict";
-var Buffer = require("safer-buffer").Buffer;
 
 // Single-byte codec. Needs a 'chars' string parameter that contains 256 or 128 chars that
 // correspond to encoded bytes (if 128 - then lower half is ASCII). 
@@ -20,10 +19,12 @@ function SBCSCodec(codecOptions, iconv) {
         codecOptions.chars = asciiString + codecOptions.chars;
     }
 
-    this.decodeBuf = Buffer.from(codecOptions.chars, 'ucs2');
+    this.iconv = iconv;
+
+    this.decodeBuf = this.iconv.Buffer.from(codecOptions.chars, 'ucs2');
     
     // Encoding buffer.
-    var encodeBuf = Buffer.alloc(65536, iconv.defaultCharSingleByte.charCodeAt(0));
+    var encodeBuf = this.iconv.Buffer.alloc(65536, iconv.defaultCharSingleByte.charCodeAt(0));
 
     for (var i = 0; i < codecOptions.chars.length; i++)
         encodeBuf[codecOptions.chars.charCodeAt(i)] = i;
@@ -36,11 +37,12 @@ SBCSCodec.prototype.decoder = SBCSDecoder;
 
 
 function SBCSEncoder(options, codec) {
+    this.iconv = codec.iconv;
     this.encodeBuf = codec.encodeBuf;
 }
 
 SBCSEncoder.prototype.write = function(str) {
-    var buf = Buffer.alloc(str.length);
+    var buf = this.iconv.Buffer.alloc(str.length);
     for (var i = 0; i < str.length; i++)
         buf[i] = this.encodeBuf[str.charCodeAt(i)];
     
@@ -52,13 +54,14 @@ SBCSEncoder.prototype.end = function() {
 
 
 function SBCSDecoder(options, codec) {
+    this.iconv = codec.iconv;
     this.decodeBuf = codec.decodeBuf;
 }
 
 SBCSDecoder.prototype.write = function(buf) {
     // Strings are immutable in JS -> we use ucs2 buffer to speed up computations.
     var decodeBuf = this.decodeBuf;
-    var newBuf = Buffer.alloc(buf.length*2);
+    var newBuf = this.iconv.Buffer.alloc(buf.length*2);
     var idx1 = 0, idx2 = 0;
     for (var i = 0; i < buf.length; i++) {
         idx1 = buf[i]*2; idx2 = i*2;
