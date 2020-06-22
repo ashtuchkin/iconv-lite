@@ -107,6 +107,10 @@ Utf32Decoder.prototype.write = function(src) {
     if (src.length === 0)
         return '';
 
+    if (!Buffer.isBuffer(src)) {
+        src = Buffer.from(src);
+    }
+
     if (this.overflow)
         src = Buffer.concat([this.overflow, src]);
 
@@ -210,6 +214,10 @@ Utf32AutoDecoder.prototype.write = function(buf) {
 
         if (this.initialBytesLen < 32) // We need more bytes to use space heuristic (see below)
             return '';
+
+        if (!Buffer.isBuffer(buf)) {
+            this.initialBytes = this.initialBytes.map(Buffer.from);
+        }
 
         // We have enough bytes -> detect endianness.
         var buf2 = Buffer.concat(this.initialBytes),

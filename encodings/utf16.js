@@ -119,6 +119,10 @@ Utf16Decoder.prototype.write = function(buf) {
         if (this.initialBytesLen < 16) // We need more bytes to use space heuristic (see below)
             return '';
 
+        if (!Buffer.isBuffer(buf)) {
+            this.initialBytes = this.initialBytes.map(Buffer.from);
+        }
+
         // We have enough bytes -> detect endianness.
         var buf = Buffer.concat(this.initialBytes),
             encoding = detectEncoding(buf, this.options.defaultEncoding);
