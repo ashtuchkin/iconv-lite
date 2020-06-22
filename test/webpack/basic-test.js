@@ -36,6 +36,37 @@ describe("iconv-lite", function() {
         var str = iconv.decode(buf, "utf8");
         assert.equal(str, "💩");
     });
+
+    [
+        'utf8',
+        'utf16le',
+        'utf16be',
+        'ucs2',
+        'binary',
+        'latin1',
+        'big5',
+        'gbk',
+        'cesu8',
+        'shiftjis',
+        'cp1251',
+        'cp1253',
+        'cp1254',
+        'armscii8'
+    ].forEach(function(encoding) {
+        it("supports Uint8Array for " + encoding, function() {
+            var expected = 'Lorem ipsum';
+
+            var encoded = iconv.encode(expected, encoding);
+            var byteArray = [];
+            for (var i = 0; i < encoded.length; i++) {
+                byteArray[i] = encoded[i];
+            }
+            const uint8Array = Uint8Array.from(byteArray);
+
+            var actual = iconv.decode(uint8Array, encoding);
+            assert.equal(actual, expected);
+        });
+    });
 });
 
 describe("stream module", function() {
