@@ -41,24 +41,26 @@ describe("iconv-lite", function() {
         iconv.encode('', 'utf8'); // Load all encodings.
 
         var encodings = Object.keys(iconv.encodings)
-        encodings.forEach(function(encoding) {
-            // remove base64 and hex temporarily, because https://github.com/ashtuchkin/iconv-lite/issues/247
-            if (['base64', 'hex', '_internal', '_sbcs', '_dbcs', '0'].indexOf(encoding) >= 0) {
-                return;
-            }
+        encodings
+            .filter(encoding => !encoding.startsWith('_') && encoding !== '0')
+            .forEach(function(encoding) {
+                // remove base64 and hex temporarily, because https://github.com/ashtuchkin/iconv-lite/issues/247
+                if (['base64', 'hex'].indexOf(encoding) >= 0) {
+                    return;
+                }
 
-            var expected = 'Lorem ipsum';
+                var expected = 'Lorem ipsum';
 
-            var encoded = iconv.encode(expected, encoding);
-            var byteArray = [];
-            for (var i = 0; i < encoded.length; i++) {
-                byteArray[i] = encoded[i];
-            }
-            var uint8Array = Uint8Array.from(byteArray);
+                var encoded = iconv.encode(expected, encoding);
+                var byteArray = [];
+                for (var i = 0; i < encoded.length; i++) {
+                    byteArray[i] = encoded[i];
+                }
+                var uint8Array = Uint8Array.from(byteArray);
 
-            var actual = iconv.decode(uint8Array, encoding);
-            assert.equal(actual, expected, encoding);
-        })
+                var actual = iconv.decode(uint8Array, encoding);
+                assert.equal(actual, expected, encoding);
+            })
     });
 });
 
