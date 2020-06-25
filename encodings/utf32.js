@@ -107,6 +107,7 @@ Utf32Decoder.prototype.write = function(src) {
     if (src.length === 0)
         return '';
 
+    // Support Uint8Array
     if (!Buffer.isBuffer(src)) {
         src = Buffer.from(src);
     }
@@ -207,17 +208,18 @@ function Utf32AutoDecoder(options, codec) {
 }
 
 Utf32AutoDecoder.prototype.write = function(buf) {
-    if (!this.decoder) {
+    if (!this.decoder) { 
+        // Support Uint8Array
+        if (!Buffer.isBuffer(buf)) {
+            buf = Buffer.from(buf);
+        }
+
         // Codec is not chosen yet. Accumulate initial bytes.
         this.initialBytes.push(buf);
         this.initialBytesLen += buf.length;
 
         if (this.initialBytesLen < 32) // We need more bytes to use space heuristic (see below)
             return '';
-
-        if (!Buffer.isBuffer(buf)) {
-            this.initialBytes = this.initialBytes.map(Buffer.from);
-        }
 
         // We have enough bytes -> detect endianness.
         var buf2 = Buffer.concat(this.initialBytes),
