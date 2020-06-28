@@ -36,6 +36,27 @@ describe("iconv-lite", function() {
         var str = iconv.decode(buf, "utf8");
         assert.equal(str, "💩");
     });
+
+    it("supports passing Uint8Array to decode for all encodings", function() {
+        iconv.encode('', 'utf8'); // Load all encodings.
+
+        var encodings = Object.keys(iconv.encodings)
+        encodings
+            .filter(encoding =>
+                !encoding.startsWith('_')
+                    // https://github.com/ashtuchkin/iconv-lite/issues/231
+                    && encoding !== 'base64' && encoding !== 'hex'
+            )
+            .forEach(function(encoding) {
+                var expected = 'Lorem ipsum';
+
+                var encoded = iconv.encode(expected, encoding);
+                var uint8Array = Uint8Array.from(encoded);
+
+                var actual = iconv.decode(uint8Array, encoding);
+                assert.equal(actual, expected, encoding);
+            })
+    });
 });
 
 describe("stream module", function() {

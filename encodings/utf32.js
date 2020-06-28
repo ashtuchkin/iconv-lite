@@ -107,6 +107,11 @@ Utf32Decoder.prototype.write = function(src) {
     if (src.length === 0)
         return '';
 
+    // Support Uint8Array
+    if (!Buffer.isBuffer(src)) {
+        src = Buffer.from(src);
+    }
+
     if (this.overflow)
         src = Buffer.concat([this.overflow, src]);
 
@@ -203,7 +208,12 @@ function Utf32AutoDecoder(options, codec) {
 }
 
 Utf32AutoDecoder.prototype.write = function(buf) {
-    if (!this.decoder) {
+    if (!this.decoder) { 
+        // Support Uint8Array
+        if (!Buffer.isBuffer(buf)) {
+            buf = Buffer.from(buf);
+        }
+
         // Codec is not chosen yet. Accumulate initial bytes.
         this.initialBytes.push(buf);
         this.initialBytesLen += buf.length;

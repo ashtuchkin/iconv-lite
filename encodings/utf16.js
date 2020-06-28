@@ -112,6 +112,11 @@ function Utf16Decoder(options, codec) {
 
 Utf16Decoder.prototype.write = function(buf) {
     if (!this.decoder) {
+        // Support Uint8Array
+        if (!Buffer.isBuffer(buf)) {
+            buf = Buffer.from(buf)
+        }
+
         // Codec is not chosen yet. Accumulate initial bytes.
         this.initialBytes.push(buf);
         this.initialBytesLen += buf.length;
