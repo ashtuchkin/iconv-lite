@@ -1,3 +1,9 @@
+## 0.6.1 / 2020-06-28
+  * Support Uint8Array-s directly when decoding (#246, by @gyzerok)
+  * Unify package.json version ranges to be strictly semver-compatible (#241)
+  * Fix minor issue in UTF-32 decoder's endianness detection code.
+
+
 ## 0.6.0 / 2020-06-08
   * Updated 'gb18030' encoding to :2005 edition (see https://github.com/whatwg/encoding/issues/22).
   * Removed `iconv.extendNodeEncodings()` mechanism. It was deprecated 5 years ago and didn't work 
