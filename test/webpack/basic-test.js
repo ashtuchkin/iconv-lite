@@ -42,21 +42,16 @@ describe("iconv-lite", function() {
 
         var encodings = Object.keys(iconv.encodings)
         encodings
-            .filter(encoding => !encoding.startsWith('_') && encoding !== '0')
+            .filter(encoding =>
+                !encoding.startsWith('_')
+                    // https://github.com/ashtuchkin/iconv-lite/issues/231
+                    && encoding !== 'base64' && encoding !== 'hex'
+            )
             .forEach(function(encoding) {
-                // remove base64 and hex temporarily, because https://github.com/ashtuchkin/iconv-lite/issues/247
-                if (['base64', 'hex'].indexOf(encoding) >= 0) {
-                    return;
-                }
-
                 var expected = 'Lorem ipsum';
 
                 var encoded = iconv.encode(expected, encoding);
-                var byteArray = [];
-                for (var i = 0; i < encoded.length; i++) {
-                    byteArray[i] = encoded[i];
-                }
-                var uint8Array = Uint8Array.from(byteArray);
+                var uint8Array = Uint8Array.from(encoded);
 
                 var actual = iconv.decode(uint8Array, encoding);
                 assert.equal(actual, expected, encoding);

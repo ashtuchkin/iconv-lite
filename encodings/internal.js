@@ -57,11 +57,11 @@ function InternalDecoder(options, codec) {
 }
 
 InternalDecoder.prototype.write = function(buf) {
-    if (Buffer.isBuffer(buf)) {
-        return this.decoder.write(buf);
+    if (!Buffer.isBuffer(buf)) {
+        buf = Buffer.from(buf);
     }
 
-    return this.decoder.write(Buffer.from(buf));
+    return this.decoder.write(buf);
 }
 
 InternalDecoder.prototype.end = function() {
