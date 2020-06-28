@@ -164,7 +164,7 @@ Utf32Decoder.prototype.end = function() {
 // Encoder prepends BOM (which can be overridden with (addBOM: false}).
 
 exports.utf32 = Utf32AutoCodec;
-exports.ucs4 = Utf32AutoCodec;
+exports.ucs4 = 'utf32';
 
 function Utf32AutoCodec(options, iconv) {
     this.iconv = iconv;
@@ -212,8 +212,8 @@ Utf32AutoDecoder.prototype.write = function(buf) {
             return '';
 
         // We have enough bytes -> detect endianness.
-        var buf2 = Buffer.concat(this.initialBytes),
-            encoding = detectEncoding(buf2, this.options.defaultEncoding);
+        var buf = Buffer.concat(this.initialBytes),
+            encoding = detectEncoding(buf, this.options.defaultEncoding);
         this.decoder = this.iconv.getDecoder(encoding, this.options);
         this.initialBytes.length = this.initialBytesLen = 0;
     }

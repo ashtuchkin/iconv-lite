@@ -297,6 +297,15 @@ describe("Streaming mode", function() {
         input: [Buffer.from('&T2'), Buffer.from('BZf'), Buffer.from('Q hei&AN8-t')],
         output: '\u4F60\u597D heißt'
     }));
+
+    it("Decoding of chunks in UTF-32 auto mode does not lose chunks", checkDecodeStream({
+        encoding: "UTF-32",
+        input: [
+            [0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x00, 0x62, 0x00, 0x00, 0x00, 0x63, 0x00, 0x00, 0x00, 0x64],
+            [0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x00, 0x62, 0x00, 0x00, 0x00, 0x63, 0x00, 0x00, 0x00, 0x64],
+        ],
+        output: "abcdabcd",
+    }));
 });
 
 describe("Streaming sugar", function() {
