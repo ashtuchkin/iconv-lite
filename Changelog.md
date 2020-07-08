@@ -1,3 +1,7 @@
+## 0.6.2 / 2020-07-08
+  * Support Uint8Array-s decoding without conversion to Buffers, plus fix an edge case.
+
+
 ## 0.6.1 / 2020-06-28
   * Support Uint8Array-s directly when decoding (#246, by @gyzerok)
   * Unify package.json version ranges to be strictly semver-compatible (#241)
