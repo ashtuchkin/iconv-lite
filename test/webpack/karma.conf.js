@@ -14,13 +14,13 @@ module.exports = function (config) {
 
     // list of files / patterns to load in the browser
     files: [
-      { pattern: "*test.js", watched: false }
+      { pattern: "*{test,tests}.js", watched: false }
     ],
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      "*test.js": ["webpack"]
+      "*{test,tests}.js": ["webpack"]
     },
 
     webpack: {

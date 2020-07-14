@@ -8,7 +8,7 @@ describe("iconv-lite", function () {
     // See https://github.com/ashtuchkin/iconv-lite/issues/204 for details.
     process.versions.node = "12.0.0"
 
-    iconv = require(".").iconv
+    iconv = require("iconv-lite")
   })
 
   it("does not support streams by default", function () {

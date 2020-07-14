@@ -179,7 +179,7 @@ describe("Streaming mode", function () {
     encoding: "us-ascii",
     encodingOptions: { decodeStrings: false },
     input: ["hello ", "world!"],
-    checkError: /Iconv decoding stream needs buffers as its input/
+    checkError: /Iconv decoding stream needs Uint8Array-s or Buffers as its input/
   }))
 
   it("Round-trip encoding and decoding", checkStreamOutput({

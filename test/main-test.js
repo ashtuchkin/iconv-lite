@@ -61,22 +61,26 @@ describe("Generic UTF8-UCS2 tests", function () {
   })
 
   it("Convert to string, not buffer (utf8 used)", function () {
-    var res = iconv.encode(Buffer.from(testStringLatin1, "utf8"), "utf8")
-    assert.ok(Buffer.isBuffer(res))
-    assert.strictEqual(res.toString("utf8"), testStringLatin1)
+    assert.throws(function () {
+      iconv.encode(Buffer.from(testStringLatin1, "utf8"), "utf8")
+    })
   })
 
   it("Throws on unknown encodings", function () {
     assert.throws(function () { iconv.encode("a", "xxx") })
     assert.throws(function () { iconv.decode(Buffer.from("a"), "xxx") })
-    assert.throws(function () { iconv.encode("abc", "constructor") })
-    assert.throws(function () { iconv.decode(Buffer.from("abc"), "constructor") })
   })
 
   it("Convert non-strings and non-buffers", function () {
-    assert.strictEqual(iconv.encode({}, "utf8").toString(), "[object Object]")
-    assert.strictEqual(iconv.encode(10, "utf8").toString(), "10")
-    assert.strictEqual(iconv.encode(undefined, "utf8").toString(), "")
+    assert.throws(function () {
+      iconv.encode({}, "utf8")
+    })
+    assert.throws(function () {
+      iconv.encode(10, "utf8")
+    })
+    assert.throws(function () {
+      iconv.encode(undefined, "utf8")
+    })
   })
 
   it("Aliases toEncoding and fromEncoding work the same as encode and decode", function () {

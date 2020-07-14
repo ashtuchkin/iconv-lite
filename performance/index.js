@@ -2,6 +2,8 @@ const iconv = require("iconv")
 const iconvLite = require("../lib")
 const { Suite } = require("bench-node")
 
+iconvLite.setBackend("node")
+
 const suite = new Suite({
   pretty: true,
   reporterOptions: {

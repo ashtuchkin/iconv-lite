@@ -48,7 +48,8 @@ function strToHex (str) { return spacify4(swapBytes(Buffer.from(str, "ucs2")).to
 // Generate tests for all SBCS encodings.
 iconv.encode("", "utf8") // Load all encodings.
 
-describe("Full SBCS encoding tests", function () {
+describe("Full SBCS encoding tests #full", function () {
+  if (!process.env.FULL_TEST_SUITE) return
   this.timeout(10000)
 
   var Iconv

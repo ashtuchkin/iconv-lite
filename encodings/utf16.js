@@ -1,64 +1,60 @@
 "use strict"
-var Buffer = require("safer-buffer").Buffer
 
 // Note: UTF16-LE (or UCS2) codec is Node.js native. See encodings/internal.js
 
 // == UTF16-BE codec. ==========================================================
 
-exports.utf16be = Utf16BECodec
-function Utf16BECodec () {
+exports.utf16be = class Utf16BECodec {
+  get encoder () { return Utf16BEEncoder }
+  get decoder () { return Utf16BEDecoder }
+  get bomAware () { return true }
 }
 
-Utf16BECodec.prototype.encoder = Utf16BEEncoder
-Utf16BECodec.prototype.decoder = Utf16BEDecoder
-Utf16BECodec.prototype.bomAware = true
-
-// -- Encoding
-
-function Utf16BEEncoder () {
-}
-
-Utf16BEEncoder.prototype.write = function (str) {
-  var buf = Buffer.from(str, "ucs2")
-  for (var i = 0; i < buf.length; i += 2) {
-    var tmp = buf[i]; buf[i] = buf[i + 1]; buf[i + 1] = tmp
-  }
-  return buf
-}
-
-Utf16BEEncoder.prototype.end = function () {
-}
-
-// -- Decoding
-
-function Utf16BEDecoder () {
-  this.overflowByte = -1
-}
-
-Utf16BEDecoder.prototype.write = function (buf) {
-  if (buf.length == 0) { return "" }
-
-  var buf2 = Buffer.alloc(buf.length + 1)
-  var i = 0; var j = 0
-
-  if (this.overflowByte !== -1) {
-    buf2[0] = buf[0]
-    buf2[1] = this.overflowByte
-    i = 1; j = 2
+class Utf16BEEncoder {
+  constructor (opts, codec, backend) {
+    this.backend = backend
   }
 
-  for (; i < buf.length - 1; i += 2, j += 2) {
-    buf2[j] = buf[i + 1]
-    buf2[j + 1] = buf[i]
+  write (str) {
+    const bytes = this.backend.allocBytes(str.length * 2)
+    let bytesPos = 0
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i)
+      bytes[bytesPos++] = char >> 8
+      bytes[bytesPos++] = char & 0xff
+    }
+    return this.backend.bytesToResult(bytes, bytesPos)
   }
 
-  this.overflowByte = (i == buf.length - 1) ? buf[buf.length - 1] : -1
-
-  return buf2.slice(0, j).toString("ucs2")
+  end () {}
 }
 
-Utf16BEDecoder.prototype.end = function () {
-  this.overflowByte = -1
+class Utf16BEDecoder {
+  constructor (opts, codec, backend) {
+    this.backend = backend
+    this.overflowByte = -1
+  }
+
+  write (buf) {
+    const chars = this.backend.allocRawChars((buf.length + 1) >> 1)
+    let charsPos = 0; let i = 0
+
+    if (this.overflowByte !== -1 && i < buf.length) {
+      chars[charsPos++] = (this.overflowByte << 8) + buf[i++]
+    }
+
+    for (; i < buf.length - 1; i += 2) {
+      chars[charsPos++] = (buf[i] << 8) + buf[i + 1]
+    }
+
+    this.overflowByte = (i == buf.length - 1) ? buf[i] : -1
+
+    return this.backend.rawCharsToResult(chars, charsPos)
+  }
+
+  end () {
+    this.overflowByte = -1
+  }
 }
 
 // == UTF-16 codec =============================================================
@@ -69,92 +65,84 @@ Utf16BEDecoder.prototype.end = function () {
 
 // Encoder uses UTF-16LE and prepends BOM (which can be overridden with addBOM: false).
 
-exports.utf16 = Utf16Codec
-function Utf16Codec (codecOptions, iconv) {
-  this.iconv = iconv
+exports.utf16 = class Utf16Codec {
+  constructor (opts, iconv) {
+    this.iconv = iconv
+  }
+
+  get encoder () { return Utf16Encoder }
+  get decoder () { return Utf16Decoder }
 }
 
-Utf16Codec.prototype.encoder = Utf16Encoder
-Utf16Codec.prototype.decoder = Utf16Decoder
+class Utf16Encoder {
+  constructor (options, codec) {
+    options = options || {}
+    if (options.addBOM === undefined) { options.addBOM = true }
+    this.encoder = codec.iconv.getEncoder(options.use || "utf-16le", options)
+  }
 
-// -- Encoding (pass-through)
+  // Pass-through to this.encoder
+  write (str) {
+    return this.encoder.write(str)
+  }
 
-function Utf16Encoder (options, codec) {
-  options = options || {}
-  if (options.addBOM === undefined) { options.addBOM = true }
-  this.encoder = codec.iconv.getEncoder("utf-16le", options)
+  end () {
+    return this.encoder.end()
+  }
 }
 
-Utf16Encoder.prototype.write = function (str) {
-  return this.encoder.write(str)
-}
+class Utf16Decoder {
+  constructor (options, codec) {
+    this.decoder = null
+    this.initialBufs = []
+    this.initialBufsLen = 0
 
-Utf16Encoder.prototype.end = function () {
-  return this.encoder.end()
-}
+    this.options = options || {}
+    this.iconv = codec.iconv
+  }
 
-// -- Decoding
+  write (buf) {
+    if (!this.decoder) {
+      // Codec is not chosen yet. Accumulate initial bytes.
+      this.initialBufs.push(buf)
+      this.initialBufsLen += buf.length
 
-function Utf16Decoder (options, codec) {
-  this.decoder = null
-  this.initialBufs = []
-  this.initialBufsLen = 0
+      // We need more bytes to use space heuristic (see below)
+      if (this.initialBufsLen < 16) { return "" }
 
-  this.options = options || {}
-  this.iconv = codec.iconv
-}
+      // We have enough bytes -> detect endianness.
+      return this._detectEndiannessAndSetDecoder()
+    }
 
-Utf16Decoder.prototype.write = function (buf) {
-  if (!this.decoder) {
-    // Codec is not chosen yet. Accumulate initial bytes.
-    this.initialBufs.push(buf)
-    this.initialBufsLen += buf.length
+    return this.decoder.write(buf)
+  }
 
-    if (this.initialBufsLen < 16) // We need more bytes to use space heuristic (see below)
-    { return "" }
+  end () {
+    if (!this.decoder) {
+      return this._detectEndiannessAndSetDecoder() + (this.decoder.end() || "")
+    }
+    return this.decoder.end()
+  }
 
-    // We have enough bytes -> detect endianness.
-    var encoding = detectEncoding(this.initialBufs, this.options.defaultEncoding)
+  _detectEndiannessAndSetDecoder () {
+    const encoding = detectEncoding(this.initialBufs, this.options.defaultEncoding)
     this.decoder = this.iconv.getDecoder(encoding, this.options)
 
-    var resStr = ""
-    for (var i = 0; i < this.initialBufs.length; i++) { resStr += this.decoder.write(this.initialBufs[i]) }
-
+    const resStr = this.initialBufs.reduce((a, b) => a + this.decoder.write(b), "")
     this.initialBufs.length = this.initialBufsLen = 0
     return resStr
   }
-
-  return this.decoder.write(buf)
-}
-
-Utf16Decoder.prototype.end = function () {
-  if (!this.decoder) {
-    var encoding = detectEncoding(this.initialBufs, this.options.defaultEncoding)
-    this.decoder = this.iconv.getDecoder(encoding, this.options)
-
-    var resStr = ""
-    for (var i = 0; i < this.initialBufs.length; i++) { resStr += this.decoder.write(this.initialBufs[i]) }
-
-    var trail = this.decoder.end()
-    if (trail) { resStr += trail }
-
-    this.initialBufs.length = this.initialBufsLen = 0
-    return resStr
-  }
-  return this.decoder.end()
 }
 
 function detectEncoding (bufs, defaultEncoding) {
-  var b = []
-  var charsProcessed = 0
-  // Number of ASCII chars when decoded as LE or BE.
-  var asciiCharsLE = 0
-  var asciiCharsBE = 0
+  const b = []
+  let charsProcessed = 0
+  let asciiCharsLE = 0; let asciiCharsBE = 0 // Number of ASCII chars when decoded as LE or BE.
 
   outerLoop:
-  for (var i = 0; i < bufs.length; i++) {
-    var buf = bufs[i]
-    for (var j = 0; j < buf.length; j++) {
+  for (let i = 0; i < bufs.length; i++) {
+    const buf = bufs[i]
+    for (let j = 0; j < buf.length; j++) {
       b.push(buf[j])
       if (b.length === 2) {
         if (charsProcessed === 0) {

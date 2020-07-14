@@ -1,7 +1,7 @@
 var assert = require("assert").strict
 
 describe("iconv-lite with streams", function () {
-  var iconv = require(".").iconv
+  var iconv = require("iconv-lite")
 
   it("supports streams when explicitly enabled", function () {
     iconv.enableStreamingAPI(require("stream"))
