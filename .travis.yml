@@ -1,9 +1,7 @@
 language: node_js
 node_js:
-  - "0.10"
-  - "0.11"
-  - "0.12"
-  - "iojs"
+  - "4.5.0"    # Oldest supported version
+  - "5.10.0"   # Oldest supported version from version 5.x
   - "4"
   - "6"
   - "8"
@@ -17,3 +15,6 @@ jobs:
       node_js: "12"
       install: cd test/webpack; npm install
       script: npm test
+    - name: node-web-backend
+      node_js: "12"
+      script: npm run-script test-node-web

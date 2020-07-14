@@ -1,2 +1,3 @@
 --check-leaks
---grep ^(?!Full).
+--forbid-only
+--no-exit

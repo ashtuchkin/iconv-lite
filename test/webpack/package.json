@@ -7,7 +7,7 @@
     "!note2": "This is needed because webpack4/watchpack1.7 crashes when trying to enumerate circular symlink.",
     "preinstall": "mv $(npm pack -pq ../../) iconv-lite.tgz",
     "postinstall": "rm iconv-lite.tgz",
-    "test": "karma start"
+    "test": "rm -r node_modules/iconv-lite package-lock.json && npm install --no-audit && karma start"
   },
   "devDependencies": {
     "karma": "^5.0.9",

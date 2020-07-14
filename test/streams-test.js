@@ -74,7 +74,7 @@ function checkStreamOutput(options) {
                 if (options.checkError) {
                     assert(err, "Expected error, but got success");
                     if (Object.prototype.toString.call(options.checkError) == '[object RegExp]')
-                        assert(options.checkError.test(err.message));
+                        assert(options.checkError.test(err.message), "Wrong error message: " + err.message);
                     else if (typeof options.checkError == 'function')
                         options.checkError(err);
                     else
@@ -181,7 +181,7 @@ describe("Streaming mode", function() {
         encoding: "us-ascii",
         encodingOptions: {decodeStrings: false},
         input: ["hello ", "world!"],
-        checkError: /Iconv decoding stream needs buffers as its input/,
+        checkError: /Iconv decoding stream needs Uint8Array-s or Buffers as its input/,
     }));
 
     it("Round-trip encoding and decoding", checkStreamOutput({
