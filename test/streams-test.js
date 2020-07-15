@@ -2,7 +2,6 @@ var mocha = require("mocha")
 var describeMocha = mocha.describe
 var assert = require("assert")
 var Buffer = require("safer-buffer").Buffer
-var semver = require("semver")
 var join = require("path").join
 var iconv = require(join(__dirname, "/../"))
 
@@ -16,9 +15,13 @@ var Readable = require("stream").Readable
 
 // Create a source stream that feeds given array of chunks.
 function feeder (chunks) {
-  if (!Array.isArray(chunks)) { chunks = [chunks] }
+  if (!Array.isArray(chunks)) {
+    chunks = [chunks]
+  }
   var opts = {}
-  if (chunks.every(function (chunk) { return typeof chunk === "string" })) { opts.encoding = "utf8" }
+  if (chunks.every(function (chunk) { return typeof chunk == "string" })) {
+    opts.encoding = "utf8"
+  }
 
   var stream = new Readable(opts)
   function writeChunk () {
@@ -47,7 +50,8 @@ function checkStreamOutput (options) {
   return function (done) {
     try {
       var stream = options.createStream()
-    } catch (e) {
+    }
+    catch (e) {
       check(e)
       return
     }
@@ -57,11 +61,16 @@ function checkStreamOutput (options) {
       try {
         while ((chunk = stream.read()) != null) {
           if (options.outputType) {
-            if (/^buffer/.test(options.outputType)) { assert(Buffer.isBuffer(chunk)) } else { assert.strictEqual(typeof chunk, options.outputType) }
+            if (/^buffer/.test(options.outputType)) {
+              assert(Buffer.isBuffer(chunk))
+            } else {
+              assert.strictEqual(typeof chunk, options.outputType)
+            }
           }
           res.push(chunk)
         }
-      } catch (e) {
+      }
+      catch (e) {
         stream.emit("error", e)
       }
     })
@@ -73,13 +82,16 @@ function checkStreamOutput (options) {
         if (options.checkError) {
           assert(err, "Expected error, but got success")
           if (Object.prototype.toString.call(options.checkError) == "[object RegExp]") {
-            assert(options.checkError.test(err.message))
-          } else if (typeof options.checkError === "function") {
+            assert(options.checkError.test(err.message), "Wrong error message: " + err.message)
+          }
+          else if (typeof options.checkError == "function") {
             options.checkError(err)
-          } else {
+          }
+          else {
             assert.fail(null, null, "Invalid type of options.checkError: " + typeof options.checkError)
           }
-        } else {
+        }
+        else {
           assert.ifError(err)
 
           if (options.checkOutput) {
@@ -88,7 +100,9 @@ function checkStreamOutput (options) {
             // eslint-disable-next-line no-cond-assign
             if (r = /^buffer-?(.*)/.exec(options.outputType)) {
               res = Buffer.concat(res)
-              if (r[1]) { res = res.toString(r[1]) } // Convert to string to make comparing buffers easier.
+              if (r[1]) {
+                res = res.toString(r[1]) // Convert to string to make comparing buffers easier.
+              }
             } else if (options.outputType == "string") {
               res = res.join("")
             }
@@ -110,7 +124,9 @@ function checkEncodeStream (opts) {
       .pipe(iconv.encodeStream(opts.encoding, opts.encodingOptions))
   }
   if (opts.outputType == null) opts.outputType = "buffer-hex"
-  if (Buffer.isBuffer(opts.output) && opts.outputType == "buffer-hex") { opts.output = opts.output.toString("hex") }
+  if (Buffer.isBuffer(opts.output) && opts.outputType == "buffer-hex") {
+    opts.output = opts.output.toString("hex")
+  }
 
   opts.checkOutput = opts.checkOutput || function (res) {
     assert.equal(res, opts.output)
@@ -211,17 +227,7 @@ describe("Streaming mode", function () {
     encoding: "ucs2",
     input: [[0x3D], [0xD8, 0x3B], [0xDE]], // U+1F63B, 😻, SMILING CAT FACE WITH HEART-SHAPED EYES
     outputType: false, // Don't concat
-    checkOutput: function (res) {
-      if (semver.satisfies(process.version, ">= 6.2.1 < 10.0.0")) {
-        // After a string_decoder rewrite in https://github.com/nodejs/node/pull/6777, which
-        // was merged in Node v6.2.1, we don't merge chunks anymore.
-        // Not really correct, but it seems we cannot do anything with it.
-        // Though it has been fixed again in Node v10.0.0
-        assert.deepEqual(res, ["\uD83D", "\uDE3B"])
-      } else {
-        assert.deepEqual(res, ["\uD83D\uDE3B"]) // We should have only 1 chunk.
-      }
-    }
+    checkOutput: function (res) { assert.deepEqual(res, ["\uD83D\uDE3B"]) } // We should have only 1 chunk.
   }))
 
   it("Encoding using internal modules: utf8", checkEncodeStream({
@@ -256,13 +262,13 @@ describe("Streaming mode", function () {
 
   it("Decoding of uneven length buffers from UTF-16BE - 2", checkDecodeStream({
     encoding: "UTF-16BE",
-    input: [[0x00, 0x61, 0x00], [0x62, 0x00, 0x63]],
+    input: [[0x00, 0x61, 0x00], [0x62, 0x00], [0x63]],
     output: "abc"
   }))
 
   it("Decoding of uneven length buffers from UTF-16", checkDecodeStream({
     encoding: "UTF-16",
-    input: [[0x61], [0x0], [0x20], [0x0]],
+    input: [[0x61], [0x0, 0x20], [0x0]],
     output: "a "
   }))
 
