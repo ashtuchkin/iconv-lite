@@ -37,7 +37,6 @@
         "iconv": "^2.3.5",
         "mocha": "^3.5.3",
         "request": "^2.88.2",
-        "semver": "^6.3.0",
         "unorm": "^1.6.0"
     },
     "dependencies": {

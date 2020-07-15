@@ -1,6 +1,5 @@
 var assert = require('assert'),
     Buffer = require('safer-buffer').Buffer,
-    semver = require('semver'),
     iconv = require(__dirname+'/../');
 
 if (!iconv.supportsStreams)
@@ -213,17 +212,7 @@ describe("Streaming mode", function() {
         encoding: "ucs2",
         input: [[0x3D], [0xD8, 0x3B], [0xDE]], // U+1F63B, 😻, SMILING CAT FACE WITH HEART-SHAPED EYES
         outputType: false, // Don't concat
-        checkOutput: function(res) {
-            if (semver.satisfies(process.version, '>= 6.2.1 < 10.0.0')) {
-                // After a string_decoder rewrite in https://github.com/nodejs/node/pull/6777, which
-                // was merged in Node v6.2.1, we don't merge chunks anymore.
-                // Not really correct, but it seems we cannot do anything with it.
-                // Though it has been fixed again in Node v10.0.0
-                assert.deepEqual(res, ["\uD83D", "\uDE3B"]);
-            } else {
-                assert.deepEqual(res, ["\uD83D\uDE3B"]); // We should have only 1 chunk.
-            }
-        },
+        checkOutput: function(res) { assert.deepEqual(res, ["\uD83D\uDE3B"]); }, // We should have only 1 chunk.
     }));
 
     it("Encoding using internal modules: utf8", checkEncodeStream({
@@ -264,13 +253,13 @@ describe("Streaming mode", function() {
 
     it("Decoding of uneven length buffers from UTF-16BE - 2", checkDecodeStream({
         encoding: "UTF-16BE",
-        input: [[0x00, 0x61, 0x00], [0x62, 0x00, 0x63]],
+        input: [[0x00, 0x61, 0x00], [0x62, 0x00], [0x63]],
         output: "abc"
     }));
 
     it("Decoding of uneven length buffers from UTF-16", checkDecodeStream({
         encoding: "UTF-16",
-        input: [[0x61], [0x0], [0x20], [0x0]],
+        input: [[0x61], [0x0, 0x20], [0x0]],
         output: "a "
     }));
 

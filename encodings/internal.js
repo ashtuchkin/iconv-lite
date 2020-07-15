@@ -9,8 +9,7 @@ module.exports = {
     cesu8:  { type: "_internal", bomAware: true},
     unicode11utf8: "utf8",
 
-    ucs2:   { type: "_internal", bomAware: true},
-    utf16le: "ucs2",
+    // NOTE: utf-16le/ucs2 are in utf16.js.
 
     binary: { type: "_internal" },
     base64: { type: "_internal" },

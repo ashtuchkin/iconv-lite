@@ -1,3 +1,5 @@
+"use strict";
+
 const assert = require("assert");
 
 const utils = module.exports = {
@@ -33,6 +35,30 @@ const utils = module.exports = {
     hex(bytes, nonStrict) {
         assert(nonStrict || (bytes instanceof utils.BytesType));
         return bytes.reduce((output, byte) => (output + ('0' + (byte & 0xFF).toString(16)).slice(-2)), '');
+    },
+
+    checkDecoderChunks(encoding, cases) {
+        return () => {
+            const decoder = utils.iconv.getDecoder(encoding);
+            if (!Array.isArray(cases)) {
+                cases = [cases];
+            }
+
+            for (let idx = 0; idx < cases.length; idx++) {
+                const inputs = cases[idx].inputs,
+                    outputs = cases[idx].outputs;
+                for (let i = 0; i < inputs.length; i++)
+                    assert.strictEqual(decoder.write(utils.bytesFrom(inputs[i])), outputs[i], `position ${i} in case ${idx}`);
+
+                if (outputs.length === inputs.length) {
+                    assert(!decoder.end(), `end is not empty in case ${idx}`);
+                } else if (outputs.length === inputs.length + 1) {
+                    assert.strictEqual(decoder.end(), outputs[outputs.length-1], `end result unexpected in case ${idx}`);
+                } else {
+                    assert(false, `invalid outputs array size in case ${idx}`);
+                }
+            }
+        }
     },
 };
 
