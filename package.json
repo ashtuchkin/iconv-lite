@@ -23,8 +23,16 @@
     },
     "scripts": {
         "coverage": "c8 _mocha --grep .",
+        "format": "prettier --write .",
+        "lint": "eslint --max-warnings 0 . && prettier --check .",
+        "test-install": "mv package.json package-orig.json && jq '.devDependencies |= {mocha, iconv, unorm}' package-orig.json > package.json && npm install; mv -f package-orig.json package.json",
         "test": "FULL_TEST_SUITE=1 mocha",
         "test-node-web": "ICONV_BACKEND=web mocha --grep '#node-web'"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged --concurrent=false"
+        }
     },
     "browser": {
         "./lib/index-node.js": "./lib/index-web.js",
@@ -34,8 +42,12 @@
         "async": "^3.2.0",
         "c8": "^7.2.0",
         "errto": "^0.2.1",
+        "eslint": "^7.4.0",
+        "husky": "^4.2.5",
         "iconv": "^2.3.5",
+        "lint-staged": "^10.2.11",
         "mocha": "^3.5.3",
+        "prettier": "2.0.5",
         "request": "^2.88.2",
         "unorm": "^1.6.0"
     },

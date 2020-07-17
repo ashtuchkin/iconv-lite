@@ -1,7 +1,7 @@
 "use strict";
 // NOTE: This backend uses TextDecoder class.
 // NOTE: Web backend differs from Node in handling invalid surrogates when decoding to strings in rawCharsToResult() function.
-//   Node passes them through unchanged, web backend (actually TextDecoder) replaces them with '�'. I haven't found a 
+//   Node passes them through unchanged, web backend (actually TextDecoder) replaces them with '�'. I haven't found a
 //   performant way to unify these behaviors while keeping compatibility with Node <11 where there's no TextDecoder.
 //   Not too worried as it seems like an edge case mostly concerning utf-16/utf-32/cesu8 codecs, but something to be aware of.
 
@@ -35,7 +35,7 @@ module.exports = {
         }
         return res;
     },
-    
+
     // Decoder bytes input: use only array access + .length, so both Buffer-s and Uint8Array-s work.
     // Decoder string output: allocRawChars -> use Uint16Array -> rawCharsToResult().
     allocRawChars(numChars) {
@@ -44,9 +44,9 @@ module.exports = {
     rawCharsToResult(rawChars, finalLen) {
         rawChars = rawChars.subarray(0, finalLen);
         // NOTE: TextDecoder will convert all invalid surrogates to '�'-s.
-        let res = new TextDecoder("utf-16", {ignoreBOM: true}).decode(rawChars);
+        let res = new TextDecoder("utf-16", { ignoreBOM: true }).decode(rawChars);
         if (res.length !== finalLen)
-            throw new Error("TextDecoder returned different length string on array " + rawChars);
+            throw new Error(`TextDecoder returned different length string on array ${rawChars}`);
         return res;
     },
 

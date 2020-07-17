@@ -1,0 +1,22 @@
+# Node.js stuff
+node_modules
+package-lock.json
+
+# Editors
+*~
+*sublime-*
+/.idea
+
+# Development environment
+/coverage
+/benchmarks/node_envs
+/generation/source-data
+
+# Generated data
+/encodings/tables
+/encodings/sbcs-data-generated.js
+Changelog.md
+
+# Temporarily excluded
+/generation/research
+/test
