@@ -1,7 +1,6 @@
 var assert = require("assert")
 var Buffer = require("safer-buffer").Buffer
-var join = require("path").join
-var iconv = require(join(__dirname, "/../"))
+var iconv = require("../")
 
 var testString = "Hello123!"
 var testStringLatin1 = "Hello123!£Å÷×çþÿ¿®"

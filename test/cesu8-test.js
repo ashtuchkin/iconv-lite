@@ -1,7 +1,6 @@
-var assert = require("assert")
-var Buffer = require("safer-buffer").Buffer
-var join = require("path").join
-var iconv = require(join(__dirname, "/../"))
+const assert = require("assert")
+const Buffer = require("safer-buffer").Buffer
+const iconv = require("../")
 
 describe("CESU-8 codec", function () {
   it("encodes correctly", function () {

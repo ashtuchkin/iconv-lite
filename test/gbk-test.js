@@ -2,7 +2,7 @@ var fs = require("fs")
 var assert = require("assert")
 var Buffer = require("safer-buffer").Buffer
 var join = require("path").join
-var iconv = require(join(__dirname, "/../"))
+var iconv = require("../")
 
 var testString = "中国abc" // unicode contains GBK-code and ascii
 var testStringGBKBuffer = Buffer.from([0xd6, 0xd0, 0xb9, 0xfa, 0x61, 0x62, 0x63])

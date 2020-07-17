@@ -1,7 +1,6 @@
 var assert = require("assert")
 var Buffer = require("safer-buffer").Buffer
-var join = require("path").join
-var iconv = require(join(__dirname, "/../"))
+var iconv = require("../")
 
 var testString = "中文abc" // unicode contains Big5-code and ascii
 var testStringBig5Buffer = Buffer.from([0xa4, 0xa4, 0xa4, 0xe5, 0x61, 0x62, 0x63])

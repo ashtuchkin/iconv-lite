@@ -1,7 +1,8 @@
-var assert = require("assert")
-var Buffer = require("safer-buffer").Buffer
-var join = require("path").join
-var iconv = require(join(__dirname, "/../"))
+"use strict"
+
+const assert = require("assert")
+const Buffer = require("safer-buffer").Buffer
+const iconv = require("../")
 
 var sampleStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<俄语>данные</俄语>"
 var strBOM = "\ufeff"

@@ -1,8 +1,7 @@
 var assert = require("assert")
 var unorm = require("unorm")
 var Buffer = require("safer-buffer").Buffer
-var join = require("path").join
-var iconv = require(join(__dirname, "/../"))
+var iconv = require("../")
 
 function convertWithDefault (converter, buf, def) {
   var res = converter.convert(buf)

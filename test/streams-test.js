@@ -2,8 +2,7 @@ var mocha = require("mocha")
 var describeMocha = mocha.describe
 var assert = require("assert")
 var Buffer = require("safer-buffer").Buffer
-var join = require("path").join
-var iconv = require(join(__dirname, "/../"))
+var iconv = require("../")
 
 var describe = describeMocha
 

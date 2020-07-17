@@ -1,7 +1,6 @@
 var assert = require("assert")
 var Buffer = require("safer-buffer").Buffer
-var join = require("path").join
-var iconv = require(join(__dirname, "/../"))
+var iconv = require("../")
 
 // Make all valid input combinations for a given encoding and call fn with it.
 // fn(valid, input, output)
