@@ -53,19 +53,19 @@ describe("GBK tests", function() {
 
     it("GB18030 findIdx works correctly", function() {
         function findIdxAlternative(table, val) {
-            for (var i = 0; i < table.length; i++)
+            for (let i = 0; i < table.length; i++)
                 if (table[i] > val)
                     return i-1;
             return table.length - 1;
         }
 
-        var codec = iconv.getEncoder('gb18030');
+        const codec = iconv.getEncoder('gb18030');
 
-        for (var i = 0; i < 0x100; i++)
+        for (let i = 0; i < 0x100; i++)
             assert.strictEqual(codec.findIdx(codec.gb18030.uChars, i), findIdxAlternative(codec.gb18030.uChars, i), i);
 
-        var tests = [0xFFFF, 0x10000, 0x10001, 0x30000];
-        for (var i = 0; i < tests.length; i++)
+        const tests = [0xFFFF, 0x10000, 0x10001, 0x30000];
+        for (let i = 0; i < tests.length; i++)
             assert.strictEqual(codec.findIdx(codec.gb18030.uChars, tests[i]), findIdxAlternative(codec.gb18030.uChars, tests[i]), tests[i]);
     });
 

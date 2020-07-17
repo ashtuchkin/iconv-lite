@@ -1,5 +1,4 @@
-var fs      = require('fs'),
-    assert  = require('assert'),
+var assert  = require('assert'),
     Buffer  = require('safer-buffer').Buffer,
     iconv   = require(__dirname+'/../'),
     Iconv   = require('iconv').Iconv;
@@ -167,13 +166,14 @@ describe("Full DBCS encoding tests #full", function() {
                 var converter = new Iconv(aliases[enc] || enc, "utf-8");
                 var errors = [];
                 forAllChars(converter.convert.bind(converter), function(valid, inp, outp) {
-                    var strActual = iconv.decode(inp, enc);
+                    const strActual = iconv.decode(inp, enc);
 
                     if (0xE000 <= strActual.charCodeAt(0) && strActual.charCodeAt(0) < 0xF900)  // Skip Private use area.
                         return;
 
+                    let strExpected;
                     if (valid) {
-                        var strExpected = outp.toString('utf-8');
+                        strExpected = outp.toString('utf-8');
                         if (strActual === strExpected)
                             return;
 
@@ -184,7 +184,7 @@ describe("Full DBCS encoding tests #full", function() {
                             return;
 
                     } else {
-                        var strExpected = "�";
+                        strExpected = "�";
                         if (strActual[0] === "�")
                             return;
 

@@ -20,11 +20,11 @@ var aliases = {
 
 function iconvAlias(enc) {
     var r;
-    if (r = /windows(\d+)/.exec(enc))
+    if ((r = /windows(\d+)/.exec(enc)))
         return "WINDOWS-"+r[1];
-    if (r = /iso8859(\d+)/.exec(enc))
+    if ((r = /iso8859(\d+)/.exec(enc)))
         return "ISO8859-"+r[1];
-    if (r = /koi8(\w+)/.exec(enc))
+    if ((r = /koi8(\w+)/.exec(enc)))
         return "KOI8-"+r[1];
     if (aliases[enc])
         return aliases[enc];
@@ -49,8 +49,6 @@ function strToHex(str) { return spacify4(swapBytes(Buffer.from(str, 'ucs2')).toS
 // Generate tests for all SBCS encodings.
 iconv.encode('', 'utf8'); // Load all encodings.
 
-
-var sbcsEncodingTests = {};
 describe("Full SBCS encoding tests #full", function() {
     if (!process.env.FULL_TEST_SUITE) return;
     this.timeout(10000);

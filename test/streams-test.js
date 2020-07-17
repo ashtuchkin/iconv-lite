@@ -85,7 +85,7 @@ function checkStreamOutput(options) {
                     if (options.checkOutput) {
                         if (options.outputType)
                             var r;
-                            if (r = /^buffer-?(.*)/.exec(options.outputType)) {
+                            if ((r = /^buffer-?(.*)/.exec(options.outputType))) {
                                 res = Buffer.concat(res);
                                 if (r[1])
                                     res = res.toString(r[1]); // Convert to string to make comparing buffers easier.
