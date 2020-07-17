@@ -1,4 +1,6 @@
-var utils = require("./utils"), 
+"use strict";
+
+const utils = require("./utils"),
     errTo = require("errto"),
     async = require("async");
 

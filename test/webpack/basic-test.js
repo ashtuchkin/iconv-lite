@@ -1,4 +1,6 @@
-var assert = require('assert').strict;
+"use strict";
+
+var assert = require("assert").strict;
 
 describe("iconv-lite", function() {
     var iconv;

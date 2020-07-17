@@ -1,4 +1,6 @@
-var fs  = require("fs");
+"use strict";
+
+var fs = require("fs");
 var path = require("path");
 var Iconv  = require("iconv").Iconv;
 var Buffer = require("safer-buffer").Buffer;

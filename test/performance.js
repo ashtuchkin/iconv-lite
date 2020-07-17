@@ -1,5 +1,7 @@
+"use strict";
 
-if (module.parent) // Skip this file from testing.
+if (module.parent)
+    // Skip this file from testing.
     return;
 
 var iconv = require('iconv');

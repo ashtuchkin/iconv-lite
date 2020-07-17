@@ -1,5 +1,7 @@
-var assert = require('assert'),
-    utils = require('./utils'),
+"use strict";
+
+var assert = require("assert"),
+    utils = require("./utils"),
     iconv = utils.requireIconv();
 
 var baseStrings = {
