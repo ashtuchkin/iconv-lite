@@ -1,6 +1,6 @@
 var assert = require("assert"),
     Buffer = require("safer-buffer").Buffer,
-    iconv = require(__dirname + "/../");
+    iconv = require("../");
 
 // These tests are mostly from https://github.com/kkaefer/utf7
 // In case of ambiguity, we do the same as iconv. For example, we encode "optional direct" characters, but leave spaces and \n\r\t as-is.

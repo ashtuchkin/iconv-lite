@@ -1,6 +1,6 @@
 var assert = require("assert"),
     Buffer = require("safer-buffer").Buffer,
-    iconv = require(__dirname + "/../"),
+    iconv = require("../"),
     Iconv = require("iconv").Iconv;
 
 // Make all valid input combinations for a given encoding and call fn with it.
