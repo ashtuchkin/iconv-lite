@@ -39,16 +39,13 @@
         "stream": false
     },
     "devDependencies": {
-        "async": "^3.2.0",
         "c8": "^7.2.0",
-        "errto": "^0.2.1",
         "eslint": "^7.4.0",
         "husky": "^4.2.5",
         "iconv": "^2.3.5",
         "lint-staged": "^10.2.11",
         "mocha": "^3.5.3",
         "prettier": "2.0.5",
-        "request": "^2.88.2",
         "unorm": "^1.6.0"
     },
     "dependencies": {
