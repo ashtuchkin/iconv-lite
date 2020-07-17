@@ -1,8 +1,8 @@
-var assert = require('assert'),
-    unorm = require('unorm'),
-    Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../'),
-    Iconv = require('iconv').Iconv;
+var assert = require("assert"),
+    unorm = require("unorm"),
+    Buffer = require("safer-buffer").Buffer,
+    iconv = require(__dirname + "/../"),
+    Iconv = require("iconv").Iconv;
 
 function convertWithDefault(converter, buf, def) {
     var res = converter.convert(buf);
@@ -16,135 +16,197 @@ var aliases = {
     iso646cn: "ISO646-CN",
     iso646jp: "ISO646-JP",
     hproman8: "HP-ROMAN8",
-}
+};
 
 function iconvAlias(enc) {
     var r;
-    if ((r = /windows(\d+)/.exec(enc)))
-        return "WINDOWS-"+r[1];
-    if ((r = /iso8859(\d+)/.exec(enc)))
-        return "ISO8859-"+r[1];
-    if ((r = /koi8(\w+)/.exec(enc)))
-        return "KOI8-"+r[1];
-    if (aliases[enc])
-        return aliases[enc];
+    if ((r = /windows(\d+)/.exec(enc))) return "WINDOWS-" + r[1];
+    if ((r = /iso8859(\d+)/.exec(enc))) return "ISO8859-" + r[1];
+    if ((r = /koi8(\w+)/.exec(enc))) return "KOI8-" + r[1];
+    if (aliases[enc]) return aliases[enc];
     return enc;
 }
 
 var normalizedEncodings = { windows1255: true, windows1258: true, tcvn: true };
 
-var combClass = {'\u0327': 202, '\u0323': 220, '\u031B': 216}; // Combining class of unicode characters.
+var combClass = { "\u0327": 202, "\u0323": 220, "\u031B": 216 }; // Combining class of unicode characters.
 for (var i = 0x300; i < 0x315; i++) combClass[String.fromCharCode(i)] = 230;
 
 var iconvEquivChars = {
-    cp1163: {'\u00D0': '\u0110', '\u203E': '\u00AF'},
+    cp1163: { Ð: "\u0110", "\u203E": "\u00AF" },
+};
+
+function swapBytes(buf) {
+    for (var i = 0; i < buf.length; i += 2) buf.writeUInt16LE(buf.readUInt16BE(i), i);
+    return buf;
+}
+function spacify2(str) {
+    return str.replace(/(..)/g, "$1 ").trim();
+}
+function spacify4(str) {
+    return str.replace(/(....)/g, "$1 ").trim();
+}
+function strToHex(str) {
+    return spacify4(swapBytes(Buffer.from(str, "ucs2")).toString("hex"));
 }
 
-
-function swapBytes(buf) { for (var i = 0; i < buf.length; i+=2) buf.writeUInt16LE(buf.readUInt16BE(i), i); return buf; }
-function spacify2(str) { return str.replace(/(..)/g, "$1 ").trim(); }
-function spacify4(str) { return str.replace(/(....)/g, "$1 ").trim(); }
-function strToHex(str) { return spacify4(swapBytes(Buffer.from(str, 'ucs2')).toString('hex')); }
-
 // Generate tests for all SBCS encodings.
-iconv.encode('', 'utf8'); // Load all encodings.
+iconv.encode("", "utf8"); // Load all encodings.
 
-describe("Full SBCS encoding tests #full", function() {
+describe("Full SBCS encoding tests #full", function () {
     if (!process.env.FULL_TEST_SUITE) return;
     this.timeout(10000);
 
     for (var enc in iconv.encodings)
-        if (iconv.encodings[enc].type === '_sbcs') (function(enc) {
-            var iconvName = iconvAlias(enc),
-                testEncName = enc + ((enc !== iconvName) ? " (" + iconvName + ")" : "");
+        if (iconv.encodings[enc].type === "_sbcs")
+            (function (enc) {
+                var iconvName = iconvAlias(enc),
+                    testEncName = enc + (enc !== iconvName ? " (" + iconvName + ")" : "");
 
-            it("Decode SBCS encoding " + testEncName, function() {
-                try {
-                    var conv = new Iconv(iconvName, "utf-8//IGNORE");
-                } catch (e) {
-                    this.skip();
-                }
-                var errors = [];
-                for (var i = 0; i < 0x100; i++) {
-                    var buf = Buffer.from([i]);
-                    var strActual   = iconv.decode(buf, enc);
-                    var strExpected = convertWithDefault(conv, buf, iconv.defaultCharUnicode).toString();
+                it("Decode SBCS encoding " + testEncName, function () {
+                    try {
+                        var conv = new Iconv(iconvName, "utf-8//IGNORE");
+                    } catch (e) {
+                        this.skip();
+                    }
+                    var errors = [];
+                    for (var i = 0; i < 0x100; i++) {
+                        var buf = Buffer.from([i]);
+                        var strActual = iconv.decode(buf, enc);
+                        var strExpected = convertWithDefault(
+                            conv,
+                            buf,
+                            iconv.defaultCharUnicode
+                        ).toString();
 
-                    if (strActual != strExpected)
-                        errors.push({input: buf.toString('hex'), strExpected: strExpected, strActual: strActual});
-                }
-                if (errors.length > 0)
-                    assert.fail(null, null, "Decoding mismatch: <input> | <expected> | <actual> | <expected char> | <actual char>\n"
-                        + errors.map(function(err) {
-                        return "          " + spacify2(err.input) + " | " + strToHex(err.strExpected) + " | " + strToHex(err.strActual) + " | " + 
-                            err.strExpected + " | " + err.strActual;
-                    }).join("\n") + "\n       ");
-            });
+                        if (strActual != strExpected)
+                            errors.push({
+                                input: buf.toString("hex"),
+                                strExpected: strExpected,
+                                strActual: strActual,
+                            });
+                    }
+                    if (errors.length > 0) {
+                        const errs = errors
+                            .map((err) =>
+                                [
+                                    spacify2(err.input),
+                                    strToHex(err.strExpected),
+                                    strToHex(err.strActual),
+                                    err.strExpected,
+                                    err.strActual,
+                                ].join(" | ")
+                            )
+                            .map((s) => "          " + s)
+                            .join("\n");
 
-            it("Encode SBCS encoding " + testEncName, function() {
-                try {
-                    var conv = new Iconv("utf-8", iconvName + "//IGNORE");
-                } catch (e) {
-                    this.skip();
-                }
-                var errors = [];
+                        assert.fail(
+                            null,
+                            null,
+                            `Decoding mismatch: <input> | <expected> | <actual> | <expected char> | <actual char>\n${errs}\n       `
+                        );
+                    }
+                });
 
-                for (var i = 0; i < 0xFFF0; i++) {
-                    if (i == 0xD800) i = 0xF900; // Skip surrogates & private use
+                it("Encode SBCS encoding " + testEncName, function () {
+                    try {
+                        var conv = new Iconv("utf-8", iconvName + "//IGNORE");
+                    } catch (e) {
+                        this.skip();
+                    }
+                    var errors = [];
 
-                    var str = String.fromCharCode(i);
-                    var strExpected = convertWithDefault(conv, str, Buffer.from(iconv.defaultCharSingleByte)).toString('hex');
-                    var strActual = iconv.encode(str, enc).toString('hex');
+                    for (var i = 0; i < 0xfff0; i++) {
+                        if (i == 0xd800) i = 0xf900; // Skip surrogates & private use
 
-                    if (strExpected == strActual)
-                        continue;
+                        var str = String.fromCharCode(i);
+                        var strExpected = convertWithDefault(
+                            conv,
+                            str,
+                            Buffer.from(iconv.defaultCharSingleByte)
+                        ).toString("hex");
+                        var strActual = iconv.encode(str, enc).toString("hex");
 
-                    // We are not supporting unicode normalization/decomposition of input, so skip it.
-                    // (when single unicode char results in >1 encoded chars because of diacritics)
-                    if (normalizedEncodings[enc] && strActual == iconv.defaultCharSingleByte.charCodeAt(0).toString(16)) {
-                        var strDenormStrict = unorm.nfd(str); // Strict decomposition
-                        if (strExpected == iconv.encode(strDenormStrict, enc).toString('hex'))
-                            continue;
+                        if (strExpected == strActual) continue;
 
-                        var strDenorm = unorm.nfkd(str); // Check also compat decomposition.
-                        if (strExpected == iconv.encode(strDenorm, enc).toString('hex'))
-                            continue;
+                        // We are not supporting unicode normalization/decomposition of input, so skip it.
+                        // (when single unicode char results in >1 encoded chars because of diacritics)
+                        if (
+                            normalizedEncodings[enc] &&
+                            strActual == iconv.defaultCharSingleByte.charCodeAt(0).toString(16)
+                        ) {
+                            var strDenormStrict = unorm.nfd(str); // Strict decomposition
+                            if (strExpected == iconv.encode(strDenormStrict, enc).toString("hex"))
+                                continue;
 
-                        // Try semicomposition if we have 2 combining characters.
-                        if (strDenorm.length == 3 && !combClass[strDenorm[0]] && combClass[strDenorm[1]] && combClass[strDenorm[2]]) {
-                            // Semicompose without swapping.
-                            var strDenorm2 = unorm.nfc(strDenorm[0] + strDenorm[1]) + strDenorm[2];
-                            if (strExpected == iconv.encode(strDenorm2, enc).toString('hex'))
-                                continue;                        
+                            var strDenorm = unorm.nfkd(str); // Check also compat decomposition.
+                            if (strExpected == iconv.encode(strDenorm, enc).toString("hex"))
+                                continue;
 
-                            // Swap combining characters if they have different combining classes, making swap unicode-equivalent.
-                            var strDenorm3 = unorm.nfc(strDenorm[0] + strDenorm[2]) + strDenorm[1];
-                            if (strExpected == iconv.encode(strDenorm3, enc).toString('hex'))
-                                if (combClass[strDenorm[1]] != combClass[strDenorm[2]])
+                            // Try semicomposition if we have 2 combining characters.
+                            if (
+                                strDenorm.length == 3 &&
+                                !combClass[strDenorm[0]] &&
+                                combClass[strDenorm[1]] &&
+                                combClass[strDenorm[2]]
+                            ) {
+                                // Semicompose without swapping.
+                                var strDenorm2 =
+                                    unorm.nfc(strDenorm[0] + strDenorm[1]) + strDenorm[2];
+                                if (strExpected == iconv.encode(strDenorm2, enc).toString("hex"))
                                     continue;
-                                else
+
+                                // Swap combining characters if they have different combining classes, making swap unicode-equivalent.
+                                var strDenorm3 =
+                                    unorm.nfc(strDenorm[0] + strDenorm[2]) + strDenorm[1];
+                                if (strExpected == iconv.encode(strDenorm3, enc).toString("hex"))
+                                    if (combClass[strDenorm[1]] != combClass[strDenorm[2]])
+                                        continue;
                                     // In theory, if combining classes are the same, we can not swap them. But iconv thinks otherwise.
                                     // So we skip this too.
-                                    continue;
+                                    else continue;
+                            }
                         }
+
+                        // Iconv sometimes treats some characters as equivalent. Check it and skip.
+                        if (
+                            iconvEquivChars[enc] &&
+                            iconvEquivChars[enc][str] &&
+                            strExpected ==
+                                iconv.encode(iconvEquivChars[enc][str], enc).toString("hex")
+                        )
+                            continue;
+
+                        errors.push({
+                            input: strToHex(str),
+                            inputChar: str,
+                            strExpected: strExpected,
+                            strActual: strActual,
+                        });
                     }
 
-                    // Iconv sometimes treats some characters as equivalent. Check it and skip.
-                    if (iconvEquivChars[enc] && iconvEquivChars[enc][str] && 
-                        strExpected == iconv.encode(iconvEquivChars[enc][str], enc).toString('hex'))
-                        continue;
+                    if (errors.length > 0) {
+                        const errs = errors
+                            .map((err) =>
+                                [
+                                    err.input,
+                                    err.inputChar,
+                                    spacify2(err.strExpected),
+                                    spacify2(err.strActual),
+                                ].join(" | ")
+                            )
+                            .map((s) => "          " + s)
+                            .join("\n");
 
-                    errors.push({input: strToHex(str), inputChar: str, strExpected: strExpected, strActual: strActual});
-                }
+                        assert.fail(
+                            null,
+                            null,
+                            `Encoding mismatch: <input> | <input char> | <expected> | <actual>\n${errs}\n       `
+                        );
+                    }
+                });
 
-                if (errors.length > 0)
-                    assert.fail(null, null, "Encoding mismatch: <input> | <input char> | <expected> | <actual>\n"
-                        + errors.map(function(err) {
-                        return "          " + err.input + " | " + err.inputChar + " | " + spacify2(err.strExpected) + " | " + spacify2(err.strActual);
-                    }).join("\n") + "\n       ");
-            });
-
-            /*
+                /*
             // TODO: Implement unicode composition. After that, this test will be meaningful.
 
             // Create a large random text.
@@ -156,6 +218,5 @@ describe("Full SBCS encoding tests #full", function() {
             assert.strictEqual(JSON.stringify(iconv.decode(buf2, enc)), JSON.stringify(str = conv.convert(buf2).toString()));
             assert.strictEqual(iconv.encode(str, enc).toString('hex'), convBack.convert(Buffer.from(str)).toString('hex'));
             */
-        })(enc);
+            })(enc);
 });
-

@@ -1,16 +1,18 @@
-var assert = require('assert'),
-    utils = require('./utils'),
+var assert = require("assert"),
+    utils = require("./utils"),
     iconv = utils.requireIconv();
 
 var baseStrings = {
     empty: "",
     hi: "Γειά!",
-    ascii: '\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f'+
-           ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f',
+    ascii:
+        "\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f" +
+        " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f",
     greek: "αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩάέήίόύώΆΈΉΊΌΎΏϊϋΪΫ",
-    untranslatable: "Åçþÿ¿"
+    untranslatable: "Åçþÿ¿",
 };
 
+// prettier-ignore
 var encodings = [{
     name: "windows1253",
     variations: ['windows-1253', 'win-1253', 'win1253', 'cp1253', 'cp-1253', 1253],
@@ -40,12 +42,12 @@ var encodings = [{
     }
 }];
 
-describe("Test Greek encodings #node-web", function() {
-    encodings.forEach(function(encoding) {
+describe("Test Greek encodings #node-web", function () {
+    encodings.forEach(function (encoding) {
         var enc = encoding.variations[0];
         var key = "hi";
-        describe(encoding.name+":", function() {
-            it("Convert from buffer", function() {
+        describe(encoding.name + ":", function () {
+            it("Convert from buffer", function () {
                 for (var key in encoding.encodedStrings)
                     assert.strictEqual(
                         iconv.decode(encoding.encodedStrings[key], enc),
@@ -53,7 +55,7 @@ describe("Test Greek encodings #node-web", function() {
                     );
             });
 
-            it("Convert to buffer", function() {
+            it("Convert to buffer", function () {
                 for (var key in encoding.encodedStrings)
                     assert.strictEqual(
                         utils.hex(iconv.encode(baseStrings[key], enc)),
@@ -61,8 +63,8 @@ describe("Test Greek encodings #node-web", function() {
                     );
             });
 
-            it("Try different variations of encoding", function() {
-                encoding.variations.forEach(function(enc) {
+            it("Try different variations of encoding", function () {
+                encoding.variations.forEach(function (enc) {
                     assert.strictEqual(
                         iconv.decode(encoding.encodedStrings[key], enc),
                         baseStrings[key]
@@ -74,15 +76,17 @@ describe("Test Greek encodings #node-web", function() {
                 });
             });
 
-            it("Untranslatable chars are converted to defaultCharSingleByte", function() {
+            it("Untranslatable chars are converted to defaultCharSingleByte", function () {
                 const untranslatableBytes = utils.bytesFrom(
-                    baseStrings.untranslatable.split('').map(() => iconv.defaultCharSingleByte.charCodeAt(0))
+                    baseStrings.untranslatable
+                        .split("")
+                        .map(() => iconv.defaultCharSingleByte.charCodeAt(0))
                 );
                 assert.strictEqual(
                     utils.hex(iconv.encode(baseStrings.untranslatable, enc)),
                     utils.hex(untranslatableBytes)
                 ); // Only '?' characters.
             });
-        })
+        });
     });
 });

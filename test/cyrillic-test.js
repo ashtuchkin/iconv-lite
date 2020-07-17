@@ -1,12 +1,13 @@
-var assert = require('assert'),
-    utils = require('./utils'),
+var assert = require("assert"),
+    utils = require("./utils"),
     iconv = utils.requireIconv();
 
 var baseStrings = {
     empty: "",
     hi: "Привет!",
-    ascii: '\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f'+
-           ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f',
+    ascii:
+        "\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f" +
+        " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f",
     rus: "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя",
     additional1: "ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏђ‘’“”•–—™љ›њќћџ ЎўЈ¤Ґ¦§Ё©Є«¬\xAD®Ї°±Ііґµ¶·ё№є»јЅѕї",
     additional2: "─│┌┐└┘├┤┬┴┼▀▄█▌▐░▒▓⌠■∙√≈≤≥ ⌡°²·÷═║╒ё╓╔╕╖╗╘╙╚╛╜╝╞╟╠╡Ё╢╣╤╥╦╧╨╩╪╫╬©",
@@ -14,6 +15,7 @@ var baseStrings = {
     untranslatable: "£Åçþÿ¿",
 };
 
+// prettier-ignore
 var encodings = [
     {
         name: "Win-1251",
@@ -50,13 +52,12 @@ var encodings = [
     }
 ];
 
-describe("Test Cyrillic encodings #node-web", function() {
-    encodings.forEach(function(encoding) {
+describe("Test Cyrillic encodings #node-web", function () {
+    encodings.forEach(function (encoding) {
         var enc = encoding.variations[0];
         var key = "hi";
-        describe(encoding.name+":", function() {
-
-            it("Convert from buffer", function() {
+        describe(encoding.name + ":", function () {
+            it("Convert from buffer", function () {
                 for (const key in encoding.encodedStrings)
                     assert.strictEqual(
                         iconv.decode(encoding.encodedStrings[key], enc),
@@ -64,7 +65,7 @@ describe("Test Cyrillic encodings #node-web", function() {
                     );
             });
 
-            it("Convert to buffer", function() {
+            it("Convert to buffer", function () {
                 for (const key in encoding.encodedStrings)
                     assert.strictEqual(
                         utils.hex(iconv.encode(baseStrings[key], enc)),
@@ -72,8 +73,8 @@ describe("Test Cyrillic encodings #node-web", function() {
                     );
             });
 
-            it("Try different variations of encoding", function() {
-                encoding.variations.forEach(function(enc) {
+            it("Try different variations of encoding", function () {
+                encoding.variations.forEach(function (enc) {
                     assert.strictEqual(
                         iconv.decode(encoding.encodedStrings[key], enc),
                         baseStrings[key]
@@ -85,9 +86,11 @@ describe("Test Cyrillic encodings #node-web", function() {
                 });
             });
 
-            it("Untranslatable chars are converted to defaultCharSingleByte", function() {
+            it("Untranslatable chars are converted to defaultCharSingleByte", function () {
                 const untranslatableBytes = utils.bytesFrom(
-                    baseStrings.untranslatable.split('').map(() => iconv.defaultCharSingleByte.charCodeAt(0))
+                    baseStrings.untranslatable
+                        .split("")
+                        .map(() => iconv.defaultCharSingleByte.charCodeAt(0))
                 );
                 assert.strictEqual(
                     utils.hex(iconv.encode(baseStrings.untranslatable, enc)),
@@ -97,4 +100,3 @@ describe("Test Cyrillic encodings #node-web", function() {
         });
     });
 });
-
