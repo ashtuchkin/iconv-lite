@@ -23,11 +23,11 @@ function forAllChars(converter, fn, origbuf, len) {
             // buf contains correct input combination. Run fn with input and converter output.
             fn(true, buf, res);
         } catch (e) {
-            if (e.code == "EILSEQ") {
+            if (e.code === "EILSEQ") {
                 // Invalid character sequence.
                 // Notify that this sequence is invalid.
                 fn(false, buf);
-            } else if (e.code == "EINVAL") {
+            } else if (e.code === "EINVAL") {
                 // Partial character sequence.
                 // Recurse deeper.
                 forAllChars(converter, fn, origbuf, len + 1);
@@ -40,7 +40,7 @@ function convertWithDefault(converter, buf) {
     try {
         return converter.convert(buf);
     } catch (e) {
-        if (e.code != "EILSEQ") throw e;
+        if (e.code !== "EILSEQ") throw e;
     }
     return Buffer.from(iconv.defaultCharSingleByte);
 }
@@ -177,8 +177,9 @@ describe("Full DBCS encoding tests #full", function () {
                     var errors = [];
                     forAllChars(converter.convert.bind(converter), function (valid, inp, outp) {
                         const strActual = iconv.decode(inp, enc);
+                        const charCode = strActual.charCodeAt(0);
 
-                        if (0xe000 <= strActual.charCodeAt(0) && strActual.charCodeAt(0) < 0xf900)
+                        if (0xe000 <= charCode && charCode < 0xf900)
                             // Skip Private use area.
                             return;
 
@@ -240,7 +241,7 @@ describe("Full DBCS encoding tests #full", function () {
                     var converterBack = new Iconv(aliases[enc] || enc, "utf-8");
                     var errors = [];
                     for (var i = 0; i < 0x10000; i++) {
-                        if (i == 0xd800) i = 0xf900; // Skip surrogates & private use.
+                        if (i === 0xd800) i = 0xf900; // Skip surrogates & private use.
 
                         var str = String.fromCharCode(i);
 
@@ -250,9 +251,9 @@ describe("Full DBCS encoding tests #full", function () {
                         var bufActual = iconv.encode(str, enc);
                         var strActual = bufActual.toString("hex");
 
-                        if (strExpected == strActual) continue;
+                        if (strExpected === strActual) continue;
 
-                        if (strExpected == "3f" && iconvCannotDecodeChars[strActual] == str)
+                        if (strExpected === "3f" && iconvCannotDecodeChars[strActual] === str)
                             continue; // Check the iconv cannot encode this char, but we encoded correctly.
 
                         var str1 = iconv.decode(bufExpected, enc);
@@ -260,14 +261,14 @@ describe("Full DBCS encoding tests #full", function () {
                         var str2 = convertWithDefault(converterBack, bufActual).toString();
                         var str22 = convertWithDefault(converterBack, bufExpected).toString();
                         if (
-                            str1 == str &&
-                            str12 == str &&
-                            str22 == str &&
-                            (str2 == str || iconvCannotDecodeChars[strActual] == str)
+                            str1 === str &&
+                            str12 === str &&
+                            str22 === str &&
+                            (str2 === str || iconvCannotDecodeChars[strActual] === str)
                         )
                             continue; // There are multiple ways to encode str, so it doesn't matter which we choose.
 
-                        if (iconvChgs[str] == str1) continue; // Skip iconv changes.
+                        if (iconvChgs[str] === str1) continue; // Skip iconv changes.
 
                         errors.push({
                             input: strToHex(str),

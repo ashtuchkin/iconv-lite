@@ -164,7 +164,8 @@ function escape(s) {
     for (var i = 0; i < s.length; ++i) {
         var cc = s.charCodeAt(i);
 
-        if (32 <= cc && cc < 127 && cc !== 0x5c) {
+        // prettier-ignore
+        if ((32 <= cc && cc < 127) && cc !== 0x5c) {  
             sb.push(s.charAt(i));
         } else {
             var h = s.charCodeAt(i).toString(16).toUpperCase();

@@ -11,13 +11,22 @@ exports.getFile = function (url, cb) {
     var sourceDataFolder = path.join(__dirname, "source-data");
     var fullpath = path.join(sourceDataFolder, path.basename(url));
     fs.readFile(fullpath, "utf8", function (err, text) {
-        if (!err) return cb(null, text);
-        if (err.code != "ENOENT") return cb(err);
+        if (!err) {
+            cb(null, text);
+            return;
+        }
+        if (err.code !== "ENOENT") {
+            cb(err);
+            return;
+        }
         request(
             url,
             errTo(cb, function (res, buf) {
                 fs.mkdir(sourceDataFolder, function (err) {
-                    if (err && err.code != "EEXIST") return cb(err);
+                    if (err && err.code !== "EEXIST") {
+                        cb(err);
+                        return;
+                    }
                     fs.writeFile(
                         fullpath,
                         buf,
@@ -57,7 +66,7 @@ function arrToStr(arr) {
     var s = "";
     for (var i = 0; i < arr.length; i++)
         if (Array.isArray(arr[i])) {
-            if (arr[i].length == 1) s += arrToStr(arr[i]);
+            if (arr[i].length === 1) s += arrToStr(arr[i]);
             else if (arr[i].length > 1)
                 s += String.fromCharCode(0xfff - (arr[i].length - 2)) + arrToStr(arr[i]);
         } else if (arr[i] > 0xffff) {

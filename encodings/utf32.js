@@ -37,8 +37,8 @@ Utf32Encoder.prototype.write = function (str) {
 
     for (var i = 0; i < src.length; i += 2) {
         var code = src.readUInt16LE(i);
-        var isHighSurrogate = 0xd800 <= code && code < 0xdc00;
-        var isLowSurrogate = 0xdc00 <= code && code < 0xe000;
+        var isHighSurrogate = (0xd800 <= code && code < 0xdc00); // prettier-ignore
+        var isLowSurrogate = (0xdc00 <= code && code < 0xe000); // prettier-ignore
 
         if (this.highSurrogate) {
             if (isHighSurrogate || !isLowSurrogate) {
@@ -78,7 +78,9 @@ Utf32Encoder.prototype.write = function (str) {
 
 Utf32Encoder.prototype.end = function () {
     // Treat any leftover high surrogate as a semi-valid independent character.
-    if (!this.highSurrogate) return;
+    if (!this.highSurrogate) {
+        return undefined;
+    }
 
     var buf = Buffer.alloc(4);
 

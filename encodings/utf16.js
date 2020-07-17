@@ -54,7 +54,7 @@ class Utf16LEDecoder {
         //     possible if after our calculations the 2-byte memory alignment of a Uint16Array is lost,
         //     in which case we have to do a copy.
 
-        if (buf.length == 0) {
+        if (buf.length === 0) {
             return "";
         }
         let offset = 0;
@@ -126,14 +126,15 @@ class Utf16LEDecoder {
     }
 
     end() {
+        let res;
         if (this.leadSurrogate || this.leadByte !== -1) {
-            const res =
+            res =
                 (this.leadSurrogate ? this.leadSurrogate : "") +
                 (this.leadByte !== -1 ? this.defaultChar : "");
             this.leadSurrogate = undefined;
             this.leadByte = -1;
-            return res;
         }
+        return res;
     }
 }
 exports.ucs2 = "utf16le"; // Alias
@@ -250,14 +251,15 @@ class Utf16BEDecoder {
     }
 
     end() {
+        let res;
         if (this.leadSurrogate || this.leadByte !== -1) {
-            const res =
+            res =
                 (this.leadSurrogate ? this.leadSurrogate : "") +
                 (this.leadByte !== -1 ? this.defaultChar : "");
             this.leadSurrogate = undefined;
             this.leadByte = -1;
-            return res;
         }
+        return res;
     }
 }
 
@@ -318,14 +320,14 @@ class Utf16Decoder {
         const encoding = detectEncoding(this.initialBufs, this.options.defaultEncoding);
         this.decoder = this.iconv.getDecoder(encoding, this.options);
 
-        let resStr = this.initialBufs.reduce((a, b) => a + this.decoder.write(b), "");
+        const resStr = this.initialBufs.reduce((a, b) => a + this.decoder.write(b), "");
         this.initialBufs.length = this.initialBufsLen = 0;
         return resStr;
     }
 }
 
 function detectEncoding(bufs, defaultEncoding) {
-    let b = [];
+    const b = [];
     let charsProcessed = 0;
     let asciiCharsLE = 0,
         asciiCharsBE = 0; // Number of ASCII chars when decoded as LE or BE.

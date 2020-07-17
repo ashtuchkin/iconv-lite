@@ -41,6 +41,7 @@
     "devDependencies": {
         "c8": "^7.2.0",
         "eslint": "^7.4.0",
+        "eslint-plugin-es": "^3.0.1",
         "husky": "^4.2.5",
         "iconv": "^2.3.5",
         "lint-staged": "^10.2.11",

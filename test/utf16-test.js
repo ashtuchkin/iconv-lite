@@ -39,8 +39,8 @@ describe("UTF-16LE encoder #node-web", function () {
     });
 
     it("has full 16-bit transparency", function () {
-        let s = "",
-            arr = [];
+        let s = "";
+        const arr = [];
         for (let i = 0; i < 65536; i++) {
             s += String.fromCharCode(i);
             arr.push(i & 0xff, i >> 8);
@@ -84,8 +84,8 @@ describe("UTF-16LE decoder #node-web", function () {
 
     // See comment in the test above.
     it.skip("has full 16-bit transparency", function () {
-        let s = "",
-            arr = [];
+        let s = "";
+        const arr = [];
         for (let i = 0; i < 65536; i++) {
             s += String.fromCharCode(i);
             arr.push(i & 0xff, i >> 8);

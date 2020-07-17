@@ -44,7 +44,7 @@ module.exports = {
     rawCharsToResult(rawChars, finalLen) {
         rawChars = rawChars.subarray(0, finalLen);
         // NOTE: TextDecoder will convert all invalid surrogates to '�'-s.
-        let res = new TextDecoder("utf-16", { ignoreBOM: true }).decode(rawChars);
+        const res = new TextDecoder("utf-16", { ignoreBOM: true }).decode(rawChars);
         if (res.length !== finalLen)
             throw new Error(`TextDecoder returned different length string on array ${rawChars}`);
         return res;

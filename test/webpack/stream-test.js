@@ -17,7 +17,10 @@ describe("iconv-lite with streams", function () {
 
         stream1.end("abc");
         stream2.collect(function (err, str) {
-            if (err) return done(err);
+            if (err) {
+                done(err);
+                return;
+            }
 
             assert.equal(str, "abc");
             done(null);

@@ -46,7 +46,7 @@ function Utf7Decoder(options, codec) {
 }
 
 const base64Regex = /[A-Za-z0-9/+]/;
-let base64Chars = [];
+const base64Chars = [];
 for (var i = 0; i < 256; i++) base64Chars[i] = base64Regex.test(String.fromCharCode(i));
 
 var plusChar = "+".charCodeAt(0),
@@ -65,7 +65,7 @@ Utf7Decoder.prototype.write = function (buf) {
         if (!inBase64) {
             // We're in direct mode.
             // Write direct chars until '+'
-            if (buf[i] == plusChar) {
+            if (buf[i] === plusChar) {
                 res += this.iconv.decode(buf.slice(lastI, i), "ascii"); // Write direct chars.
                 lastI = i + 1;
                 inBase64 = true;
@@ -74,7 +74,7 @@ Utf7Decoder.prototype.write = function (buf) {
             // We decode base64.
             if (!base64Chars[buf[i]]) {
                 // Base64 ended.
-                if (i == lastI && buf[i] == minusChar) {
+                if (i === lastI && buf[i] === minusChar) {
                     // "+-" -> "+"
                     res += "+";
                 } else {
@@ -82,7 +82,7 @@ Utf7Decoder.prototype.write = function (buf) {
                     res += this.iconv.decode(Buffer.from(b64str, "base64"), "utf16-be");
                 }
 
-                if (buf[i] != minusChar)
+                if (buf[i] !== minusChar)
                     // Minus is absorbed after base64.
                     i--;
 
@@ -195,7 +195,7 @@ Utf7IMAPEncoder.prototype.write = function (str) {
                 base64Accum[base64AccumIdx++] = uChar >> 8;
                 base64Accum[base64AccumIdx++] = uChar & 0xff;
 
-                if (base64AccumIdx == base64Accum.length) {
+                if (base64AccumIdx === base64Accum.length) {
                     bufIdx += buf.write(base64Accum.toString("base64").replace(/\//g, ","), bufIdx);
                     base64AccumIdx = 0;
                 }
@@ -256,7 +256,7 @@ Utf7IMAPDecoder.prototype.write = function (buf) {
         if (!inBase64) {
             // We're in direct mode.
             // Write direct chars until '&'
-            if (buf[i] == andChar) {
+            if (buf[i] === andChar) {
                 res += this.iconv.decode(buf.slice(lastI, i), "ascii"); // Write direct chars.
                 lastI = i + 1;
                 inBase64 = true;
@@ -265,7 +265,7 @@ Utf7IMAPDecoder.prototype.write = function (buf) {
             // We decode base64.
             if (!base64IMAPChars[buf[i]]) {
                 // Base64 ended.
-                if (i == lastI && buf[i] == minusChar) {
+                if (i === lastI && buf[i] === minusChar) {
                     // "&-" -> "&"
                     res += "&";
                 } else {
@@ -275,7 +275,7 @@ Utf7IMAPDecoder.prototype.write = function (buf) {
                     res += this.iconv.decode(Buffer.from(b64str, "base64"), "utf16-be");
                 }
 
-                if (buf[i] != minusChar)
+                if (buf[i] !== minusChar)
                     // Minus may be absorbed after base64.
                     i--;
 

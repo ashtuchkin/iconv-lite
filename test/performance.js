@@ -1,3 +1,4 @@
+/* eslint no-console: "off" */
 "use strict";
 
 if (module.parent)

@@ -66,8 +66,9 @@ describe("Full SBCS encoding tests #full", function () {
                     testEncName = enc + (enc !== iconvName ? " (" + iconvName + ")" : "");
 
                 it("Decode SBCS encoding " + testEncName, function () {
+                    let conv;
                     try {
-                        var conv = new Iconv(iconvName, "utf-8//IGNORE");
+                        conv = new Iconv(iconvName, "utf-8//IGNORE");
                     } catch (e) {
                         this.skip();
                     }
@@ -81,7 +82,7 @@ describe("Full SBCS encoding tests #full", function () {
                             iconv.defaultCharUnicode
                         ).toString();
 
-                        if (strActual != strExpected)
+                        if (strActual !== strExpected)
                             errors.push({
                                 input: buf.toString("hex"),
                                 strExpected: strExpected,
@@ -111,15 +112,16 @@ describe("Full SBCS encoding tests #full", function () {
                 });
 
                 it("Encode SBCS encoding " + testEncName, function () {
+                    let conv;
                     try {
-                        var conv = new Iconv("utf-8", iconvName + "//IGNORE");
+                        conv = new Iconv("utf-8", iconvName + "//IGNORE");
                     } catch (e) {
                         this.skip();
                     }
                     var errors = [];
 
                     for (var i = 0; i < 0xfff0; i++) {
-                        if (i == 0xd800) i = 0xf900; // Skip surrogates & private use
+                        if (i === 0xd800) i = 0xf900; // Skip surrogates & private use
 
                         var str = String.fromCharCode(i);
                         var strExpected = convertWithDefault(
@@ -129,25 +131,25 @@ describe("Full SBCS encoding tests #full", function () {
                         ).toString("hex");
                         var strActual = iconv.encode(str, enc).toString("hex");
 
-                        if (strExpected == strActual) continue;
+                        if (strExpected === strActual) continue;
 
                         // We are not supporting unicode normalization/decomposition of input, so skip it.
                         // (when single unicode char results in >1 encoded chars because of diacritics)
                         if (
                             normalizedEncodings[enc] &&
-                            strActual == iconv.defaultCharSingleByte.charCodeAt(0).toString(16)
+                            strActual === iconv.defaultCharSingleByte.charCodeAt(0).toString(16)
                         ) {
                             var strDenormStrict = unorm.nfd(str); // Strict decomposition
-                            if (strExpected == iconv.encode(strDenormStrict, enc).toString("hex"))
+                            if (strExpected === iconv.encode(strDenormStrict, enc).toString("hex"))
                                 continue;
 
                             var strDenorm = unorm.nfkd(str); // Check also compat decomposition.
-                            if (strExpected == iconv.encode(strDenorm, enc).toString("hex"))
+                            if (strExpected === iconv.encode(strDenorm, enc).toString("hex"))
                                 continue;
 
                             // Try semicomposition if we have 2 combining characters.
                             if (
-                                strDenorm.length == 3 &&
+                                strDenorm.length === 3 &&
                                 !combClass[strDenorm[0]] &&
                                 combClass[strDenorm[1]] &&
                                 combClass[strDenorm[2]]
@@ -155,14 +157,14 @@ describe("Full SBCS encoding tests #full", function () {
                                 // Semicompose without swapping.
                                 var strDenorm2 =
                                     unorm.nfc(strDenorm[0] + strDenorm[1]) + strDenorm[2];
-                                if (strExpected == iconv.encode(strDenorm2, enc).toString("hex"))
+                                if (strExpected === iconv.encode(strDenorm2, enc).toString("hex"))
                                     continue;
 
                                 // Swap combining characters if they have different combining classes, making swap unicode-equivalent.
                                 var strDenorm3 =
                                     unorm.nfc(strDenorm[0] + strDenorm[2]) + strDenorm[1];
-                                if (strExpected == iconv.encode(strDenorm3, enc).toString("hex"))
-                                    if (combClass[strDenorm[1]] != combClass[strDenorm[2]])
+                                if (strExpected === iconv.encode(strDenorm3, enc).toString("hex"))
+                                    if (combClass[strDenorm[1]] !== combClass[strDenorm[2]])
                                         continue;
                                     // In theory, if combining classes are the same, we can not swap them. But iconv thinks otherwise.
                                     // So we skip this too.
@@ -174,7 +176,7 @@ describe("Full SBCS encoding tests #full", function () {
                         if (
                             iconvEquivChars[enc] &&
                             iconvEquivChars[enc][str] &&
-                            strExpected ==
+                            strExpected ===
                                 iconv.encode(iconvEquivChars[enc][str], enc).toString("hex")
                         )
                             continue;

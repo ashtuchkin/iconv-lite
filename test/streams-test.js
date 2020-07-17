@@ -41,8 +41,9 @@ function feeder(chunks) {
 
 function checkStreamOutput(options) {
     return function (done) {
+        let stream;
         try {
-            var stream = options.createStream();
+            stream = options.createStream();
         } catch (e) {
             check(e);
             return;
@@ -72,7 +73,7 @@ function checkStreamOutput(options) {
             try {
                 if (options.checkError) {
                     assert(err, "Expected error, but got success");
-                    if (Object.prototype.toString.call(options.checkError) == "[object RegExp]") {
+                    if (Object.prototype.toString.call(options.checkError) === "[object RegExp]") {
                         assert(
                             options.checkError.test(err.message),
                             "Wrong error message: " + err.message
@@ -95,7 +96,7 @@ function checkStreamOutput(options) {
                             if ((r = /^buffer-?(.*)/.exec(options.outputType))) {
                                 res = Buffer.concat(res);
                                 if (r[1]) res = res.toString(r[1]); // Convert to string to make comparing buffers easier.
-                            } else if (options.outputType == "string") {
+                            } else if (options.outputType === "string") {
                                 res = res.join("");
                             }
                         }
@@ -116,7 +117,7 @@ function checkEncodeStream(opts) {
         return feeder(opts.input).pipe(iconv.encodeStream(opts.encoding, opts.encodingOptions));
     };
     if (opts.outputType == null) opts.outputType = "buffer-hex";
-    if (Buffer.isBuffer(opts.output) && opts.outputType == "buffer-hex")
+    if (Buffer.isBuffer(opts.output) && opts.outputType === "buffer-hex")
         opts.output = opts.output.toString("hex");
 
     opts.checkOutput =

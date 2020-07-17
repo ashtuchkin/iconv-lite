@@ -1,3 +1,4 @@
+/* eslint no-console: "off" */
 "use strict";
 
 const utils = require("./utils"),
@@ -42,7 +43,7 @@ async.parallel(
             const pointer = (lead - 0x81) * 157 + (trail - offset);
             const cpChar = data.cp950[i];
             const big5Char = data.$big5[pointer];
-            if (big5Char !== undefined && cpChar != big5Char) big5add[i] = big5Char;
+            if (big5Char !== undefined && cpChar !== big5Char) big5add[i] = big5Char;
         }
 
         // Add char sequences that are not in the index file (as given in http://encoding.spec.whatwg.org/#big5-encoder)
@@ -70,14 +71,14 @@ async.parallel(
             const gbAddr = (lead - 0x81) * 190 + (trail - offset);
             const cpChar = data.cp936[i];
             const gbChar = data.$gbk[gbAddr];
-            if (cpChar !== undefined && cpChar != gbChar)
+            if (cpChar !== undefined && cpChar !== gbChar)
                 console.log("Dont match: ", i.toString(16), gbAddr.toString(16), gbChar, cpChar);
 
-            if (gbChar !== undefined && cpChar != gbChar) gbkadd[i] = gbChar;
+            if (gbChar !== undefined && cpChar !== gbChar) gbkadd[i] = gbChar;
         }
 
         // GB18030:2005 addition
-        let gbk2005add = [["8135f437", ""]];
+        const gbk2005add = [["8135f437", ""]];
 
         utils.writeTable("gbk-added", utils.generateTable(gbkadd).concat(gbk2005add));
 
@@ -126,9 +127,9 @@ async.parallel(
         const eucKr = {};
         for (let i = 0; i < 0x80; i++) eucKr[i] = i;
         for (let i = 0x8100; i < 0xff00; i++) {
-            let lead = i >> 8,
-                byte = i & 0xff,
-                ptr = null;
+            const lead = i >> 8,
+                byte = i & 0xff;
+            let ptr = null;
             if (0x41 <= byte && byte <= 0xfe) ptr = (lead - 0x81) * 190 + (byte - 0x41);
             if (ptr !== null) eucKr[i] = data.$eucKr[ptr];
 
@@ -144,7 +145,7 @@ async.parallel(
 
         // Write all plain tables as-is.
         for (const enc in data)
-            if (enc[0] != "$") utils.writeTable(enc, utils.generateTable(data[enc]));
+            if (enc[0] !== "$") utils.writeTable(enc, utils.generateTable(data[enc]));
 
         console.log("DBCS encodings regenerated.");
     })
