@@ -1,4 +1,4 @@
-"use strict";
+"use strict"
 
 // Karma configuration
 // Generated on Sat May 23 2020 18:02:48 GMT-0400 (Eastern Daylight Time)

@@ -1,4 +1,4 @@
-"use strict";
+"use strict"
 
 var assert = require("assert")
 var Buffer = require("safer-buffer").Buffer

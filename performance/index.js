@@ -1,4 +1,4 @@
-"use strict";
+"use strict"
 
 const iconv = require("iconv")
 const iconvLite = require("../lib")

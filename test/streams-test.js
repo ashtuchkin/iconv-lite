@@ -1,4 +1,4 @@
-"use strict";
+"use strict"
 
 var mocha = require("mocha")
 var describeMocha = mocha.describe

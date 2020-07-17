@@ -1,4 +1,4 @@
-"use strict";
+"use strict"
 
 const iconv = require("iconv-lite")
 iconv.setBackend(require("iconv-lite/backends/web"))
