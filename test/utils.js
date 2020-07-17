@@ -22,7 +22,18 @@ const utils = module.exports = {
         return utils.iconv;
     },
 
-    bytesFrom(arr) {
+    // Returns backend 'bytes' types from an array of ints or a hex string.
+    bytes(arr) {
+        if (typeof arr === "string") {
+            // Hex string - convert to array
+            const str = arr.replace(/[\s_:.]/g, ""); // Remove potential separators
+            assert(str.length % 2 === 0);
+            arr = [];
+            for (let i = 0; i < str.length - 1; i += 2) {
+                arr.push(parseInt(str.slice(i, i + 2), 16));
+            }
+        }
+
         const bytes = utils.backend.allocBytes(arr.length);
         bytes.set(arr);
         return utils.backend.bytesToResult(bytes, bytes.length);
@@ -33,8 +44,10 @@ const utils = module.exports = {
     },
 
     hex(bytes, nonStrict) {
-        assert(nonStrict || (bytes instanceof utils.BytesType));
-        return bytes.reduce((output, byte) => (output + ('0' + (byte & 0xFF).toString(16)).slice(-2)), '');
+        assert(nonStrict || bytes instanceof utils.BytesType);
+        return Array.prototype.map
+            .call(bytes, (byte) => ("0" + (byte & 0xff).toString(16)).slice(-2))
+            .join(" ");
     },
 
     checkDecoderChunks(encoding, cases) {
@@ -48,7 +61,11 @@ const utils = module.exports = {
                 const inputs = cases[idx].inputs,
                     outputs = cases[idx].outputs;
                 for (let i = 0; i < inputs.length; i++)
-                    assert.strictEqual(decoder.write(utils.bytesFrom(inputs[i])), outputs[i], `position ${i} in case ${idx}`);
+                    assert.strictEqual(
+                        decoder.write(utils.bytes(inputs[i])),
+                        outputs[i],
+                        `position ${i} in case ${idx}`
+                    );
 
                 if (outputs.length === inputs.length) {
                     assert(!decoder.end(), `end is not empty in case ${idx}`);
