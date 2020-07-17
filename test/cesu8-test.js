@@ -1,6 +1,6 @@
-var assert = require('assert'),
-    Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../');
+var assert = require("assert"),
+    Buffer = require("safer-buffer").Buffer,
+    iconv = require("../");
 
 describe("CESU-8 codec", function() {
     it("encodes correctly", function() {

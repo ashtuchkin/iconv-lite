@@ -1,8 +1,8 @@
-var assert = require('assert'),
-    unorm = require('unorm'),
-    Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../'),
-    Iconv = require('iconv').Iconv;
+var assert = require("assert"),
+    unorm = require("unorm"),
+    Buffer = require("safer-buffer").Buffer,
+    iconv = require("../"),
+    Iconv = require("iconv").Iconv;
 
 function convertWithDefault(converter, buf, def) {
     var res = converter.convert(buf);

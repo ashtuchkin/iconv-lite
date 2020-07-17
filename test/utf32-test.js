@@ -1,7 +1,7 @@
-var assert = require('assert'),
-    Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../'),
-    Iconv = require('iconv').Iconv;
+var assert = require("assert"),
+    Buffer = require("safer-buffer").Buffer,
+    iconv = require("../"),
+    Iconv = require("iconv").Iconv;
 
 var testStr = '1aя中文☃💩',
     testStr2 = '❝Stray high \uD977😱 and low\uDDDD☔ surrogate values.❞',

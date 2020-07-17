@@ -1,6 +1,6 @@
-var assert  = require('assert'),
-    Buffer  = require('safer-buffer').Buffer,
-    iconv   = require(__dirname + '/../');
+var assert = require("assert"),
+    Buffer = require("safer-buffer").Buffer,
+    iconv = require("../");
 
 describe("ShiftJIS tests", function() {
     it("ShiftJIS correctly encoded/decoded", function() {    
