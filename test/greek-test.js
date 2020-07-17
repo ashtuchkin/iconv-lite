@@ -1,7 +1,6 @@
 var assert = require("assert")
-var Buffer = require("safer-buffer").Buffer
-var join = require("path").join
-var iconv = require(join(__dirname, "/../"))
+var utils = require("./utils")
+var iconv = utils.requireIconv()
 
 var baseStrings = {
   empty: "",
@@ -16,60 +15,73 @@ var encodings = [{
   name: "windows1253",
   variations: ["windows-1253", "win-1253", "win1253", "cp1253", "cp-1253", 1253],
   encodedStrings: {
-    empty: Buffer.from(""),
-    hi: Buffer.from("\xc3\xe5\xe9\xdc!", "binary"),
-    ascii: Buffer.from(baseStrings.ascii, "binary"),
-    greek: Buffer.from("\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xdc\xdd\xde\xdf\xfc\xfd\xfe\xa2\xb8\xb9\xba\xbc\xbe\xbf\xfa\xfb\xda\xdb", "binary")
+    empty: utils.bytesFrom([]),
+    hi: utils.bytesFrom([0xc3, 0xe5, 0xe9, 0xdc, 0x21]),
+    ascii: utils.bytesFrom(baseStrings.ascii.split("").map(c => c.charCodeAt(0))),
+    greek: utils.bytesFrom([0xe1, 0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xeb, 0xec, 0xed, 0xee, 0xef, 0xf0, 0xf1, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf, 0xd0, 0xd1, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xdc, 0xdd, 0xde, 0xdf, 0xfc, 0xfd, 0xfe, 0xa2, 0xb8, 0xb9, 0xba, 0xbc, 0xbe, 0xbf, 0xfa, 0xfb, 0xda, 0xdb])
   }
 }, {
   name: "iso88597",
   variations: ["iso-8859-7", "greek", "greek8", "cp28597", "cp-28597", 28597],
   encodedStrings: {
-    empty: Buffer.from(""),
-    hi: Buffer.from("\xc3\xe5\xe9\xdc!", "binary"),
-    ascii: Buffer.from(baseStrings.ascii, "binary"),
-    greek: Buffer.from("\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xdc\xdd\xde\xdf\xfc\xfd\xfe\xb6\xb8\xb9\xba\xbc\xbe\xbf\xfa\xfb\xda\xdb", "binary")
+    empty: utils.bytesFrom([]),
+    hi: utils.bytesFrom([0xc3, 0xe5, 0xe9, 0xdc, 0x21]),
+    ascii: utils.bytesFrom(baseStrings.ascii.split("").map(c => c.charCodeAt(0))),
+    greek: utils.bytesFrom([0xe1, 0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xeb, 0xec, 0xed, 0xee, 0xef, 0xf0, 0xf1, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf, 0xd0, 0xd1, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xdc, 0xdd, 0xde, 0xdf, 0xfc, 0xfd, 0xfe, 0xb6, 0xb8, 0xb9, 0xba, 0xbc, 0xbe, 0xbf, 0xfa, 0xfb, 0xda, 0xdb])
   }
 }, {
   name: "cp737",
   variations: ["cp-737", 737],
   encodedStrings: {
-    empty: Buffer.from(""),
-    hi: Buffer.from("\x82\x9c\xa0\xe1!", "binary"),
-    ascii: Buffer.from(baseStrings.ascii, "binary"),
-    greek: Buffer.from("\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xab\xac\xad\xae\xaf\xe0\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\xe1\xe2\xe3\xe5\xe6\xe7\xe9\xea\xeb\xec\xed\xee\xef\xf0\xe4\xe8\xf4\xf5", "binary")
+    empty: utils.bytesFrom([]),
+    hi: utils.bytesFrom([0x82, 0x9c, 0xa0, 0xe1, 0x21]),
+    ascii: utils.bytesFrom(baseStrings.ascii.split("").map(c => c.charCodeAt(0))),
+    greek: utils.bytesFrom([0x98, 0x99, 0x9a, 0x9b, 0x9c, 0x9d, 0x9e, 0x9f, 0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xab, 0xac, 0xad, 0xae, 0xaf, 0xe0, 0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0xe1, 0xe2, 0xe3, 0xe5, 0xe6, 0xe7, 0xe9, 0xea, 0xeb, 0xec, 0xed, 0xee, 0xef, 0xf0, 0xe4, 0xe8, 0xf4, 0xf5])
   }
 }]
 
-describe("Test Greek encodings", function () {
+describe("Test Greek encodings #node-web", function () {
   encodings.forEach(function (encoding) {
     var enc = encoding.variations[0]
     var key = "hi"
     describe(encoding.name + ":", function () {
       it("Convert from buffer", function () {
-        for (var key in encoding.encodedStrings) {
-          assert.strictEqual(iconv.decode(encoding.encodedStrings[key], enc),
-            baseStrings[key])
-        }
+        for (var key in encoding.encodedStrings)
+        { assert.strictEqual(
+          iconv.decode(encoding.encodedStrings[key], enc),
+          baseStrings[key]
+        ) }
       })
 
       it("Convert to buffer", function () {
-        for (var key in encoding.encodedStrings) {
-          assert.strictEqual(iconv.encode(baseStrings[key], enc).toString("binary"),
-            encoding.encodedStrings[key].toString("binary"))
-        }
+        for (var key in encoding.encodedStrings)
+        { assert.strictEqual(
+          utils.hex(iconv.encode(baseStrings[key], enc)),
+          utils.hex(encoding.encodedStrings[key])
+        ) }
       })
 
       it("Try different variations of encoding", function () {
         encoding.variations.forEach(function (enc) {
-          assert.strictEqual(iconv.decode(encoding.encodedStrings[key], enc), baseStrings[key])
-          assert.strictEqual(iconv.encode(baseStrings[key], enc).toString("binary"), encoding.encodedStrings[key].toString("binary"))
+          assert.strictEqual(
+            iconv.decode(encoding.encodedStrings[key], enc),
+            baseStrings[key]
+          )
+          assert.strictEqual(
+            utils.hex(iconv.encode(baseStrings[key], enc)),
+            utils.hex(encoding.encodedStrings[key])
+          )
         })
       })
 
       it("Untranslatable chars are converted to defaultCharSingleByte", function () {
-        var expected = baseStrings.untranslatable.split("").map(function (c) { return iconv.defaultCharSingleByte }).join("")
-        assert.strictEqual(iconv.encode(baseStrings.untranslatable, enc).toString("binary"), expected) // Only '?' characters.
+        const untranslatableBytes = utils.bytesFrom(
+          baseStrings.untranslatable.split("").map(() => iconv.defaultCharSingleByte.charCodeAt(0))
+        )
+        assert.strictEqual(
+          utils.hex(iconv.encode(baseStrings.untranslatable, enc)),
+          utils.hex(untranslatableBytes)
+        ) // Only '?' characters.
       })
     })
   })

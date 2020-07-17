@@ -287,8 +287,8 @@ class Utf16Decoder {
       this.initialBufsLen += buf.length
 
       // We need more bytes to use space heuristic (see below)
-      if (this.initialBufsLen < 16) { 
-        return "" 
+      if (this.initialBufsLen < 16) {
+        return ""
       }
 
       // We have enough bytes -> detect endianness.
