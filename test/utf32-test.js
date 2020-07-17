@@ -1,3 +1,5 @@
+"use strict";
+
 var assert = require("assert")
 var Buffer = require("safer-buffer").Buffer
 var iconv = require("../")

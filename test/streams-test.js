@@ -1,3 +1,5 @@
+"use strict";
+
 var mocha = require("mocha")
 var describeMocha = mocha.describe
 var assert = require("assert")

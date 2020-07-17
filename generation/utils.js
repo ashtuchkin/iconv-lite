@@ -1,8 +1,9 @@
+"use strict";
 
-var request = require('request'),
-    fs = require('fs'),
-    path = require('path'),
-    errTo = require('errto');
+var request = require("request"),
+    fs = require("fs"),
+    path = require("path"),
+    errTo = require("errto");
 
 // Common utilities used in scripts.
 

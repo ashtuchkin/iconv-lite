@@ -1,3 +1,5 @@
+"use strict";
+
 var fs = require("fs")
 var assert = require("assert")
 var Buffer = require("safer-buffer").Buffer
