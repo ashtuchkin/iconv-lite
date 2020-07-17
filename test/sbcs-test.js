@@ -1,3 +1,5 @@
+"use strict";
+
 var assert = require("assert"),
     unorm = require("unorm"),
     Buffer = require("safer-buffer").Buffer,

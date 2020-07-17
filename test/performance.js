@@ -1,3 +1,5 @@
+"use strict";
+
 if (module.parent)
     // Skip this file from testing.
     return;
