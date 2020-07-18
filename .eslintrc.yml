@@ -24,4 +24,6 @@ rules:
     yoda: ["error", "never", { "exceptRange": true }]
 
     # 'es' pluin rules. See https://mysticatea.github.io/eslint-plugin-es/rules/
-    es/no-destructuring: "error" # Node 4.5 does not support these
+    # Disallow the ones that are not supported by Node 4.5
+    es/no-destructuring: "error"
+    es/no-default-parameters: "error"

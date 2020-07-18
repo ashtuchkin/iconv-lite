@@ -26,7 +26,7 @@
         "format": "prettier --write .",
         "lint": "eslint --max-warnings 0 . && prettier --check .",
         "test-install": "mv package.json package-orig.json && jq '.devDependencies |= {mocha, iconv, unorm}' package-orig.json > package.json && npm install; mv -f package-orig.json package.json",
-        "test": "FULL_TEST_SUITE=1 mocha",
+        "test": "mocha --grep .",
         "test-node-web": "ICONV_BACKEND=web mocha --grep '#node-web'"
     },
     "husky": {
