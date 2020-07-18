@@ -23,7 +23,7 @@
     },
     "scripts": {
         "coverage": "c8 _mocha --grep .",
-        "test": "FULL_TEST_SUITE=1 mocha",
+        "test": "mocha --grep .",
         "test-node-web": "ICONV_BACKEND=web mocha --grep '#node-web'"
     },
     "browser": {
