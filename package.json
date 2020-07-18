@@ -28,7 +28,7 @@
     "scripts": {
         "lint": "eslint",
         "lint:fix": "eslint --fix",
-        "test": "FULL_TEST_SUITE=1 mocha --reporter spec --check-leaks --grep .",
+        "test": "mocha --reporter spec --check-leaks --grep .",
         "test:ci": "nyc --exclude test --reporter=lcovonly --reporter=text npm test",
         "test:cov": "nyc --exclude test --reporter=html --reporter=text npm test",
         "test:node-web": "ICONV_BACKEND=web mocha --grep '#node-web'",
