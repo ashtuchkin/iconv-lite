@@ -1,32 +1,32 @@
 "use strict";
 
 var assert = require("assert"),
-    Buffer = require("safer-buffer").Buffer,
-    iconv = require("../");
+    utils = require("./utils"),
+    iconv = utils.requireIconv();
 
 var testString = "中文abc", //unicode contains Big5-code and ascii
-    testStringBig5Buffer = Buffer.from([0xa4, 0xa4, 0xa4, 0xe5, 0x61, 0x62, 0x63]),
+    testStringBig5Buffer = utils.bytes("a4 a4 a4 e5 61 62 63"),
     testString2 = "測試",
-    testStringBig5Buffer2 = Buffer.from([0xb4, 0xfa, 0xb8, 0xd5]);
+    testStringBig5Buffer2 = utils.bytes("b4 fa b8 d5");
 
 describe("Big5 tests", function () {
     it("Big5 correctly encoded/decoded", function () {
         assert.strictEqual(
-            iconv.encode(testString, "big5").toString("hex"),
-            testStringBig5Buffer.toString("hex")
+            utils.hex(iconv.encode(testString, "big5")),
+            utils.hex(testStringBig5Buffer)
         );
         assert.strictEqual(iconv.decode(testStringBig5Buffer, "big5"), testString);
         assert.strictEqual(
-            iconv.encode(testString2, "big5").toString("hex"),
-            testStringBig5Buffer2.toString("hex")
+            utils.hex(iconv.encode(testString2, "big5")),
+            utils.hex(testStringBig5Buffer2)
         );
         assert.strictEqual(iconv.decode(testStringBig5Buffer2, "big5"), testString2);
     });
 
     it("cp950 correctly encoded/decoded", function () {
         assert.strictEqual(
-            iconv.encode(testString, "cp950").toString("hex"),
-            testStringBig5Buffer.toString("hex")
+            utils.hex(iconv.encode(testString, "cp950")),
+            utils.hex(testStringBig5Buffer)
         );
         assert.strictEqual(iconv.decode(testStringBig5Buffer, "cp950"), testString);
     });
@@ -45,27 +45,27 @@ describe("Big5 tests", function () {
         // https://github.com/ashtuchkin/iconv-lite/issues/13
         // Reference: http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP950.TXT
         var chars = "·×";
-        var big5Chars = Buffer.from([0xa1, 0x50, 0xa1, 0xd1]);
-        assert.strictEqual(iconv.encode(chars, "big5").toString("hex"), big5Chars.toString("hex"));
+        var big5Chars = utils.bytes("a1 50 a1 d1");
+        assert.strictEqual(utils.hex(iconv.encode(chars, "big5")), utils.hex(big5Chars));
         assert.strictEqual(iconv.decode(big5Chars, "big5"), chars);
     });
 
     it("Big5 correctly encodes & decodes sequences", function () {
-        assert.strictEqual(iconv.encode("\u00CA\u0304", "big5").toString("hex"), "8862");
-        assert.strictEqual(iconv.encode("\u00EA\u030C", "big5").toString("hex"), "88a5");
-        assert.strictEqual(iconv.encode("\u00CA", "big5").toString("hex"), "8866");
-        assert.strictEqual(iconv.encode("\u00CA\u00CA", "big5").toString("hex"), "88668866");
+        assert.strictEqual(utils.hex(iconv.encode("\u00CA\u0304", "big5")), "88 62");
+        assert.strictEqual(utils.hex(iconv.encode("\u00EA\u030C", "big5")), "88 a5");
+        assert.strictEqual(utils.hex(iconv.encode("\u00CA", "big5")), "88 66");
+        assert.strictEqual(utils.hex(iconv.encode("\u00CA\u00CA", "big5")), "88 66 88 66");
 
-        assert.strictEqual(iconv.encode("\u00CA\uD800", "big5").toString("hex"), "88663f"); // Unfinished surrogate.
-        assert.strictEqual(iconv.encode("\u00CA\uD841\uDD47", "big5").toString("hex"), "8866fa40"); // Finished surrogate ('𠕇').
-        assert.strictEqual(iconv.encode("\u00CA𠕇", "big5").toString("hex"), "8866fa40"); // Finished surrogate ('𠕇').
+        assert.strictEqual(utils.hex(iconv.encode("\u00CA\uD800", "big5")), "88 66 3f"); // Unfinished surrogate.
+        assert.strictEqual(utils.hex(iconv.encode("\u00CA\uD841\uDD47", "big5")), "88 66 fa 40"); // Finished surrogate ('𠕇').
+        assert.strictEqual(utils.hex(iconv.encode("\u00CA𠕇", "big5")), "88 66 fa 40"); // Finished surrogate ('𠕇').
 
-        assert.strictEqual(iconv.decode(Buffer.from("8862", "hex"), "big5"), "\u00CA\u0304");
-        assert.strictEqual(iconv.decode(Buffer.from("8866", "hex"), "big5"), "\u00CA");
-        assert.strictEqual(iconv.decode(Buffer.from("8866fa40", "hex"), "big5"), "\u00CA𠕇");
+        assert.strictEqual(iconv.decode(utils.bytes("88 62"), "big5"), "\u00CA\u0304");
+        assert.strictEqual(iconv.decode(utils.bytes("88 66"), "big5"), "\u00CA");
+        assert.strictEqual(iconv.decode(utils.bytes("88 66 fa 40"), "big5"), "\u00CA𠕇");
     });
 
     it("Big5 correctly encodes 十", function () {
-        assert.strictEqual(iconv.encode("十", "big5").toString("hex"), "a451");
+        assert.strictEqual(utils.hex(iconv.encode("十", "big5")), "a4 51");
     });
 });
