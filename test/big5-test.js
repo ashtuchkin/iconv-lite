@@ -1,15 +1,16 @@
 "use strict";
 
-var assert = require("assert"),
+const assert = require("assert"),
     utils = require("./utils"),
+    big5File = require("./fixtures/big5.json"),
     iconv = utils.requireIconv();
 
-var testString = "中文abc", //unicode contains Big5-code and ascii
+const testString = "中文abc", //unicode contains Big5-code and ascii
     testStringBig5Buffer = utils.bytes("a4 a4 a4 e5 61 62 63"),
     testString2 = "測試",
     testStringBig5Buffer2 = utils.bytes("b4 fa b8 d5");
 
-describe("Big5 tests", function () {
+describe("Big5 tests #node-web", function () {
     it("Big5 correctly encoded/decoded", function () {
         assert.strictEqual(
             utils.hex(iconv.encode(testString, "big5")),
@@ -32,20 +33,16 @@ describe("Big5 tests", function () {
     });
 
     it("Big5 file read decoded,compare with iconv result", function () {
-        var contentBuffer = Buffer.from(
-            "PEhUTUw+DQo8SEVBRD4gICAgDQoJPFRJVExFPiBtZXRhILzQxdKquqjPpc6hR6SkpOW69K22IDwvVElUTEU+DQoJPG1ldGEgSFRUUC1FUVVJVj0iQ29udGVudC1UeXBlIiBDT05URU5UPSJ0ZXh0L2h0bWw7IGNoYXJzZXQ9YmlnNSI+DQo8L0hFQUQ+DQo8Qk9EWT4NCg0Ks2+sT6RArdPBY8XppKSk5br0rbahSTxicj4NCihUaGlzIHBhZ2UgdXNlcyBiaWc1IGNoYXJhY3RlciBzZXQuKTxicj4NCmNoYXJzZXQ9YmlnNQ0KDQo8L0JPRFk+DQo8L0hUTUw+",
-            "base64"
-        );
-        var str = iconv.decode(contentBuffer, "big5");
-        var iconvc = new (require("iconv").Iconv)("big5", "utf8");
-        assert.strictEqual(iconvc.convert(contentBuffer).toString(), str);
+        const contentBuffer = utils.bytes(big5File.bytes);
+        const str = iconv.decode(contentBuffer, "big5");
+        assert.strictEqual(big5File.string, str);
     });
 
     it("Big5 correctly decodes and encodes characters · and ×", function () {
         // https://github.com/ashtuchkin/iconv-lite/issues/13
         // Reference: http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP950.TXT
-        var chars = "·×";
-        var big5Chars = utils.bytes("a1 50 a1 d1");
+        const chars = "·×";
+        const big5Chars = utils.bytes("a1 50 a1 d1");
         assert.strictEqual(utils.hex(iconv.encode(chars, "big5")), utils.hex(big5Chars));
         assert.strictEqual(iconv.decode(big5Chars, "big5"), chars);
     });

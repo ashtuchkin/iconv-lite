@@ -12,3 +12,5 @@ require("../turkish-test");
 require("../utf16-test");
 require("../utils-test");
 require("../shiftjis-test");
+require("../gbk-test");
+require("../big5-test");

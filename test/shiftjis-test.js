@@ -1,12 +1,12 @@
 "use strict";
 
-var assert = require("assert"),
+const assert = require("assert"),
     utils = require("./utils"),
     iconv = utils.requireIconv();
 
 describe("ShiftJIS tests #node-web", function () {
     it("ShiftJIS correctly encoded/decoded", function () {
-        var testString = "中文abc", //unicode contains ShiftJIS-code and ascii
+        const testString = "中文abc", //unicode contains ShiftJIS-code and ascii
             testStringBig5Buffer = utils.bytes("92 86 95 b6 61 62 63"),
             testString2 = "測試",
             testStringBig5Buffer2 = utils.bytes("91 aa 8e 8e");
@@ -24,7 +24,7 @@ describe("ShiftJIS tests #node-web", function () {
     });
 
     it("ShiftJIS extended chars are decoded, but not encoded", function () {
-        var buf = utils.bytes("ed 40 ee fc ee ef"),
+        const buf = utils.bytes("ed 40 ee fc ee ef"),
             str = "纊＂ⅰ",
             res = "fa 5c fa 57 fa 40", // repeated block (these same chars are repeated in the different place)
             buf2 = utils.bytes("f0 40 f2 fc f9 40"),

@@ -1,14 +1,14 @@
 "use strict";
 
-var fs = require("fs"),
-    assert = require("assert"),
+const assert = require("assert"),
     utils = require("./utils"),
+    gbkFile = require("./fixtures/gbk.json"),
     iconv = utils.requireIconv();
 
-var testString = "中国abc", //unicode contains GBK-code and ascii
+const testString = "中国abc", //unicode contains GBK-code and ascii
     testStringGBKBuffer = utils.bytes("d6 d0 b9 fa 61 62 63");
 
-describe("GBK tests", function () {
+describe("GBK tests #node-web", function () {
     it("GBK correctly encoded/decoded", function () {
         assert.strictEqual(
             utils.hex(iconv.encode(testString, "GBK")),
@@ -26,17 +26,16 @@ describe("GBK tests", function () {
     });
 
     it("GBK file read decoded,compare with iconv result", function () {
-        var contentBuffer = fs.readFileSync(__dirname + "/gbkFile.txt");
-        var str = iconv.decode(contentBuffer, "GBK");
-        var iconvc = new (require("iconv").Iconv)("GBK", "utf8");
-        assert.strictEqual(iconvc.convert(contentBuffer).toString(), str);
+        const contentBuffer = utils.bytes(gbkFile.bytes);
+        const str = iconv.decode(contentBuffer, "GBK");
+        assert.strictEqual(gbkFile.string, str);
     });
 
     it("GBK correctly decodes and encodes characters · and ×", function () {
         // https://github.com/ashtuchkin/iconv-lite/issues/13
         // Reference: http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP936.TXT
-        var chars = "·×";
-        var gbkChars = utils.bytes("a1 a4 a1 c1");
+        const chars = "·×";
+        const gbkChars = utils.bytes("a1 a4 a1 c1");
         assert.strictEqual(utils.hex(iconv.encode(chars, "GBK")), utils.hex(gbkChars));
         assert.strictEqual(iconv.decode(gbkChars, "GBK"), chars);
     });
@@ -45,7 +44,7 @@ describe("GBK tests", function () {
         // Euro character (U+20AC) has two encodings in GBK family: 0x80 and 0xA2 0xE3
         // According to W3C's technical recommendation (https://www.w3.org/TR/encoding/#gbk-encoder),
         // Both GBK and GB18030 decoders should accept both encodings.
-        var gbkEuroEncoding1 = utils.bytes("80"),
+        const gbkEuroEncoding1 = utils.bytes("80"),
             gbkEuroEncoding2 = utils.bytes("a2 e3"),
             strEuro = "€";
 
@@ -86,19 +85,8 @@ describe("GBK tests", function () {
             );
     });
 
-    function swapBytes(buf) {
-        for (var i = 0; i < buf.length; i += 2) buf.writeUInt16LE(buf.readUInt16BE(i), i);
-        return buf;
-    }
-    function spacify4(str) {
-        return str.replace(/(....)/g, "$1 ").trim();
-    }
-    function strToHex(str) {
-        return spacify4(swapBytes(Buffer.from(str, "ucs2")).toString("hex"));
-    }
-
     it("GB18030 encodes/decodes 4 byte sequences", function () {
-        var chars = {
+        const chars = {
             "\u0080": utils.bytes("81 30 81 30"),
             "\u0081": utils.bytes("81 30 81 31"),
             "\u008b": utils.bytes("81 30 82 31"),
@@ -106,15 +94,18 @@ describe("GBK tests", function () {
             㦟: utils.bytes("82 31 82 31"),
             "\udbd9\ude77": utils.bytes("e0 31 82 31"),
         };
-        for (var uChar in chars) {
-            var gbkBuf = chars[uChar];
+        for (const uChar in chars) {
+            const gbkBuf = chars[uChar];
             assert.strictEqual(utils.hex(iconv.encode(uChar, "GB18030")), utils.hex(gbkBuf));
-            assert.strictEqual(strToHex(iconv.decode(gbkBuf, "GB18030")), strToHex(uChar));
+            assert.strictEqual(
+                utils.strToHex(iconv.decode(gbkBuf, "GB18030")),
+                utils.strToHex(uChar)
+            );
         }
     });
 
     it("GB18030 correctly decodes incomplete 4 byte sequences", function () {
-        var chars = {
+        const chars = {
             "�": utils.bytes("82"),
             "�1": utils.bytes("82 31"),
             "�1�": utils.bytes("82 31 82"),
@@ -128,16 +119,19 @@ describe("GBK tests", function () {
             㦟俛: utils.bytes("82 31 82 31 82 61"),
             "�1\u50101�1": utils.bytes("82 31 82 82 31 82 31"),
         };
-        for (var uChar in chars) {
-            var gbkBuf = chars[uChar];
-            assert.strictEqual(strToHex(iconv.decode(gbkBuf, "GB18030")), strToHex(uChar));
+        for (const uChar in chars) {
+            const gbkBuf = chars[uChar];
+            assert.strictEqual(
+                utils.strToHex(iconv.decode(gbkBuf, "GB18030")),
+                utils.strToHex(uChar)
+            );
         }
     });
 
     it("GB18030:2005 changes are applied", function () {
         // See https://github.com/whatwg/encoding/issues/22
-        var chars = "\u1E3F\u0000\uE7C7"; // Use \u0000 as separator
-        var gbkChars = utils.bytes("a8 bc 00 81 35 f4 37");
+        const chars = "\u1E3F\u0000\uE7C7"; // Use \u0000 as separator
+        const gbkChars = utils.bytes("a8 bc 00 81 35 f4 37");
         assert.strictEqual(iconv.decode(gbkChars, "GB18030"), chars);
         assert.strictEqual(utils.hex(iconv.encode(chars, "GB18030")), utils.hex(gbkChars));
     });
