@@ -2,7 +2,7 @@
 
 const assert = require("assert"),
     utils = require("./utils"),
-    big5File = require("./fixtures/big5.json"),
+    fixtures = require("./fixtures/gbk-big5.json"),
     iconv = utils.requireIconv();
 
 const testString = "中文abc", //unicode contains Big5-code and ascii
@@ -33,9 +33,9 @@ describe("Big5 tests #node-web", function () {
     });
 
     it("Big5 file read decoded,compare with iconv result", function () {
-        const contentBuffer = utils.bytes(big5File.bytes);
+        const contentBuffer = utils.bytes(fixtures.big5.bytes);
         const str = iconv.decode(contentBuffer, "big5");
-        assert.strictEqual(big5File.string, str);
+        assert.strictEqual(fixtures.big5.string, str);
     });
 
     it("Big5 correctly decodes and encodes characters · and ×", function () {

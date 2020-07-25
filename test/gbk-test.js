@@ -2,7 +2,7 @@
 
 const assert = require("assert"),
     utils = require("./utils"),
-    gbkFile = require("./fixtures/gbk.json"),
+    fixtures = require("./fixtures/gbk-big5.json"),
     iconv = utils.requireIconv();
 
 const testString = "中国abc", //unicode contains GBK-code and ascii
@@ -26,9 +26,9 @@ describe("GBK tests #node-web", function () {
     });
 
     it("GBK file read decoded,compare with iconv result", function () {
-        const contentBuffer = utils.bytes(gbkFile.bytes);
+        const contentBuffer = utils.bytes(fixtures.gbk.bytes);
         const str = iconv.decode(contentBuffer, "GBK");
-        assert.strictEqual(gbkFile.string, str);
+        assert.strictEqual(fixtures.gbk.string, str);
     });
 
     it("GBK correctly decodes and encodes characters · and ×", function () {
