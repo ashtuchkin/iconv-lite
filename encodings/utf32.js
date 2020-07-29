@@ -29,6 +29,12 @@ function Utf32Encoder(options, codec) {
     this.highSurrogate = 0;
 }
 
+Object.defineProperty(Utf32Encoder.prototype, 'hasState', {
+    get: function () {
+        return !!this.highSurrogate;
+    }
+});
+
 Utf32Encoder.prototype.write = function (str) {
     var src = Buffer.from(str, "ucs2");
     var dst = Buffer.alloc(src.length * 2);
@@ -76,6 +82,36 @@ Utf32Encoder.prototype.write = function (str) {
     return dst;
 };
 
+Utf32Encoder.prototype.byteLength = function (str) {
+    var byteLength = 0;
+    var currentHighSurrogate = 0;
+
+    for (var i = 0; i < str.length; i++) {
+        var code = str.charCodeAt(i);
+        var isHighSurrogate = (0xd800 <= code && code < 0xdc00); // prettier-ignore
+        var isLowSurrogate = (0xdc00 <= code && code < 0xe000); // prettier-ignore
+
+        if (currentHighSurrogate) {
+            if (isHighSurrogate || !isLowSurrogate) {
+                byteLength += 4;
+            } else {
+                byteLength += 4;
+                currentHighSurrogate = 0;
+                continue;
+            }
+        }
+
+        if (isHighSurrogate) {
+            currentHighSurrogate = code;
+        } else {
+            byteLength += 4;
+            currentHighSurrogate = 0;
+        }
+    }
+
+    return byteLength;
+}
+
 Utf32Encoder.prototype.end = function () {
     // Treat any leftover high surrogate as a semi-valid independent character.
     if (!this.highSurrogate) {
@@ -99,6 +135,12 @@ function Utf32Decoder(options, codec) {
     this.badChar = codec.iconv.defaultCharUnicode.charCodeAt(0);
     this.overflow = [];
 }
+
+Object.defineProperty(Utf32Encoder.prototype, 'hasState', {
+    get: function () {
+        return this.overflow.length > 0;
+    }
+});
 
 Utf32Decoder.prototype.write = function (src) {
     if (src.length === 0) return "";
@@ -212,6 +254,16 @@ function Utf32AutoEncoder(options, codec) {
     this.encoder = codec.iconv.getEncoder(options.defaultEncoding || "utf-32le", options);
 }
 
+Object.defineProperty(Utf32Encoder.prototype, 'hasState', {
+    get: function () {
+        return this.encoder.hasState;
+    }
+});
+
+Utf32AutoEncoder.prototype.byteLength = function (str) {
+    return this.encoder.byteLength(str);
+}
+
 Utf32AutoEncoder.prototype.write = function (str) {
     return this.encoder.write(str);
 };
@@ -229,6 +281,12 @@ function Utf32AutoDecoder(options, codec) {
     this.options = options || {};
     this.iconv = codec.iconv;
 }
+
+Object.defineProperty(Utf32Encoder.prototype, 'hasState', {
+    get: function () {
+        return this.initialBufsLen !== 0 || (this.decoder != null && this.decoder.hasState);
+    }
+});
 
 Utf32AutoDecoder.prototype.write = function (buf) {
     if (!this.decoder) {

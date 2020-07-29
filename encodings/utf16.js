@@ -22,6 +22,12 @@ class Utf16LEEncoder {
         this.backend = backend;
     }
 
+    byteLength(str) {
+        return str.length * 2;
+    }
+
+    get hasState() { return false; }
+
     write(str) {
         const bytes = this.backend.allocBytes(str.length * 2);
         const chars = new Uint16Array(bytes.buffer, bytes.byteOffset, str.length);
@@ -31,7 +37,7 @@ class Utf16LEEncoder {
         return this.backend.bytesToResult(bytes, bytes.length);
     }
 
-    end() {}
+    end() { }
 }
 
 class Utf16LEDecoder {
@@ -40,6 +46,10 @@ class Utf16LEDecoder {
         this.defaultChar = defaultChar;
         this.leadByte = -1;
         this.leadSurrogate = undefined;
+    }
+
+    get hasState() {
+        return this.leadSurrogate || this.leadByte !== -1;
     }
 
     write(buf) {
@@ -158,6 +168,12 @@ class Utf16BEEncoder {
         this.backend = backend;
     }
 
+    byteLength(str) {
+        return str.length * 2;
+    }
+
+    get hasState() { return false; }
+
     write(str) {
         const bytes = this.backend.allocBytes(str.length * 2);
         let bytesPos = 0;
@@ -169,7 +185,7 @@ class Utf16BEEncoder {
         return this.backend.bytesToResult(bytes, bytesPos);
     }
 
-    end() {}
+    end() { }
 }
 
 class Utf16BEDecoder {
@@ -178,6 +194,10 @@ class Utf16BEDecoder {
         this.defaultChar = defaultChar;
         this.leadByte = -1;
         this.leadSurrogate = undefined;
+    }
+
+    get hasState() {
+        return this.leadSurrogate || this.leadByte !== -1;
     }
 
     write(buf) {
@@ -290,6 +310,10 @@ class Utf16Decoder {
 
         this.options = options || {};
         this.iconv = iconv;
+    }
+
+    get hasState() {
+        return this.initialBufsLen !== 0 || (this.decoder != null && this.decoder.hasState);
     }
 
     write(buf) {

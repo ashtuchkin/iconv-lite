@@ -17,25 +17,50 @@ Utf7Codec.prototype.bomAware = true;
 // -- Encoding
 
 const nonDirectChars = /[^A-Za-z0-9'(),-./:? \n\r\t]+/g;
+const segmentPattern = /([^A-Za-z0-9'(),-./:? \n\r\t]+)|([A-Za-z0-9'(),-./:? \n\r\t]+)/g;
 
 function Utf7Encoder(options, codec) {
     this.iconv = codec.iconv;
 }
 
+Utf7Encoder.prototype.byteLength = function (str) {
+    var byteLength = 0;
+
+    const segments = str.matchAll(segmentPattern);
+    for (const segment of segments) {
+        if (segment[2] != null) // match group 2: direct chars
+            byteLength += segment[2].length;
+        else { // match group 1: non direct chars
+            if (segment[1] !== "+")
+                byteLength += Math.ceil((segment[1].length * 2) * 4 / 3); // without padding
+            byteLength += 2; // + and - 
+        }
+    }
+
+    return byteLength;
+}
+
+Object.defineProperty(Utf7Encoder.prototype, 'hasState', {
+    get: function () {
+        return false;
+    }
+});
+
 Utf7Encoder.prototype.write = function (str) {
     // Naive implementation.
     // Non-direct chars are encoded as "+<base64>-"; single "+" char is encoded as "+-".
-    const replaceFn = (chunk) =>
-        "+" +
-        (chunk === "+"
-            ? ""
-            : this.iconv.encode(chunk, "utf16-be").toString("base64").replace(/=+$/, "")) +
-        "-";
+    function replaceFn(chunk) {
+        if (chunk === "+")
+            return "+-";
+        var base64Str = this.iconv.encode(chunk, "utf16-be").toString("base64").replace(/=+$/, "");
+        return "+" + base64Str + "-";
+    };
 
     return Buffer.from(str.replace(nonDirectChars, replaceFn));
 };
 
-Utf7Encoder.prototype.end = function () {};
+
+Utf7Encoder.prototype.end = function () { };
 
 // -- Decoding
 
@@ -52,6 +77,12 @@ for (var i = 0; i < 256; i++) base64Chars[i] = base64Regex.test(String.fromCharC
 var plusChar = "+".charCodeAt(0),
     minusChar = "-".charCodeAt(0),
     andChar = "&".charCodeAt(0);
+
+Object.defineProperty(Utf7Decoder.prototype, 'hasState', {
+    get: function () {
+        return this.inBase64 && this.base64Accum.length > 0;
+    }
+});
 
 Utf7Decoder.prototype.write = function (buf) {
     let res = "",
@@ -150,6 +181,51 @@ function Utf7IMAPEncoder(options, codec) {
     this.base64AccumIdx = 0;
 }
 
+Utf7Encoder.prototype.byteLength = function (str) {
+    var byteLength = 0;
+    var inBase64 = false,
+        base64AccumLength = 0,
+
+    for (var i = 0; i < str.length; i++) {
+        var uChar = str.charCodeAt(i);
+        if (0x20 <= uChar && uChar <= 0x7e) { // Direct character or '&'.
+            if (inBase64) {
+                if (base64AccumLength > 0) {
+                    byteLength += Math.ceil(base64AccumLength * 4 / 3); // without padding
+                    base64AccumLength = 0;
+                }
+                byteLength++; // Count '-', then go to direct mode.
+                inBase64 = false;
+            }
+            if (!inBase64) {
+                byteLength++; // Count direct character
+                if (uChar === andChar) // Ampersand -> '&-'
+                    byteLength++;
+            }
+        } else { // Non-direct character
+            if (!inBase64) {
+                byteLength++; // Count '&', then go to base64 mode.
+                inBase64 = true;
+            }
+            if (inBase64) {
+                base64AccumLength += 2;
+                if (base64AccumLength === 6) {
+                    byteLength += base64AccumLength * 4 / 3;
+                    base64AccumLength = 0;
+                }
+            }
+        }
+    }
+
+    return byteLength;
+}
+
+Object.defineProperty(Utf7IMAPEncoder.prototype, 'hasState', {
+    get: function () {
+        return this.inBase64;
+    }
+});
+
 Utf7IMAPEncoder.prototype.write = function (str) {
     var inBase64 = this.inBase64,
         base64Accum = this.base64Accum,
@@ -242,6 +318,12 @@ function Utf7IMAPDecoder(options, codec) {
 
 var base64IMAPChars = base64Chars.slice();
 base64IMAPChars[",".charCodeAt(0)] = true;
+
+Object.defineProperty(Utf7IMAPDecoder.prototype, 'hasState', {
+    get: function () {
+        return this.inBase64 && this.base64Accum.length > 0;
+    }
+});
 
 Utf7IMAPDecoder.prototype.write = function (buf) {
     var res = "",

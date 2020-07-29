@@ -332,6 +332,124 @@ class DBCSEncoder {
         this.gb18030 = codec.gb18030;
     }
 
+    byteLength(str) {
+        let byteLength = 0;
+        let leadSurrogate = -1,
+            seqObj = undefined,
+            nextChar = -1,
+            i = 0,
+
+        for (; ;) {
+            // 0. Get next character.
+            let uCode;
+            if (nextChar === -1) {
+                if (i === str.length) break;
+                uCode = str.charCodeAt(i++);
+            } else {
+                uCode = nextChar;
+                nextChar = -1;
+            }
+
+            // 1. Handle surrogates.
+            if (0xd800 <= uCode && uCode < 0xe000) {
+                // Char is one of surrogates.
+                if (uCode < 0xdc00) {
+                    // We've got a lead surrogate.
+                    if (leadSurrogate === -1) {
+                        leadSurrogate = uCode;
+                        continue;
+                    } else {
+                        leadSurrogate = uCode;
+                        // Double lead surrogate found.
+                        uCode = UNASSIGNED;
+                    }
+                } else {
+                    // We've got trail surrogate.
+                    if (leadSurrogate !== -1) {
+                        uCode = 0x10000 + (leadSurrogate - 0xd800) * 0x400 + (uCode - 0xdc00);
+                        leadSurrogate = -1;
+                    } else {
+                        // Incomplete surrogate pair - only trail surrogate found.
+                        uCode = UNASSIGNED;
+                    }
+                }
+            } else if (leadSurrogate !== -1) {
+                // Incomplete surrogate pair - only lead surrogate found.
+                nextChar = uCode;
+                uCode = UNASSIGNED;
+                leadSurrogate = -1;
+            }
+
+            // 2. Convert uCode character.
+            let dbcsCode = UNASSIGNED;
+            if (seqObj !== undefined && uCode !== UNASSIGNED) {
+                // We are in the middle of the sequence
+                let resCode = seqObj[uCode];
+                if (typeof resCode === "object") {
+                    // Sequence continues.
+                    seqObj = resCode;
+                    continue;
+                } else if (typeof resCode == "number") {
+                    // Sequence finished.
+                    dbcsCode = resCode;
+                } else if (resCode === undefined) {
+                    // Current character is not part of the sequence.
+
+                    // Try default character for this sequence
+                    resCode = seqObj[DEF_CHAR];
+                    if (resCode !== undefined) {
+                        dbcsCode = resCode; // Found.
+                        nextChar = uCode; // Current character will be written too in the next iteration.
+                    } else {
+                        // Skip
+                    }
+                }
+                seqObj = undefined;
+            } else if (uCode >= 0) {
+                // Regular character
+                const subtable = this.encodeTable[uCode >> 8];
+                if (subtable !== undefined) dbcsCode = subtable[uCode & 0xff];
+
+                if (dbcsCode <= SEQ_START) {
+                    // Sequence start
+                    seqObj = this.encodeTableSeq[SEQ_START - dbcsCode];
+                    continue;
+                }
+
+                if (dbcsCode === UNASSIGNED && this.gb18030) {
+                    // Use GB18030 algorithm to find character(s) to count.
+                    const idx = findIdx(this.gb18030.uChars, uCode);
+                    if (idx !== -1) {
+                        dbcsCode = this.gb18030.gbChars[idx] + (uCode - this.gb18030.uChars[idx]);
+                        dbcsCode = dbcsCode % 12600 % 1260 % 10;
+                        byteLength += 4;
+                        continue;
+                    }
+                }
+            }
+
+            // 3. Count dbcsCode character.
+            if (dbcsCode === UNASSIGNED) {
+                dbcsCode = this.defaultCharSingleByte;
+            }
+
+            if (dbcsCode < 0x100)
+                byteLength += 1;
+            else if (dbcsCode < 0x10000)
+                byteLength += 2;
+            else if (dbcsCode < 0x1000000)
+                byteLength += 3;
+            else
+                byteLength += 4;
+        }
+
+        return byteLength;
+    }
+
+    get hasState() {
+        return this.leadSurrogate !== -1 || this.seqObj !== undefined;
+    }
+
     write(str) {
         const bytes = this.backend.allocBytes(str.length * (this.gb18030 ? 4 : 3));
         let leadSurrogate = this.leadSurrogate,
@@ -519,6 +637,10 @@ class DBCSDecoder {
         this.decodeTableSeq = codec.decodeTableSeq;
         this.defaultCharUnicode = codec.defaultCharUnicode;
         this.gb18030 = codec.gb18030;
+    }
+
+    get hasState() {
+        return this.prevBytes.length > 0;
     }
 
     write(buf) {
