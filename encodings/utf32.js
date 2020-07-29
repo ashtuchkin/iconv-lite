@@ -29,10 +29,10 @@ function Utf32Encoder(options, codec) {
     this.highSurrogate = 0;
 }
 
-Object.defineProperty(Utf32Encoder.prototype, 'hasState', {
+Object.defineProperty(Utf32Encoder.prototype, "hasState", {
     get: function () {
         return !!this.highSurrogate;
-    }
+    },
 });
 
 Utf32Encoder.prototype.write = function (str) {
@@ -110,7 +110,7 @@ Utf32Encoder.prototype.byteLength = function (str) {
     }
 
     return byteLength;
-}
+};
 
 Utf32Encoder.prototype.end = function () {
     // Treat any leftover high surrogate as a semi-valid independent character.
@@ -136,10 +136,10 @@ function Utf32Decoder(options, codec) {
     this.overflow = [];
 }
 
-Object.defineProperty(Utf32Encoder.prototype, 'hasState', {
+Object.defineProperty(Utf32Decoder.prototype, "hasState", {
     get: function () {
         return this.overflow.length > 0;
-    }
+    },
 });
 
 Utf32Decoder.prototype.write = function (src) {
@@ -254,15 +254,15 @@ function Utf32AutoEncoder(options, codec) {
     this.encoder = codec.iconv.getEncoder(options.defaultEncoding || "utf-32le", options);
 }
 
-Object.defineProperty(Utf32Encoder.prototype, 'hasState', {
+Object.defineProperty(Utf32AutoEncoder.prototype, "hasState", {
     get: function () {
         return this.encoder.hasState;
-    }
+    },
 });
 
 Utf32AutoEncoder.prototype.byteLength = function (str) {
     return this.encoder.byteLength(str);
-}
+};
 
 Utf32AutoEncoder.prototype.write = function (str) {
     return this.encoder.write(str);
@@ -282,10 +282,10 @@ function Utf32AutoDecoder(options, codec) {
     this.iconv = codec.iconv;
 }
 
-Object.defineProperty(Utf32Encoder.prototype, 'hasState', {
+Object.defineProperty(Utf32AutoDecoder.prototype, "hasState", {
     get: function () {
         return this.initialBufsLen !== 0 || (this.decoder != null && this.decoder.hasState);
-    }
+    },
 });
 
 Utf32AutoDecoder.prototype.write = function (buf) {

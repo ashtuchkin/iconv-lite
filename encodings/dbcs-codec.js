@@ -337,9 +337,9 @@ class DBCSEncoder {
         let leadSurrogate = -1,
             seqObj = undefined,
             nextChar = -1,
-            i = 0,
+            i = 0;
 
-        for (; ;) {
+        for (;;) {
             // 0. Get next character.
             let uCode;
             if (nextChar === -1) {
@@ -421,7 +421,7 @@ class DBCSEncoder {
                     const idx = findIdx(this.gb18030.uChars, uCode);
                     if (idx !== -1) {
                         dbcsCode = this.gb18030.gbChars[idx] + (uCode - this.gb18030.uChars[idx]);
-                        dbcsCode = dbcsCode % 12600 % 1260 % 10;
+                        dbcsCode = ((dbcsCode % 12600) % 1260) % 10;
                         byteLength += 4;
                         continue;
                     }
@@ -433,14 +433,10 @@ class DBCSEncoder {
                 dbcsCode = this.defaultCharSingleByte;
             }
 
-            if (dbcsCode < 0x100)
-                byteLength += 1;
-            else if (dbcsCode < 0x10000)
-                byteLength += 2;
-            else if (dbcsCode < 0x1000000)
-                byteLength += 3;
-            else
-                byteLength += 4;
+            if (dbcsCode < 0x100) byteLength += 1;
+            else if (dbcsCode < 0x10000) byteLength += 2;
+            else if (dbcsCode < 0x1000000) byteLength += 3;
+            else byteLength += 4;
         }
 
         return byteLength;

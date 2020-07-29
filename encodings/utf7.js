@@ -28,30 +28,30 @@ Utf7Encoder.prototype.byteLength = function (str) {
 
     const segments = str.matchAll(segmentPattern);
     for (const segment of segments) {
-        if (segment[2] != null) // match group 2: direct chars
+        if (segment[2] != null)
+            // match group 2: direct chars
             byteLength += segment[2].length;
-        else { // match group 1: non direct chars
-            if (segment[1] !== "+")
-                byteLength += Math.ceil((segment[1].length * 2) * 4 / 3); // without padding
-            byteLength += 2; // + and - 
+        else {
+            // match group 1: non direct chars
+            if (segment[1] !== "+") byteLength += Math.ceil((segment[1].length * 2 * 4) / 3); // without padding
+            byteLength += 2; // + and -
         }
     }
 
     return byteLength;
-}
+};
 
-Object.defineProperty(Utf7Encoder.prototype, 'hasState', {
+Object.defineProperty(Utf7Encoder.prototype, "hasState", {
     get: function () {
         return false;
-    }
+    },
 });
 
 Utf7Encoder.prototype.write = function (str) {
     // Naive implementation.
     // Non-direct chars are encoded as "+<base64>-"; single "+" char is encoded as "+-".
-    function replaceFn(chunk) {
-        if (chunk === "+")
-            return "+-";
+    var replaceFn = (chunk) => {
+        if (chunk === "+") return "+-";
         var base64Str = this.iconv.encode(chunk, "utf16-be").toString("base64").replace(/=+$/, "");
         return "+" + base64Str + "-";
     };
@@ -59,8 +59,7 @@ Utf7Encoder.prototype.write = function (str) {
     return Buffer.from(str.replace(nonDirectChars, replaceFn));
 };
 
-
-Utf7Encoder.prototype.end = function () { };
+Utf7Encoder.prototype.end = function () {};
 
 // -- Decoding
 
@@ -78,10 +77,10 @@ var plusChar = "+".charCodeAt(0),
     minusChar = "-".charCodeAt(0),
     andChar = "&".charCodeAt(0);
 
-Object.defineProperty(Utf7Decoder.prototype, 'hasState', {
+Object.defineProperty(Utf7Decoder.prototype, "hasState", {
     get: function () {
         return this.inBase64 && this.base64Accum.length > 0;
-    }
+    },
 });
 
 Utf7Decoder.prototype.write = function (buf) {
@@ -184,14 +183,15 @@ function Utf7IMAPEncoder(options, codec) {
 Utf7Encoder.prototype.byteLength = function (str) {
     var byteLength = 0;
     var inBase64 = false,
-        base64AccumLength = 0,
+        base64AccumLength = 0;
 
     for (var i = 0; i < str.length; i++) {
         var uChar = str.charCodeAt(i);
-        if (0x20 <= uChar && uChar <= 0x7e) { // Direct character or '&'.
+        if (0x20 <= uChar && uChar <= 0x7e) {
+            // Direct character or '&'.
             if (inBase64) {
                 if (base64AccumLength > 0) {
-                    byteLength += Math.ceil(base64AccumLength * 4 / 3); // without padding
+                    byteLength += Math.ceil((base64AccumLength * 4) / 3); // without padding
                     base64AccumLength = 0;
                 }
                 byteLength++; // Count '-', then go to direct mode.
@@ -199,10 +199,12 @@ Utf7Encoder.prototype.byteLength = function (str) {
             }
             if (!inBase64) {
                 byteLength++; // Count direct character
-                if (uChar === andChar) // Ampersand -> '&-'
+                if (uChar === andChar)
+                    // Ampersand -> '&-'
                     byteLength++;
             }
-        } else { // Non-direct character
+        } else {
+            // Non-direct character
             if (!inBase64) {
                 byteLength++; // Count '&', then go to base64 mode.
                 inBase64 = true;
@@ -210,7 +212,7 @@ Utf7Encoder.prototype.byteLength = function (str) {
             if (inBase64) {
                 base64AccumLength += 2;
                 if (base64AccumLength === 6) {
-                    byteLength += base64AccumLength * 4 / 3;
+                    byteLength += (base64AccumLength * 4) / 3;
                     base64AccumLength = 0;
                 }
             }
@@ -218,12 +220,12 @@ Utf7Encoder.prototype.byteLength = function (str) {
     }
 
     return byteLength;
-}
+};
 
-Object.defineProperty(Utf7IMAPEncoder.prototype, 'hasState', {
+Object.defineProperty(Utf7IMAPEncoder.prototype, "hasState", {
     get: function () {
         return this.inBase64;
-    }
+    },
 });
 
 Utf7IMAPEncoder.prototype.write = function (str) {
@@ -319,10 +321,10 @@ function Utf7IMAPDecoder(options, codec) {
 var base64IMAPChars = base64Chars.slice();
 base64IMAPChars[",".charCodeAt(0)] = true;
 
-Object.defineProperty(Utf7IMAPDecoder.prototype, 'hasState', {
+Object.defineProperty(Utf7IMAPDecoder.prototype, "hasState", {
     get: function () {
         return this.inBase64 && this.base64Accum.length > 0;
-    }
+    },
 });
 
 Utf7IMAPDecoder.prototype.write = function (buf) {

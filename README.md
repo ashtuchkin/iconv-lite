@@ -31,6 +31,30 @@ buf = iconv.encode("Sample input string", "win1251");
 
 // Check if encoding is supported
 iconv.encodingExists("us-ascii");
+
+// Calculate the actual length in bytes.
+len = iconv.byteLength("Hello, world! 😀", "utf16be");
+
+// Get a decoder and decode two different buffers into a single string, the decoder keeps state between buffers
+var utf8Decoder = iconv.getDecoder("utf8");
+var bytes1 = Buffer.from([0x20, 0x23, 0xe2]); // space, # and part of ☣
+var bytes2 = Buffer.from([0x98, 0xa3]); // the rest of ☣
+var str = utf8Decoder.write(bytes1);
+// You can check if the decoder has state currently
+var hasState = utf8Decoder.hasState; // true;
+str += utf8Decoder.write(bytes2);
+var hasState = utf8Decoder.hasState; // false;
+
+// The same for encoder, you rarely need to care about the encoder's state, except for some special encoders and surrogate pair
+var utf8Encoder = iconv.getEncoder("utf8");
+var bytes = utf8Encoder.write("Hi \uD83D");
+var hasState = utf8Encoder.hasState; // true
+bytes = bytes.concat([utf8Encoder.write("\uDE00")]);
+hasState = utf8Encoder.hasState; // false
+
+// Use the "end" method to get the remaining data in encoder/decoder's state and clear the state
+var bytes = encoder.end();
+var str = decoder.end();
 ```
 
 ### Streaming API
@@ -112,9 +136,9 @@ This library supports UTF-32LE, UTF-32BE and UTF-32 encodings. Like the UTF-16 e
 
 ## Other notes
 
-When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things usually happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).  
-Untranslatable characters are set to � or ?. No transliteration is currently supported.  
-Node versions 0.10.31 and 0.11.13 are buggy, don't use them (see #65, #77).
+-   When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things usually happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).
+-   Untranslatable characters are set to � or ?. No transliteration is currently supported.
+-   Node versions 0.10.31 and 0.11.13 are buggy, don't use them (see #65, #77).
 
 ## Testing
 

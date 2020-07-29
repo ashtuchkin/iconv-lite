@@ -56,11 +56,11 @@ function InternalDecoder(options, codec) {
     this.decoder = new StringDecoder(codec.enc);
 }
 
-Object.defineProperty(InternalDecoder.prototype, 'hasState', {
+Object.defineProperty(InternalDecoder.prototype, "hasState", {
     get: function () {
         // TODO: hopefully this will not be changed in newer version of NodeJS
-        return this.decoder['lastNeed'] !== 0;
-    }
+        return this.decoder["lastNeed"] !== 0;
+    },
 });
 
 InternalDecoder.prototype.write = function (buf) {
@@ -82,15 +82,15 @@ function InternalEncoder(options, codec) {
     this.enc = codec.enc;
 }
 
-Object.defineProperty(InternalEncoder.prototype, 'hasState', {
+Object.defineProperty(InternalEncoder.prototype, "hasState", {
     get: function () {
         return false;
-    }
+    },
 });
 
 InternalEncoder.prototype.byteLength = function (str) {
     return Buffer.byteLength(str, this.enc);
-}
+};
 
 InternalEncoder.prototype.write = function (str) {
     return Buffer.from(str, this.enc);
@@ -105,10 +105,10 @@ function InternalEncoderBase64() {
     this.prevStr = "";
 }
 
-Object.defineProperty(InternalEncoderBase64.prototype, 'hasState', {
+Object.defineProperty(InternalEncoderBase64.prototype, "hasState", {
     get: function () {
         return this.prevStr.length > 0;
-    }
+    },
 });
 
 InternalEncoderBase64.prototype.byteLength = function (str) {
@@ -116,8 +116,8 @@ InternalEncoderBase64.prototype.byteLength = function (str) {
     str = str.slice(0, completeQuads);
     var nonPaddedLength = str.search(/=*$/);
     if (nonPaddedLength === -1) nonPaddedLength = str.length;
-    return Math.floor(nonPaddedLength * 3 / 4);
-}
+    return Math.floor((nonPaddedLength * 3) / 4);
+};
 
 InternalEncoderBase64.prototype.write = function (str) {
     str = this.prevStr + str;
@@ -137,25 +137,22 @@ InternalEncoderBase64.prototype.end = function () {
 
 function InternalEncoderCesu8() {}
 
-Object.defineProperty(InternalEncoderBase64.prototype, 'hasState', {
+Object.defineProperty(InternalEncoderCesu8.prototype, "hasState", {
     get: function () {
         return false;
-    }
+    },
 });
 
 InternalEncoderCesu8.prototype.byteLength = function (str) {
     let byteLength = 0;
     for (let i = 0; i < str.length; i++) {
         const charCode = str.charCodeAt(i);
-        if (charCode < 0x80)
-            byteLength += 1;
-        else if (charCode < 0x800)
-            byteLength += 2;
-        else
-            byteLength += 3;
+        if (charCode < 0x80) byteLength += 1;
+        else if (charCode < 0x800) byteLength += 2;
+        else byteLength += 3;
     }
     return byteLength;
-}
+};
 
 InternalEncoderCesu8.prototype.write = function (str) {
     const buf = Buffer.alloc(str.length * 3);
@@ -191,10 +188,10 @@ function InternalDecoderCesu8(options, codec) {
     this.defaultCharUnicode = codec.defaultCharUnicode;
 }
 
-Object.defineProperty(InternalDecoderCesu8.prototype, 'hasState', {
+Object.defineProperty(InternalDecoderCesu8.prototype, "hasState", {
     get: function () {
         return this.contBytes > 0;
-    }
+    },
 });
 
 InternalDecoderCesu8.prototype.write = function (buf) {
