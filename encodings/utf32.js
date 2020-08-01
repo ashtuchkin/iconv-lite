@@ -109,6 +109,10 @@ Utf32Encoder.prototype.byteLength = function (str) {
         }
     }
 
+    if (currentHighSurrogate) {
+        byteLength += 4;
+    }
+
     return byteLength;
 };
 

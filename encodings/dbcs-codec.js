@@ -439,6 +439,25 @@ class DBCSEncoder {
             else byteLength += 4;
         }
 
+        if (leadSurrogate !== -1 || seqObj !== undefined) {
+            if (seqObj) {
+                // We're in the sequence.
+                const dbcsCode = seqObj[DEF_CHAR];
+                if (dbcsCode !== undefined) {
+                    // Write beginning of the sequence.
+                    if (dbcsCode < 0x100) byteLength++;
+                    else byteLength += 2;
+                } else {
+                    // See todo above.
+                }
+            }
+
+            if (leadSurrogate !== -1) {
+                // Incomplete surrogate pair - only lead surrogate found.
+                byteLength++;
+            }
+        }
+
         return byteLength;
     }
 

@@ -54,6 +54,8 @@ describe("UTF-16LE encoder #node-web", function () {
         assert.equal(hex(encoder.write("\uDCA9")), "a9 dc");
         assert.strictEqual(encoder.end(), undefined);
     });
+
+    it("byteLength works correctly", utils.checkByteLength(enc));
 });
 
 describe("UTF-16LE decoder #node-web", function () {
@@ -178,6 +180,8 @@ describe("UTF-16BE encoder #node-web", function () {
         assert.equal(hex(encoder.write("\uDCA9")), "dc a9");
         assert.strictEqual(encoder.end(), undefined);
     });
+
+    it("byteLength works correctly", utils.checkByteLength(enc));
 });
 
 describe("UTF-16BE decoder #node-web", function () {
@@ -261,6 +265,8 @@ describe("UTF-16 encoder #node-web", function () {
     it("can skip BOM", function () {
         assert.equal(hex(iconv.encode(testStr, enc, { addBOM: false })), hex(utf16leBuf));
     });
+
+    it("byteLength works correctly", utils.checkByteLength(enc));
 });
 
 describe("UTF-16 decoder #node-web", function () {

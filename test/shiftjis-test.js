@@ -42,4 +42,6 @@ describe("ShiftJIS tests #node-web", function () {
         assert.strictEqual(iconv.decode(utils.bytes("87 40"), "shiftjis"), "①");
         assert.strictEqual(utils.hex(iconv.encode("①", "shiftjis")), "87 40");
     });
+
+    it("shiftjis byteLength works correctly", utils.checkByteLength("shiftjis"));
 });

@@ -110,6 +110,8 @@ describe("Test Cyrillic encodings #node-web", function () {
                     utils.hex(untranslatableBytes)
                 ); // Only '?' characters.
             });
+
+            it(enc + " byteLength works correctly", utils.checkByteLength(enc));
         });
     });
 });

@@ -180,7 +180,7 @@ function Utf7IMAPEncoder(options, codec) {
     this.base64AccumIdx = 0;
 }
 
-Utf7Encoder.prototype.byteLength = function (str) {
+Utf7IMAPEncoder.prototype.byteLength = function (str) {
     var byteLength = 0;
     var inBase64 = false,
         base64AccumLength = 0;
@@ -217,6 +217,12 @@ Utf7Encoder.prototype.byteLength = function (str) {
                 }
             }
         }
+    }
+    if (inBase64) {
+        if (base64AccumLength > 0) {
+            byteLength += Math.ceil((base64AccumLength * 4) / 3); // without padding
+        }
+        byteLength++; // Count '-', then go to direct mode.
     }
 
     return byteLength;

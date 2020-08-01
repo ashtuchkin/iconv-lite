@@ -112,11 +112,17 @@ Object.defineProperty(InternalEncoderBase64.prototype, "hasState", {
 });
 
 InternalEncoderBase64.prototype.byteLength = function (str) {
+    var byteLength = 0;
     var completeQuads = str.length - (str.length % 4);
+    var prevStr = str.slice(completeQuads);
     str = str.slice(0, completeQuads);
     var nonPaddedLength = str.search(/=*$/);
     if (nonPaddedLength === -1) nonPaddedLength = str.length;
-    return Math.floor((nonPaddedLength * 3) / 4);
+    byteLength += Math.floor((nonPaddedLength * 3) / 4);
+    nonPaddedLength = prevStr.search(/=*$/);
+    if (nonPaddedLength === -1) nonPaddedLength = str.length;
+    byteLength += Math.floor((nonPaddedLength * 3) / 4);
+    return byteLength;
 };
 
 InternalEncoderBase64.prototype.write = function (str) {
