@@ -19,6 +19,18 @@ Utf7Codec.prototype.bomAware = true;
 const nonDirectChars = /[^A-Za-z0-9'(),-./:? \n\r\t]+/g;
 const segmentPattern = /([^A-Za-z0-9'(),-./:? \n\r\t]+)|([A-Za-z0-9'(),-./:? \n\r\t]+)/g;
 
+function* matchAll(str, regExp) {
+    if (!regExp.global) {
+        throw new TypeError("Flag /g must be set!");
+    }
+    const localCopy = new RegExp(regExp, regExp.flags);
+    let match = localCopy.exec(str);
+    while (match) {
+        yield match;
+        match = localCopy.exec(str);
+    }
+}
+
 function Utf7Encoder(options, codec) {
     this.iconv = codec.iconv;
 }
@@ -26,7 +38,7 @@ function Utf7Encoder(options, codec) {
 Utf7Encoder.prototype.byteLength = function (str) {
     var byteLength = 0;
 
-    const segments = str.matchAll(segmentPattern);
+    const segments = matchAll(str, segmentPattern);
     for (const segment of segments) {
         if (segment[2] != null)
             // match group 2: direct chars
