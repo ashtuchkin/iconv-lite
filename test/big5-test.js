@@ -65,4 +65,8 @@ describe("Big5 tests #node-web", function () {
     it("Big5 correctly encodes 十", function () {
         assert.strictEqual(utils.hex(iconv.encode("十", "big5")), "a4 51");
     });
+
+    it("Big5 byteLength works correctly", utils.checkByteLength("Big5"));
+
+    it("cp950 byteLength works correctly", utils.checkByteLength("cp950"));
 });

@@ -1,6 +1,7 @@
 "use strict";
 
 var assert = require("assert"),
+    utils = require("./utils"),
     Buffer = require("safer-buffer").Buffer,
     iconv = require("../");
 
@@ -23,4 +24,5 @@ describe("CESU-8 codec", function () {
         assert.equal(iconv.decode(Buffer.from("eda081edb080", "hex"), "cesu8"), "𐐀");
         assert.equal(iconv.decode(Buffer.from("eda0bdedb8b1", "hex"), "cesu8"), "😱");
     });
+    it("CESU-8 byteLength works correctly", utils.checkByteLength("cesu8"));
 });

@@ -98,6 +98,8 @@ describe("Test Greek encodings #node-web", function () {
                     utils.hex(untranslatableBytes)
                 ); // Only '?' characters.
             });
+
+            it(enc + " byteLength works correctly", utils.checkByteLength(enc));
         });
     });
 });

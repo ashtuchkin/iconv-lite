@@ -253,4 +253,26 @@ const utils = (module.exports = {
         }
         assert.equal(i, str.length);
     },
+
+    checkByteLength(encoding, options, _content) {
+        return () => {
+            utils.requireIconv();
+            (_content
+                ? [_content]
+                : [
+                      "Hello😀world!",
+                      "😊 Good bye 😊",
+                      "Missing surrogate character \uD83D",
+                      "中文abc",
+                      "iconv-liteへようこそ",
+                      "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя",
+                      "αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩάέήίόύώΆΈΉΊΌΎΏϊϋΪΫ",
+                  ]
+            ).forEach((content) => {
+                const actual = utils.iconv.byteLength(content, encoding, options);
+                const expect = utils.iconv.encode(content, encoding, options).length;
+                assert.equal(actual, expect);
+            });
+        };
+    },
 });

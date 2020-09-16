@@ -1,6 +1,7 @@
 "use strict";
 
 var assert = require("assert"),
+    utils = require("./utils"),
     Buffer = require("safer-buffer").Buffer,
     iconv = require("../"),
     Iconv = require("iconv").Iconv;
@@ -53,17 +54,18 @@ var aliases = {
 // prettier-ignore
 var iconvChanges = { // Characters that iconv changing (iconv char -> our char)
     // shiftjis/cp932 is changed in iconv (see comments in cp932.h)
-    shiftjis: {"〜":"～","‖":"∥","−":"－","¢":"￠","£":"￡","¬":"￢"},
-    eucjp:    {"〜":"～","‖":"∥","−":"－","¢":"￠","£":"￡","¬":"￢"},
-    cp950: {"¥":"￥"},
+    shiftjis: { "〜": "～", "‖": "∥", "−": "－", "¢": "￠", "£": "￡", "¬": "￢" },
+    eucjp: { "〜": "～", "‖": "∥", "−": "－", "¢": "￠", "£": "￡", "¬": "￢" },
+    cp950: { "¥": "￥" },
 
     // Big5 is known for lots of different variations. We use Encoding Standard.
-    big5hkscs: {"•": "‧", "､": "﹑", "‾": "¯", "∼": "～", "♁": "⊕", "☉": "⊙", "／": "∕", "＼": "﹨", "¥": "￥", "¢": "￠", "£": "￡"},
+    big5hkscs: { "•": "‧", "､": "﹑", "‾": "¯", "∼": "～", "♁": "⊕", "☉": "⊙", "／": "∕", "＼": "﹨", "¥": "￥", "¢": "￠", "£": "￡" },
 
     // Iconv encodes some chars to the PUA area. In ICU there's no such mapping.
-    gb18030: { "ḿ": "", "龴": "", "龵": "", "龶": "", "龷": "", "龸": "", "龹": "", 
-        "龺": "", "龻": "", "︐": "", "︑": "", "︒": "", "︓": "", "︔": "", "︕": "", 
-        "︖": "", "︗": "", "︘": "", "︙": "", 
+    gb18030: {
+        "ḿ": "", "龴": "", "龵": "", "龶": "", "龷": "", "龸": "", "龹": "",
+        "龺": "", "龻": "", "︐": "", "︑": "", "︒": "", "︓": "", "︔": "", "︕": "",
+        "︖": "", "︗": "", "︘": "", "︙": "",
     }
 }
 
@@ -72,8 +74,8 @@ var iconvCannotDecode = { // Characters that we can decode, but iconv cannot. En
     shiftjis: { "80": "\x80", "5c": "¥", "7e": "‾", "81ca": "￢" },
     eucjp: {
         "adf0": "≒", "adf1": "≡", "adf2": "∫", "adf3": "∮", "adf4": "∑", "adf5": "√", "adf6": "⊥", "adf7": "∠", "adf8": "∟", "adf9": "⊿",
-        "adfa": "∵", "adfb": "∩", "adfc": "∪", "a1c2": "∥", "ade2": "№", "ade4": "℡", 
-        
+        "adfa": "∵", "adfb": "∩", "adfc": "∪", "a1c2": "∥", "ade2": "№", "ade4": "℡",
+
         "adb5": "Ⅰ", "adb6": "Ⅱ", "adb7": "Ⅲ", "adb8": "Ⅳ", "adb9": "Ⅴ", "adba": "Ⅵ", "adbb": "Ⅶ", "adbc": "Ⅷ", "adbd": "Ⅸ", "adbe": "Ⅹ",
         "fcf1": "ⅰ", "fcf2": "ⅱ", "fcf3": "ⅲ", "fcf4": "ⅳ", "fcf5": "ⅴ", "fcf6": "ⅵ", "fcf7": "ⅶ", "fcf8": "ⅷ", "fcf9": "ⅸ", "fcfa": "ⅹ",
         "ada1": "①", "ada2": "②", "ada3": "③", "ada4": "④", "ada5": "⑤", "ada6": "⑥", "ada7": "⑦", "ada8": "⑧", "ada9": "⑨", "adaa": "⑩",
@@ -109,27 +111,27 @@ var iconvCannotDecode = { // Characters that we can decode, but iconv cannot. En
         "a3c8": "␈", "a3c9": "␉", "a3ca": "␊", "a3cb": "␋", "a3cc": "␌", "a3cd": "␍", "a3ce": "␎", "a3cf": "␏",
         "a3d0": "␐", "a3d1": "␑", "a3d2": "␒", "a3d3": "␓", "a3d4": "␔", "a3d5": "␕", "a3d6": "␖", "a3d7": "␗",
         "a3d8": "␘", "a3d9": "␙", "a3da": "␚", "a3db": "␛", "a3dc": "␜", "a3dd": "␝", "a3de": "␞", "a3df": "␟",
-        "a3e0": "␡", "a3e1": "€", 
+        "a3e0": "␡", "a3e1": "€",
 
-        "c6cf": "廴", "c6d3": "无", "c6d5": "癶", "c6d7": "隶", "c6de": "〃", "c6df": "仝", 
-        "fa5f": "倩", "fa66": "偽", 
-        "fabd": "包", "fac5": "卄", "fad5": "卿", "fb48": "嘅", "fbb8": "婷", "fbf3": "幵", "fbf9": "廐", "fc4f": "彘", 
-        "fc6c": "悤", "fcb9": "撐", "fce2": "晴", "fcf1": "杞", "fdb7": "沜", "fdb8": "渝", "fdbb": "港", "fdf1": "煮", 
+        "c6cf": "廴", "c6d3": "无", "c6d5": "癶", "c6d7": "隶", "c6de": "〃", "c6df": "仝",
+        "fa5f": "倩", "fa66": "偽",
+        "fabd": "包", "fac5": "卄", "fad5": "卿", "fb48": "嘅", "fbb8": "婷", "fbf3": "幵", "fbf9": "廐", "fc4f": "彘",
+        "fc6c": "悤", "fcb9": "撐", "fce2": "晴", "fcf1": "杞", "fdb7": "沜", "fdb8": "渝", "fdbb": "港", "fdf1": "煮",
         "fe52": "猪", "fe6f": "瑜", "feaa": "瓩", "fedd": "砉",
     },
     gbk: { // All these will appear in GB18030, + U+0080 = € is compatibility with Windows.
-        "80": "€", "a2e3": "€", "a8bf": "ǹ", 
-        "a98a": "⿰", "a98b": "⿱", "a98c": "⿲", "a98d": "⿳", "a98e": "⿴", "a98f": "⿵", "a990": "⿶", 
+        "80": "€", "a2e3": "€", "a8bf": "ǹ",
+        "a98a": "⿰", "a98b": "⿱", "a98c": "⿲", "a98d": "⿳", "a98e": "⿴", "a98f": "⿵", "a990": "⿶",
         "a991": "⿷", "a992": "⿸", "a993": "⿹", "a994": "⿺", "a995": "⿻", "a989": "〾",
-        "fe50": "⺁", "fe54": "⺄", "fe55": "㑳", "fe56": "㑇", "fe57": "⺈", "fe58": "⺋", "fe5a": "㖞", 
-        "fe5b": "㘚", "fe5c": "㘎",  "fe5d": "⺌", "fe5e": "⺗", "fe5f": "㥮",
+        "fe50": "⺁", "fe54": "⺄", "fe55": "㑳", "fe56": "㑇", "fe57": "⺈", "fe58": "⺋", "fe5a": "㖞",
+        "fe5b": "㘚", "fe5c": "㘎", "fe5d": "⺌", "fe5e": "⺗", "fe5f": "㥮",
         "fe60": "㤘", "fe62": "㧏", "fe63": "㧟", "fe64": "㩳", "fe65": "㧐", "fe68": "㭎", "fe69": "㱮",
-        "fe6a": "㳠", "fe6b": "⺧", "fe6e": "⺪",  "fe6f": "䁖",
+        "fe6a": "㳠", "fe6b": "⺧", "fe6e": "⺪", "fe6f": "䁖",
         "fe70": "䅟", "fe71": "⺮", "fe72": "䌷", "fe73": "⺳", "fe74": "⺶", "fe75": "⺷", "fe77": "䎱",
         "fe78": "䎬", "fe79": "⺻", "fe7a": "䏝", "fe7b": "䓖", "fe7c": "䙡", "fe7d": "䙌",
-        "fe80": "䜣", "fe81": "䜩", "fe82": "䝼", "fe83": "䞍", "fe84": "⻊", "fe85": "䥇", "fe86": "䥺", "fe87": "䥽", 
+        "fe80": "䜣", "fe81": "䜩", "fe82": "䝼", "fe83": "䞍", "fe84": "⻊", "fe85": "䥇", "fe86": "䥺", "fe87": "䥽",
         "fe88": "䦂", "fe89": "䦃", "fe8a": "䦅", "fe8b": "䦆", "fe8c": "䦟", "fe8d": "䦛", "fe8e": "䦷", "fe8f": "䦶",
-        "fe92": "䲣", "fe93": "䲟", "fe94": "䲠", "fe95": "䲡", "fe96": "䱷", "fe97": "䲢", 
+        "fe92": "䲣", "fe93": "䲟", "fe94": "䲠", "fe95": "䲡", "fe96": "䱷", "fe97": "䲢",
         "fe98": "䴓", "fe99": "䴔", "fe9a": "䴕", "fe9b": "䴖", "fe9c": "䴗", "fe9d": "䴘", "fe9e": "䴙", "fe9f": "䶮",
 
         // iconv and ICU are mapping "a3 a0" -> U+E5E5. However, WebKit/Chrome maps it to U+3000 noting compatibility with older websites.
@@ -297,6 +299,8 @@ describe("Full DBCS encoding tests", function () {
                         );
                     }
                 });
+
+                it(enc + " byteLength works correctly", utils.checkByteLength(enc));
             })(enc);
     }
 });

@@ -1,6 +1,7 @@
 "use strict";
 
 var assert = require("assert"),
+    utils = require("./utils"),
     Buffer = require("safer-buffer").Buffer,
     iconv = require("../");
 
@@ -137,6 +138,8 @@ describe("UTF-7 codec", function () {
         assert.equal(iconv.decode(Buffer.from("+AMAA4A-Next"), "utf-7"), "\u00c0\u00e0Next");
         assert.equal(iconv.decode(Buffer.from("+AMAA4A!Next"), "utf-7"), "\u00c0\u00e0!Next");
     });
+
+    it("byteLength works correctly", utils.checkByteLength("utf-7"));
 });
 
 describe("UTF-7-IMAP codec", function () {
@@ -220,4 +223,6 @@ describe("UTF-7-IMAP codec", function () {
             "\u00E4&\u00E4&\u00E4"
         );
     });
+
+    it("byteLength works correctly", utils.checkByteLength("utf-7-imap"));
 });

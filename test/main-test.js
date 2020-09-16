@@ -1,6 +1,7 @@
 "use strict";
 
 var assert = require("assert"),
+    utils = require("./utils"),
     Buffer = require("safer-buffer").Buffer,
     iconv = require("../");
 
@@ -27,6 +28,13 @@ describe("Generic UTF8-UCS2 tests", function () {
         });
     });
 
+    it("UCS2 byteLength works correctly", utils.checkByteLength("UCS2", null, testStringLatin1));
+
+    it(
+        "binary byteLength works correctly",
+        utils.checkByteLength("binary", null, testStringLatin1)
+    );
+
     it("Base64 correctly encoded/decoded", function () {
         assert.strictEqual(iconv.encode(testStringBase64, "base64").toString("binary"), testString);
         assert.strictEqual(
@@ -35,10 +43,17 @@ describe("Generic UTF8-UCS2 tests", function () {
         );
     });
 
+    it(
+        "Base64 byteLength works correctly",
+        utils.checkByteLength("base64", null, testStringBase64)
+    );
+
     it("Hex correctly encoded/decoded", function () {
         assert.strictEqual(iconv.encode(testStringHex, "hex").toString("binary"), testString);
         assert.strictEqual(iconv.decode(Buffer.from(testString, "binary"), "hex"), testStringHex);
     });
+
+    it("Hex byteLength works correctly", utils.checkByteLength("hex", null, testStringHex));
 
     it("Latin1 correctly encoded/decoded", function () {
         assert.strictEqual(
@@ -50,6 +65,11 @@ describe("Generic UTF8-UCS2 tests", function () {
             testStringLatin1
         );
     });
+
+    it(
+        "Latin1 byteLength works correctly",
+        utils.checkByteLength("Latin1", null, testStringLatin1)
+    );
 
     it("Convert to string, not buffer (utf8 used)", function () {
         assert.throws(function () {

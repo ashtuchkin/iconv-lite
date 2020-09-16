@@ -58,6 +58,14 @@ class SBCSEncoder {
         this.encodeBuf = codec.encodeBuf;
     }
 
+    byteLength(str) {
+        return str.length;
+    }
+
+    get hasState() {
+        return false;
+    }
+
     write(str) {
         const bytes = this.backend.allocBytes(str.length);
 
@@ -75,6 +83,10 @@ class SBCSDecoder {
     constructor(opts, codec, backend) {
         this.decodeBuf = codec.decodeBuf;
         this.backend = backend;
+    }
+
+    get hasState() {
+        return false;
     }
 
     write(buf) {

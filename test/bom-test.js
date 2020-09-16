@@ -1,6 +1,7 @@
 "use strict";
 
 const assert = require("assert"),
+    utils = require("./utils"),
     Buffer = require("safer-buffer").Buffer,
     iconv = require("../");
 
@@ -89,4 +90,25 @@ describe("BOM Handling", function () {
         assert.equal(iconv.decode(body2, "utf8", { stripBOM: stripBOM }), sampleStr);
         assert(!bomStripped);
     });
+
+    it("UTF-7 BOM byteLength works correctly", utils.checkByteLength("utf7", { addBOM: true }));
+
+    it("UTF-8 BOM byteLength works correctly", utils.checkByteLength("utf8", { addBOM: true }));
+
+    it(
+        "utf16le BOM byteLength works correctly",
+        utils.checkByteLength("utf16le", { addBOM: true })
+    );
+
+    it(
+        "utf16be BOM byteLength works correctly",
+        utils.checkByteLength("utf16be", { addBOM: true })
+    );
+
+    it("utf16 BOM byteLength works correctly", utils.checkByteLength("utf16", { addBOM: true }));
+
+    it(
+        "utf16 NO BOM byteLength works correctly",
+        utils.checkByteLength("utf16", { addBOM: false })
+    );
 });

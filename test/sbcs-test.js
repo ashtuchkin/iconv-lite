@@ -179,6 +179,8 @@ describe("Full SBCS encoding tests #node-web", function () {
                     }
                 });
 
+                it(enc + " byteLength works correctly", utils.checkByteLength(enc));
+
                 /*
             // TODO: Implement unicode composition. After that, this test will be meaningful.
 

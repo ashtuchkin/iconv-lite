@@ -135,4 +135,10 @@ describe("GBK tests #node-web", function () {
         assert.strictEqual(iconv.decode(gbkChars, "GB18030"), chars);
         assert.strictEqual(utils.hex(iconv.encode(chars, "GB18030")), utils.hex(gbkChars));
     });
+
+    it("GBK byteLength works correctly", utils.checkByteLength("GBK"));
+
+    it("GB2312 byteLength works correctly", utils.checkByteLength("GB2312"));
+
+    it("GB18030 byteLength works correctly", utils.checkByteLength("GB18030"));
 });

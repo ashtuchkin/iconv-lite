@@ -1,6 +1,7 @@
 "use strict";
 
 var assert = require("assert"),
+    utils = require("./utils"),
     Buffer = require("safer-buffer").Buffer,
     iconv = require("../"),
     Iconv = require("iconv").Iconv;
@@ -8,8 +9,8 @@ var assert = require("assert"),
 // prettier-ignore
 var testStr = "1aя中文☃💩",
     testStr2 = "❝Stray high \uD977😱 and low\uDDDD☔ surrogate values.❞",
-    utf32leBuf = Buffer.from([ 0x31, 0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x00, 0x4f, 0x04, 0x00, 0x00, 0x2d, 0x4e, 0x00, 0x00, 0x87, 0x65, 0x00, 0x00, 0x03, 0x26, 0x00, 0x00, 0xa9, 0xf4, 0x01, 0x00 ]),
-    utf32beBuf = Buffer.from([ 0x00, 0x00, 0x00, 0x31, 0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x04, 0x4f, 0x00, 0x00, 0x4e, 0x2d, 0x00, 0x00, 0x65, 0x87, 0x00, 0x00, 0x26, 0x03, 0x00, 0x01, 0xf4, 0xa9 ]),
+    utf32leBuf = Buffer.from([0x31, 0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x00, 0x4f, 0x04, 0x00, 0x00, 0x2d, 0x4e, 0x00, 0x00, 0x87, 0x65, 0x00, 0x00, 0x03, 0x26, 0x00, 0x00, 0xa9, 0xf4, 0x01, 0x00]),
+    utf32beBuf = Buffer.from([0x00, 0x00, 0x00, 0x31, 0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x04, 0x4f, 0x00, 0x00, 0x4e, 0x2d, 0x00, 0x00, 0x65, 0x87, 0x00, 0x00, 0x26, 0x03, 0x00, 0x01, 0xf4, 0xa9]),
     utf32leBOM = Buffer.from([0xff, 0xfe, 0x00, 0x00]),
     utf32beBOM = Buffer.from([0x00, 0x00, 0xfe, 0xff]),
     utf32leBufWithBOM = Buffer.concat([utf32leBOM, utf32leBuf]),
@@ -81,6 +82,8 @@ describe("UTF-32LE codec", function () {
         var nodeStr = nodeIconv.convert(allCharsLEBuf).toString("utf8");
         assert.equal(nodeStr, allCharsStr);
     });
+
+    it("byteLength works correctly", utils.checkByteLength("UTF-32LE"));
 });
 
 describe("UTF-32BE codec", function () {
@@ -118,6 +121,8 @@ describe("UTF-32BE codec", function () {
         var nodeStr = nodeIconv.convert(allCharsBEBuf).toString("utf8");
         assert.equal(nodeStr, allCharsStr);
     });
+
+    it("byteLength works correctly", utils.checkByteLength("UTF-32BE"));
 });
 
 describe("UTF-32 general codec", function () {
@@ -155,6 +160,8 @@ describe("UTF-32 general codec", function () {
     it("correctly decodes UTF-32BE without BOM", function () {
         assert.equal(iconv.decode(iconv.encode(sampleStr, "utf-32-be"), "utf-32"), sampleStr);
     });
+
+    it("byteLength works correctly", utils.checkByteLength("UTF-32"));
 });
 
 // Utility function to make bad matches easier to visualize.
@@ -165,7 +172,7 @@ function escape(s) {
         var cc = s.charCodeAt(i);
 
         // prettier-ignore
-        if ((32 <= cc && cc < 127) && cc !== 0x5c) {  
+        if ((32 <= cc && cc < 127) && cc !== 0x5c) {
             sb.push(s.charAt(i));
         } else {
             var h = s.charCodeAt(i).toString(16).toUpperCase();

@@ -13,6 +13,8 @@ declare module "iconv-lite" {
 
     export function encodingExists(encoding: string): boolean;
 
+    export function byteLength(content: string, encoding: string, options?: Options): number;
+
     // Stream API
     export function decodeStream(encoding: string, options?: Options): NodeJS.ReadWriteStream;
 
@@ -31,11 +33,14 @@ export interface Options {
 }
 
 export interface EncoderStream {
+    byteLength(str: string): number;
     write(str: string): Buffer;
     end(): Buffer | undefined;
+    hasState: boolean;
 }
 
 export interface DecoderStream {
     write(buf: Buffer): string;
     end(): string | undefined;
+    hasState: boolean;
 }
