@@ -26,7 +26,9 @@ class Utf16LEEncoder {
         return str.length * 2;
     }
 
-    get hasState() { return false; }
+    get hasState() {
+        return false;
+    }
 
     write(str) {
         const bytes = this.backend.allocBytes(str.length * 2);
@@ -37,7 +39,7 @@ class Utf16LEEncoder {
         return this.backend.bytesToResult(bytes, bytes.length);
     }
 
-    end() { }
+    end() {}
 }
 
 class Utf16LEDecoder {
@@ -172,7 +174,9 @@ class Utf16BEEncoder {
         return str.length * 2;
     }
 
-    get hasState() { return false; }
+    get hasState() {
+        return false;
+    }
 
     write(str) {
         const bytes = this.backend.allocBytes(str.length * 2);
@@ -185,7 +189,7 @@ class Utf16BEEncoder {
         return this.backend.bytesToResult(bytes, bytesPos);
     }
 
-    end() { }
+    end() {}
 }
 
 class Utf16BEDecoder {
