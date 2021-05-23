@@ -54,4 +54,8 @@ describe("Big5 tests", function() {
     it("Big5 correctly encodes 十", function() {
         assert.strictEqual(iconv.encode("十", "big5").toString('hex'), "a451");
     });
+
+    it("Big5 correctly encodes 起 (issue #264)", function() {
+        assert.strictEqual(iconv.encode("起", "big5").toString('hex'), "b05f");
+    });
 });

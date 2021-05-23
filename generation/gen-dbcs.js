@@ -27,7 +27,7 @@ async.parallel({
     }
 
     // Calculate difference between big5 and cp950, and write it to a file.
-    // See http://encoding.spec.whatwg.org/#big5-encoder
+    // See http://encoding.spec.whatwg.org/#big5
     var big5add = {}
     for (var i = 0x8100; i < 0x10000; i++) { // Lead byte is 0x81 .. 0xFE
         var trail = i & 0xFF;
@@ -41,7 +41,35 @@ async.parallel({
             big5add[i] = big5Char;
     }
 
-    // Add char sequences that are not in the index file (as given in http://encoding.spec.whatwg.org/#big5-encoder)
+    // Calculate HKSCS codes that are duplicates of big5 codes and need to be skipped when encoding.
+    console.log("Duplicate HKSCS codes that need to be skipped when encoded (see encodeSkipVals in big5hkscs): ")
+    var big5codes = {};
+    for (var i = 0xA100; i < 0x10000; i++) {
+        var uCharCode = (big5add[i] !== undefined) ? big5add[i] : data.cp950[i];
+        if (uCharCode !== undefined) {
+            big5codes[uCharCode] = true;
+        }
+    }
+    for (var i = 0x8100; i < 0xA100; i++) {
+        var uCharCode = (big5add[i] !== undefined) ? big5add[i] : data.cp950[i];
+        if (uCharCode !== undefined && big5codes[uCharCode]) {
+            console.log("0x"+i.toString(16));
+        }
+    }
+
+    if (big5Char !== undefined) {
+        if (lead < 0xA1) {
+            if (d[big5Char] !== undefined) {
+                console.log("duplicate in first: "+ pointer + " char " + big5Char);
+            }
+            d[big5Char] = i;
+        } else if (d[big5Char] !== undefined) {
+            console.log("dup 0x"+d[big5Char].toString(16) + " -> " + i.toString(16))
+        }
+
+    }
+
+    // Add char sequences that are not in the index file (as given in http://encoding.spec.whatwg.org/#big5-decoder)
     function toIdx(pointer) { var trail = pointer % 157; var lead = Math.floor(pointer / 157) + 0x81; return (lead << 8) + (trail + (trail < 0x3F ? 0x40 : 0x62))}
     big5add[toIdx(1133)] = [0x00CA, 0x0304];
     big5add[toIdx(1135)] = [0x00CA, 0x030C];
