@@ -22,6 +22,7 @@ rules:
     block-scoped-var: "error"
     prefer-const: "error"
     yoda: ["error", "never", { "exceptRange": true }]
+    no-buffer-constructor: "error"
 
     # 'es' pluin rules. See https://mysticatea.github.io/eslint-plugin-es/rules/
     # Disallow the ones that are not supported by Node 4.5
