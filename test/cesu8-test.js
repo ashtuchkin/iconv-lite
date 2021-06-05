@@ -1,7 +1,7 @@
 "use strict"
 
 const assert = require("assert")
-const Buffer = require("safer-buffer").Buffer
+const Buffer = require("buffer").Buffer
 const iconv = require("../")
 
 describe("CESU-8 codec", function () {

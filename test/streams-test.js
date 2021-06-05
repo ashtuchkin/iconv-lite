@@ -3,7 +3,7 @@
 var mocha = require("mocha")
 var describeMocha = mocha.describe
 var assert = require("assert")
-var Buffer = require("safer-buffer").Buffer
+var Buffer = require("buffer").Buffer
 var iconv = require("../")
 
 var describe = describeMocha

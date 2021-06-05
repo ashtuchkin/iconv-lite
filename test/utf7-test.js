@@ -1,7 +1,7 @@
 "use strict"
 
 var assert = require("assert")
-var Buffer = require("safer-buffer").Buffer
+var Buffer = require("buffer").Buffer
 var iconv = require("../")
 
 // These tests are mostly from https://github.com/kkaefer/utf7

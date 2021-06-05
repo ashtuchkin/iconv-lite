@@ -2,7 +2,7 @@
 
 var fs = require("fs")
 var assert = require("assert")
-var Buffer = require("safer-buffer").Buffer
+var Buffer = require("buffer").Buffer
 var join = require("path").join
 var iconv = require("../")
 
