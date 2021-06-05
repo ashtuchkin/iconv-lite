@@ -1,7 +1,7 @@
 "use strict";
 
 const assert = require("assert"),
-    Buffer = require("safer-buffer").Buffer,
+    Buffer = require("buffer").Buffer,
     iconv = require("../");
 
 const sampleStr = '<?xml version="1.0" encoding="UTF-8"?>\n<俄语>данные</俄语>',

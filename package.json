@@ -31,7 +31,7 @@
     },
     "husky": {
         "hooks": {
-            "pre-commit": "lint-staged --concurrent=false"
+            "pre-commit": "npx lint-staged --concurrent=false"
         }
     },
     "browser": {
@@ -49,7 +49,5 @@
         "prettier": "2.0.5",
         "unorm": "^1.6.0"
     },
-    "dependencies": {
-        "safer-buffer": ">= 2.1.2 < 3.0.0"
-    }
+    "dependencies": {}
 }

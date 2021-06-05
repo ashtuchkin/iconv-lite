@@ -1,7 +1,7 @@
 "use strict";
 
 var assert = require("assert"),
-    Buffer = require("safer-buffer").Buffer,
+    Buffer = require("buffer").Buffer,
     iconv = require("../");
 
 if (!iconv.supportsStreams) return;

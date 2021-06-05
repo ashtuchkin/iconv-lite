@@ -1,7 +1,7 @@
 "use strict";
 
 var assert = require("assert"),
-    Buffer = require("safer-buffer").Buffer,
+    Buffer = require("buffer").Buffer,
     iconv = require("../");
 
 var testString = "中文abc", //unicode contains Big5-code and ascii
