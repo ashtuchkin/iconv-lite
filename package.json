@@ -36,7 +36,5 @@
         "mocha": "^3.5.3",
         "unorm": "^1.6.0"
     },
-    "dependencies": {
-        "safer-buffer": ">= 2.1.2 < 3.0.0"
-    }
+    "dependencies": {}
 }
