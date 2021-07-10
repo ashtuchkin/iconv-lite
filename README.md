@@ -1,6 +1,6 @@
 ## iconv-lite: Pure JS character encoding conversion
 
- * No need for native code compilation. Quick to install, works on Windows and in sandboxed environments like [Cloud9](http://c9.io).
+ * No need for native code compilation. Quick to install, works on Windows, Web, and in sandboxed environments.
  * Used in popular projects like [Express.js (body_parser)](https://github.com/expressjs/body-parser), 
    [Grunt](http://gruntjs.com/), [Nodemailer](http://www.nodemailer.com/), [Yeoman](http://yeoman.io/) and others.
  * Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
