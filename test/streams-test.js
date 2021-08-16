@@ -8,13 +8,25 @@ if (!iconv.supportsStreams)
 
 var Readable = require('stream').Readable;
 
+// If surrogate pair, merge them
+function formatSurrogate(arr=[]) {
+  let h = arr[0],
+    l = arr[1]
+  if('\uD800' < h && h <= '\uDBFF' && '\uDC00' < l && l <= '\uDFFF'){
+    return [h+l]
+  }
+  return arr
+}
+
 // Create a source stream that feeds given array of chunks.
 function feeder(chunks) {
     if (!Array.isArray(chunks))
         chunks = [chunks];
     var opts = {};
-    if (chunks.every(function(chunk) {return typeof chunk == 'string'}))
-        opts.encoding = 'utf8';
+    if (chunks.every(function(chunk) {return typeof chunk == 'string'})){
+      opts.encoding = 'utf8';
+      chunks = formatSurrogate(chunks)
+    }
 
     var stream = new Readable(opts);
     function writeChunk() {
@@ -135,6 +147,12 @@ function checkDecodeStream(opts) {
 }
 
 describe("Streaming mode", function() {
+    it.only("Encoding using internal modules: utf8 with surrogates in separate chunks", checkEncodeStream({
+      encoding: "utf8",
+      input: ["\uD83D", "\uDE3B"],
+      output: "f09f98bb",
+    }));
+    
     it("Feeder outputs strings", checkStreamOutput({
         createStream: function() { return feeder(["abc", "def"]); },
         outputType: 'string',
