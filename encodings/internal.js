@@ -1,5 +1,5 @@
 "use strict";
-var Buffer = require("safer-buffer").Buffer;
+const {Buffer} = require("buffer");
 
 // Export Node.js internal encodings.
 

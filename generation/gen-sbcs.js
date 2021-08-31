@@ -1,7 +1,7 @@
 var fs  = require("fs");
 var path = require("path");
 var Iconv  = require("iconv").Iconv;
-var Buffer = require("safer-buffer").Buffer;
+const {Buffer} = require("buffer");
 
 // Generate encoding families using original iconv.
 var destFileName = "encodings/sbcs-data-generated.js";

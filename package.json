@@ -37,8 +37,5 @@
         "request": "^2.88.2",
         "semver": "^6.3.0",
         "unorm": "^1.6.0"
-    },
-    "dependencies": {
-        "safer-buffer": ">= 2.1.2 < 3.0.0"
     }
 }

@@ -1,5 +1,5 @@
 "use strict";
-var Buffer = require("safer-buffer").Buffer;
+const {Buffer} = require("buffer");
 
 // Note: UTF16-LE (or UCS2) codec is Node.js native. See encodings/internal.js
 
