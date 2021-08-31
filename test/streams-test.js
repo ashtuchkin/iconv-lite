@@ -147,7 +147,7 @@ function checkDecodeStream(opts) {
 }
 
 describe("Streaming mode", function() {
-    it.only("Encoding using internal modules: utf8 with surrogates in separate chunks", checkEncodeStream({
+    it("Encoding using internal modules: utf8 with surrogates in separate chunks", checkEncodeStream({
       encoding: "utf8",
       input: ["\uD83D", "\uDE3B"],
       output: "f09f98bb",
