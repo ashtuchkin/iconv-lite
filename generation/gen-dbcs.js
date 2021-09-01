@@ -32,7 +32,7 @@ async.parallel(
         }
 
         // Calculate difference between big5 and cp950, and write it to a file.
-        // See http://encoding.spec.whatwg.org/#big5-encoder
+        // See http://encoding.spec.whatwg.org/#big5
         const big5add = {};
         for (let i = 0x8100; i < 0x10000; i++) {
             // Lead byte is 0x81 .. 0xFE
@@ -46,7 +46,25 @@ async.parallel(
             if (big5Char !== undefined && cpChar !== big5Char) big5add[i] = big5Char;
         }
 
-        // Add char sequences that are not in the index file (as given in http://encoding.spec.whatwg.org/#big5-encoder)
+        // Calculate HKSCS codes that are duplicates of big5 codes and need to be skipped when encoding.
+        const big5codes = {};
+        for (let i = 0xa100; i < 0x10000; i++) {
+            const uCharCode = big5add[i] !== undefined ? big5add[i] : data.cp950[i];
+            if (uCharCode !== undefined) {
+                big5codes[uCharCode] = true;
+            }
+        }
+        let duplicateCodes = "[";
+        for (let i = 0x8100; i < 0xa100; i++) {
+            const uCharCode = big5add[i] !== undefined ? big5add[i] : data.cp950[i];
+            if (uCharCode !== undefined && big5codes[uCharCode]) {
+                duplicateCodes += "0x" + i.toString(16) + ", ";
+            }
+        }
+        duplicateCodes += "]";
+        console.log("Duplicate HKSCS codes (see encodeSkipVals in big5hkscs):\n" + duplicateCodes);
+
+        // Add char sequences that are not in the index file (as given in http://encoding.spec.whatwg.org/#big5-decoder)
         function toIdx(pointer) {
             const trail = pointer % 157;
             const lead = Math.floor(pointer / 157) + 0x81;
