@@ -1,17 +1,17 @@
 ## iconv-lite: Pure JS character encoding conversion
 
- * No need for native code compilation. Quick to install, works on Windows and in sandboxed environments like [Cloud9](http://c9.io).
- * Used in popular projects like [Express.js (body_parser)](https://github.com/expressjs/body-parser), 
-   [Grunt](http://gruntjs.com/), [Nodemailer](http://www.nodemailer.com/), [Yeoman](http://yeoman.io/) and others.
- * Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
- * Intuitive encode/decode API, including Streaming support.
- * In-browser usage via [browserify](https://github.com/substack/node-browserify) or [webpack](https://webpack.js.org/) (~180kb gzip compressed with Buffer shim included).
- * Typescript [type definition file](https://github.com/ashtuchkin/iconv-lite/blob/master/lib/index.d.ts) included.
- * React Native is supported (need to install `stream` module to enable Streaming API).
- * License: MIT.
+-   No need for native code compilation. Quick to install, works on Windows, Web, and in sandboxed environments.
+-   Used in popular projects like [Express.js (body_parser)](https://github.com/expressjs/body-parser),
+    [Grunt](http://gruntjs.com/), [Nodemailer](http://www.nodemailer.com/), [Yeoman](http://yeoman.io/) and others.
+-   Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
+-   Intuitive encode/decode API, including Streaming support.
+-   In-browser usage via [browserify](https://github.com/substack/node-browserify) or [webpack](https://webpack.js.org/) (~180kb gzip compressed with Buffer shim included).
+-   Typescript [type definition file](https://github.com/ashtuchkin/iconv-lite/blob/master/lib/index.d.ts) included.
+-   React Native is supported (need to install `stream` module to enable Streaming API).
+-   License: MIT.
 
 [![NPM Stats](https://nodei.co/npm/iconv-lite.png)](https://npmjs.org/package/iconv-lite/)  
-[![Build Status](https://travis-ci.org/ashtuchkin/iconv-lite.svg?branch=master)](https://travis-ci.org/ashtuchkin/iconv-lite)
+[![Build Status](https://app.travis-ci.com/ashtuchkin/iconv-lite.svg?branch=master)](https://app.travis-ci.com/ashtuchkin/iconv-lite)
 [![npm](https://img.shields.io/npm/v/iconv-lite.svg)](https://npmjs.org/package/iconv-lite/)
 [![npm downloads](https://img.shields.io/npm/dm/iconv-lite.svg)](https://npmjs.org/package/iconv-lite/)
 [![npm bundle size](https://img.shields.io/bundlephobia/min/iconv-lite.svg)](https://npmjs.org/package/iconv-lite/)
