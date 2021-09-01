@@ -53,7 +53,7 @@ module.exports = {
     xsjis: "shiftjis",
     windows932: "shiftjis",
     ms932: "shiftjis",
-    "932": "shiftjis",
+    932: "shiftjis",
     cp932: "shiftjis",
 
     eucjp: {
@@ -83,7 +83,7 @@ module.exports = {
     // Microsoft's CP936 is a subset and approximation of GBK.
     windows936: "cp936",
     ms936: "cp936",
-    "936": "cp936",
+    936: "cp936",
     cp936: {
         type: "_dbcs",
         table: function () {
@@ -124,7 +124,7 @@ module.exports = {
     // EUC-KR, KS_C_5601 and KS X 1001 are exactly the same.
     windows949: "cp949",
     ms949: "cp949",
-    "949": "cp949",
+    949: "cp949",
     cp949: {
         type: "_dbcs",
         table: function () {
@@ -166,7 +166,7 @@ module.exports = {
 
     windows950: "cp950",
     ms950: "cp950",
-    "950": "cp950",
+    950: "cp950",
     cp950: {
         type: "_dbcs",
         table: function () {
@@ -195,7 +195,7 @@ module.exports = {
 
             // Step 2 of https://encoding.spec.whatwg.org/#index-big5-pointer: Use last pointer for U+2550, U+255E, U+2561, U+256A, U+5341, or U+5345
             0xa2a4, 0xa2a5, 0xa2a7, 0xa2a6, 0xa2cc, 0xa2ce,
-        ]
+        ],
     },
 
     cnbig5: "big5hkscs",
