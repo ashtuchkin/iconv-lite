@@ -1,14 +1,14 @@
 "use strict";
 
-var assert = require("assert"),
+const assert = require("assert"),
     utils = require("./utils"),
     iconv = utils.requireIconv();
 
-var ascii =
+const ascii =
     "\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f" +
     " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f";
 
-var encodings = [
+const encodings = [
     {
         name: "windows1254",
         variations: ["windows-1254", "win-1254", "win1254", "cp1254", "cp-1254", 1254],
@@ -54,11 +54,11 @@ var encodings = [
 
 describe("Test Turkish encodings #node-web", function () {
     encodings.forEach(function (encoding) {
-        var enc = encoding.variations[0];
-        var key = "turkish";
+        const enc = encoding.variations[0];
+        const key = "turkish";
         describe(encoding.name + ":", function () {
             it("Convert from buffer", function () {
-                for (var key in encoding.encodedStrings)
+                for (const key in encoding.encodedStrings)
                     assert.strictEqual(
                         iconv.decode(encoding.encodedStrings[key], enc),
                         encoding.strings[key]
@@ -66,7 +66,7 @@ describe("Test Turkish encodings #node-web", function () {
             });
 
             it("Convert to buffer", function () {
-                for (var key in encoding.encodedStrings)
+                for (const key in encoding.encodedStrings)
                     assert.strictEqual(
                         utils.hex(iconv.encode(encoding.strings[key], enc)),
                         utils.hex(encoding.encodedStrings[key])

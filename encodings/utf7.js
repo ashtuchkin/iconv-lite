@@ -1,5 +1,5 @@
 "use strict";
-var Buffer = require("buffer").Buffer;
+const Buffer = require("buffer").Buffer;
 
 // UTF-7 codec, according to https://tools.ietf.org/html/rfc2152
 // See also below a UTF-7-IMAP codec, according to http://tools.ietf.org/html/rfc3501#section-5.1.3
@@ -47,9 +47,9 @@ function Utf7Decoder(options, codec) {
 
 const base64Regex = /[A-Za-z0-9/+]/;
 const base64Chars = [];
-for (var i = 0; i < 256; i++) base64Chars[i] = base64Regex.test(String.fromCharCode(i));
+for (let i = 0; i < 256; i++) base64Chars[i] = base64Regex.test(String.fromCharCode(i));
 
-var plusChar = "+".charCodeAt(0),
+const plusChar = "+".charCodeAt(0),
     minusChar = "-".charCodeAt(0),
     andChar = "&".charCodeAt(0);
 
@@ -151,14 +151,14 @@ function Utf7IMAPEncoder(options, codec) {
 }
 
 Utf7IMAPEncoder.prototype.write = function (str) {
-    var inBase64 = this.inBase64,
-        base64Accum = this.base64Accum,
+    let inBase64 = this.inBase64,
         base64AccumIdx = this.base64AccumIdx,
-        buf = Buffer.alloc(str.length * 5 + 10),
         bufIdx = 0;
+    const base64Accum = this.base64Accum,
+        buf = Buffer.alloc(str.length * 5 + 10);
 
-    for (var i = 0; i < str.length; i++) {
-        var uChar = str.charCodeAt(i);
+    for (let i = 0; i < str.length; i++) {
+        const uChar = str.charCodeAt(i);
         if (0x20 <= uChar && uChar <= 0x7e) {
             // Direct character or '&'.
             if (inBase64) {
@@ -210,8 +210,8 @@ Utf7IMAPEncoder.prototype.write = function (str) {
 };
 
 Utf7IMAPEncoder.prototype.end = function () {
-    var buf = Buffer.alloc(10),
-        bufIdx = 0;
+    const buf = Buffer.alloc(10);
+    let bufIdx = 0;
     if (this.inBase64) {
         if (this.base64AccumIdx > 0) {
             bufIdx += buf.write(
@@ -240,11 +240,11 @@ function Utf7IMAPDecoder(options, codec) {
     this.base64Accum = "";
 }
 
-var base64IMAPChars = base64Chars.slice();
+const base64IMAPChars = base64Chars.slice();
 base64IMAPChars[",".charCodeAt(0)] = true;
 
 Utf7IMAPDecoder.prototype.write = function (buf) {
-    var res = "",
+    let res = "",
         lastI = 0,
         inBase64 = this.inBase64,
         base64Accum = this.base64Accum;
@@ -252,7 +252,7 @@ Utf7IMAPDecoder.prototype.write = function (buf) {
     // The decoder is more involved as we must handle chunks in stream.
     // It is forgiving, closer to standard UTF-7 (for example, '-' is optional at the end).
 
-    for (var i = 0; i < buf.length; i++) {
+    for (let i = 0; i < buf.length; i++) {
         if (!inBase64) {
             // We're in direct mode.
             // Write direct chars until '&'
@@ -305,7 +305,7 @@ Utf7IMAPDecoder.prototype.write = function (buf) {
 };
 
 Utf7IMAPDecoder.prototype.end = function () {
-    var res = "";
+    let res = "";
     if (this.inBase64 && this.base64Accum.length > 0)
         res = this.iconv.decode(Buffer.from(this.base64Accum, "base64"), "utf16-be");
 

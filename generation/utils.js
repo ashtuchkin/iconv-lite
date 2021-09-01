@@ -1,6 +1,7 @@
+// noinspection JSUnusedAssignment
 "use strict";
 
-var request = require("request"),
+const request = require("request"),
     fs = require("fs"),
     path = require("path"),
     errTo = require("errto");
@@ -8,8 +9,8 @@ var request = require("request"),
 // Common utilities used in scripts.
 
 exports.getFile = function (url, cb) {
-    var sourceDataFolder = path.join(__dirname, "source-data");
-    var fullpath = path.join(sourceDataFolder, path.basename(url));
+    const sourceDataFolder = path.join(__dirname, "source-data");
+    const fullpath = path.join(sourceDataFolder, path.basename(url));
     fs.readFile(fullpath, "utf8", function (err, text) {
         if (!err) {
             cb(null, text);
@@ -63,8 +64,8 @@ exports.parseText = function (text, splitChar) {
 // sequences (arrays) - we emit them prepended with U+0FFF-(length-2).
 // U+0FFF was chosen because it's small and unassigned, as well as 32 chars before it
 function arrToStr(arr) {
-    var s = "";
-    for (var i = 0; i < arr.length; i++)
+    let s = "";
+    for (let i = 0; i < arr.length; i++)
         if (Array.isArray(arr[i])) {
             if (arr[i].length === 1) s += arrToStr(arr[i]);
             else if (arr[i].length > 1)
@@ -88,13 +89,14 @@ function arrToStr(arr) {
 // <str> - characters of the chunk.
 // <num> - increasing sequence of the length num, starting with prev character.
 exports.generateTable = function (dbcs, maxBytes) {
-    var minSeqLen = 4;
-    var table = [],
-        range,
-        block,
-        seqLen;
-    var max = 1 << ((maxBytes || 2) * 8);
-    for (var i = 0x0000; i < max; i++)
+    const minSeqLen = 4;
+    const table = [];
+    const max = 1 << ((maxBytes || 2) * 8);
+    let range = [],
+        block = [],
+        seqLen = 0;
+
+    for (let i = 0x0000; i < max; i++)
         if (dbcs[i] !== undefined) {
             if (dbcs[i - 1] === undefined) {
                 // Range started.
@@ -119,13 +121,13 @@ exports.generateTable = function (dbcs, maxBytes) {
             }
 
             block.push(dbcs[i]);
-        } else if (range) {
+        } else if (range.length > 0) {
             // Range finished, write last segments.
             if (seqLen >= minSeqLen) range.push(arrToStr(block.slice(0, -seqLen)), seqLen);
             else range.push(arrToStr(block));
 
             table.push(range);
-            range = null;
+            range = [];
         }
 
     return table;

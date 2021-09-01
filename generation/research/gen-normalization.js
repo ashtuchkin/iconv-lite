@@ -1,26 +1,28 @@
+"use strict";
+/* eslint no-console: "off" */
 
 // This script generates unicode normalization data.
 
-var utils = require("../utils"),
+const utils = require("../utils"),
     errTo = require("errto"),
     async = require("async");
 
-var baseUrl = "http://www.unicode.org/Public/6.3.0/ucd/";
+const baseUrl = "http://www.unicode.org/Public/6.3.0/ucd/";
 
 async.parallel({
     data:       utils.getFile.bind(null, baseUrl + "UnicodeData.txt"),
     exclusions: utils.getFile.bind(null, baseUrl + "CompositionExclusions.txt")
 }, errTo(console.log, function(data) {
 
-    var features = {};
+    const features = {};
     utils.parseText(data.data, ";").map(function(a) {
-        var ch = parseInt(a[0], 16);
-        var combiningClass = parseInt(a[3], 10) || 0;
-        var decompStr = a[5].trim();
-        var canonical, decomp;
+        const ch = parseInt(a[0], 16);
+        const combiningClass = parseInt(a[3], 10) || 0;
+        const decompStr = a[5].trim();
+        let canonical, decomp;
 
         if (decompStr.length > 0) {
-            decomp = decompStr.split(" ").map(function(s) {return parseInt(s, 16)});;
+            decomp = decompStr.split(" ").map(function(s) {return parseInt(s, 16)});
             canonical = true;
             if (isNaN(decomp[0])) {  // When first item is a tag (unparsable as int), this is a 'compatibility decomposition'
                 canonical = false;
@@ -40,33 +42,33 @@ async.parallel({
 
     // Process CompositionExclusions.txt
     utils.parseText(data.exclusions).map(function(a) { 
-        var ch = parseInt(a[0], 16);
+        const ch = parseInt(a[0], 16);
         features[ch].noCompose = true;
     });
 
     // Exclude Non-Starter Decompositions and Singleton Decompositions (CompositionExclusions.txt parts 3, 4)
-    for (var ch in features) {
-        var feat = features[ch];
-        if (feat.canonical && (feat.decomp.length == 1 || feat.combiningClass || (features[feat.decomp[0]] || {}).combiningClass)) {
+    for (const ch in features) {
+        const feat = features[ch];
+        if (feat.canonical && (feat.decomp.length === 1 || feat.combiningClass || (features[feat.decomp[0]] || {}).combiningClass)) {
             //console.log("Excluded:", (+ch).toString(16));
             feat.noCompose = true;
         }
     }
 
     // Add Jamo decompositions (see part 3.12 of http://www.unicode.org/versions/Unicode6.3.0/ch03.pdf)
-    var LBase = 0x1100, VBase = 0x1161, TBase = 0x11A7, SBase = 0xAC00;
-    var LCount = 19, VCount = 21, TCount = 28;
+    const LBase = 0x1100, VBase = 0x1161, TBase = 0x11A7, SBase = 0xAC00;
+    const LCount = 19, VCount = 21, TCount = 28;
 
-    for (var l = 0; l < LCount; l++)
-        for (var v = 0; v < VCount; v++) {
-            var lv = l * VCount * TCount + v * TCount + SBase;
+    for (let l = 0; l < LCount; l++)
+        for (let v = 0; v < VCount; v++) {
+            const lv = l * VCount * TCount + v * TCount + SBase;
             features[lv] = {
                 decomp: [l + LBase, v + VBase],
                 canonical: true,
                 combiningClass: 0
             }
 
-            for (var t = 1; t < TCount; t++)
+            for (let t = 1; t < TCount; t++)
                 features[lv + t] = {
                     decomp: [lv, t + TBase],
                     canonical: true,
@@ -79,12 +81,12 @@ async.parallel({
     function f(ch) { return features[ch] || {combiningClass: 0}; }
     function hex(ch) { return (+ch).toString(16);}
 
-    function decompose(ch, canonical) {
-        var feat = f(ch);
-        if (feat.decomp && (feat.canonical || !canonical)) {
-            return [].concat.apply([], feat.decomp.map(function(c) {return decompose(c, canonical)}));
-        } else return [ch];
-    }
+    // function decompose(ch, canonical) {
+    //     var feat = f(ch);
+    //     if (feat.decomp && (feat.canonical || !canonical)) {
+    //         return [].concat.apply([], feat.decomp.map(function(c) {return decompose(c, canonical)}));
+    //     } else return [ch];
+    // }
     /*
     for (var ch in features) {
         [true, false].map(function(can) {
@@ -135,15 +137,15 @@ async.parallel({
 
     // }
 
-    for (var charCode in features) {
-        var feat = f(charCode);
+    for (const charCode in features) {
+        const feat = f(charCode);
         if (feat.decomp && feat.canonical) {
-            if (feat.decomp.length == 1) {
-                if (f(feat.decomp[0]).combiningClass != feat.combiningClass)
+            if (feat.decomp.length === 1) {
+                if (f(feat.decomp[0]).combiningClass !== feat.combiningClass)
                     console.log("!!1", hex(charCode), "->", feat.decomp.map(hex));    
 
-            } else if (feat.decomp.length == 2) {
-                if (f(feat.decomp[0]).combiningClass != feat.combiningClass) // || f(feat.decomp[1]).combiningClass == 0)
+            } else if (feat.decomp.length === 2) {
+                if (f(feat.decomp[0]).combiningClass !== feat.combiningClass) // || f(feat.decomp[1]).combiningClass == 0)
                     console.log("!!2", hex(charCode), "->", feat.decomp.map(hex));    
 
             } else {

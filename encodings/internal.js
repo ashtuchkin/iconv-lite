@@ -1,5 +1,5 @@
 "use strict";
-var Buffer = require("buffer").Buffer;
+const Buffer = require("buffer").Buffer;
 
 // Export Node.js internal encodings.
 
@@ -45,7 +45,7 @@ InternalCodec.prototype.decoder = InternalDecoder;
 //------------------------------------------------------------------------------
 
 // We use node.js internal decoder. Its signature is the same as ours.
-var StringDecoder = require("string_decoder").StringDecoder;
+const StringDecoder = require("string_decoder").StringDecoder;
 
 if (!StringDecoder.prototype.end) {
     // Node v0.8 doesn't have this method.
@@ -90,7 +90,7 @@ function InternalEncoderBase64() {
 
 InternalEncoderBase64.prototype.write = function (str) {
     str = this.prevStr + str;
-    var completeQuads = str.length - (str.length % 4);
+    const completeQuads = str.length - (str.length % 4);
     this.prevStr = str.slice(completeQuads);
     str = str.slice(0, completeQuads);
 

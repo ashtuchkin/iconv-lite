@@ -1,26 +1,26 @@
 "use strict";
 
-var assert = require("assert"),
+const assert = require("assert"),
     Buffer = require("buffer").Buffer,
     iconv = require("../");
 
 if (!iconv.supportsStreams) return;
 
-var Readable = require("stream").Readable;
+const Readable = require("stream").Readable;
 
 // Create a source stream that feeds given array of chunks.
 function feeder(chunks) {
     if (!Array.isArray(chunks)) chunks = [chunks];
-    var opts = {};
+    const opts = {};
     if (chunks.every((chunk) => typeof chunk == "string")) {
         opts.encoding = "utf8";
     }
 
-    var stream = new Readable(opts);
+    const stream = new Readable(opts);
     function writeChunk() {
         try {
             if (chunks.length > 0) {
-                var chunk = chunks.shift();
+                let chunk = chunks.shift();
                 if (Array.isArray(chunk)) chunk = Buffer.from(chunk);
                 stream.push(chunk, opts.encoding);
             } else {
@@ -48,9 +48,9 @@ function checkStreamOutput(options) {
             check(e);
             return;
         }
-        var res = [];
+        let res = [];
         stream.on("readable", function () {
-            var chunk;
+            let chunk;
             try {
                 while ((chunk = stream.read()) != null) {
                     if (options.outputType) {
@@ -92,7 +92,7 @@ function checkStreamOutput(options) {
 
                     if (options.checkOutput) {
                         if (options.outputType) {
-                            var r;
+                            let r;
                             if ((r = /^buffer-?(.*)/.exec(options.outputType))) {
                                 res = Buffer.concat(res);
                                 if (r[1]) res = res.toString(r[1]); // Convert to string to make comparing buffers easier.

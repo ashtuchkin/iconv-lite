@@ -1,10 +1,10 @@
 "use strict";
 
-var assert = require("assert"),
+const assert = require("assert"),
     Buffer = require("buffer").Buffer,
     iconv = require("../");
 
-var testString = "中文abc", //unicode contains Big5-code and ascii
+const testString = "中文abc", //unicode contains Big5-code and ascii
     testStringBig5Buffer = Buffer.from([0xa4, 0xa4, 0xa4, 0xe5, 0x61, 0x62, 0x63]),
     testString2 = "測試",
     testStringBig5Buffer2 = Buffer.from([0xb4, 0xfa, 0xb8, 0xd5]);
@@ -32,20 +32,20 @@ describe("Big5 tests", function () {
     });
 
     it("Big5 file read decoded,compare with iconv result", function () {
-        var contentBuffer = Buffer.from(
+        const contentBuffer = Buffer.from(
             "PEhUTUw+DQo8SEVBRD4gICAgDQoJPFRJVExFPiBtZXRhILzQxdKquqjPpc6hR6SkpOW69K22IDwvVElUTEU+DQoJPG1ldGEgSFRUUC1FUVVJVj0iQ29udGVudC1UeXBlIiBDT05URU5UPSJ0ZXh0L2h0bWw7IGNoYXJzZXQ9YmlnNSI+DQo8L0hFQUQ+DQo8Qk9EWT4NCg0Ks2+sT6RArdPBY8XppKSk5br0rbahSTxicj4NCihUaGlzIHBhZ2UgdXNlcyBiaWc1IGNoYXJhY3RlciBzZXQuKTxicj4NCmNoYXJzZXQ9YmlnNQ0KDQo8L0JPRFk+DQo8L0hUTUw+",
             "base64"
         );
-        var str = iconv.decode(contentBuffer, "big5");
-        var iconvc = new (require("iconv").Iconv)("big5", "utf8");
+        const str = iconv.decode(contentBuffer, "big5");
+        const iconvc = new (require("iconv").Iconv)("big5", "utf8");
         assert.strictEqual(iconvc.convert(contentBuffer).toString(), str);
     });
 
     it("Big5 correctly decodes and encodes characters · and ×", function () {
         // https://github.com/ashtuchkin/iconv-lite/issues/13
         // Reference: http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP950.TXT
-        var chars = "·×";
-        var big5Chars = Buffer.from([0xa1, 0x50, 0xa1, 0xd1]);
+        const chars = "·×";
+        const big5Chars = Buffer.from([0xa1, 0x50, 0xa1, 0xd1]);
         assert.strictEqual(iconv.encode(chars, "big5").toString("hex"), big5Chars.toString("hex"));
         assert.strictEqual(iconv.decode(big5Chars, "big5"), chars);
     });

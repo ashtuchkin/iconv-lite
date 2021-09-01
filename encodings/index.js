@@ -2,7 +2,7 @@
 
 // Update this array if you add/rename/remove files in this directory.
 // We support Browserify by skipping automatic module discovery and requiring modules directly.
-var modules = [
+const modules = [
     require("./internal"),
     require("./utf32"),
     require("./utf16"),
@@ -15,8 +15,8 @@ var modules = [
 ];
 
 // Put all encoding/alias/codec definitions to single object and export it.
-for (var i = 0; i < modules.length; i++) {
-    var module = modules[i];
-    for (var enc in module)
+for (let i = 0; i < modules.length; i++) {
+    const module = modules[i];
+    for (const enc in module)
         if (Object.prototype.hasOwnProperty.call(module, enc)) exports[enc] = module[enc];
 }

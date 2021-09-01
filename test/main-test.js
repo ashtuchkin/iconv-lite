@@ -1,19 +1,19 @@
 "use strict";
 
-var assert = require("assert"),
+const assert = require("assert"),
     Buffer = require("buffer").Buffer,
     iconv = require("../");
 
-var testString = "Hello123!";
-var testStringLatin1 = "Hello123!£Å÷×çþÿ¿®";
-var testStringBase64 = "SGVsbG8xMjMh";
-var testStringHex = "48656c6c6f31323321";
+const testString = "Hello123!";
+const testStringLatin1 = "Hello123!£Å÷×çþÿ¿®";
+const testStringBase64 = "SGVsbG8xMjMh";
+const testStringHex = "48656c6c6f31323321";
 
 describe("Generic UTF8-UCS2 tests", function () {
     it("Return values are of correct types", function () {
         assert.ok(Buffer.isBuffer(iconv.encode(testString, "utf8")));
 
-        var s = iconv.decode(Buffer.from(testString), "utf8");
+        const s = iconv.decode(Buffer.from(testString), "utf8");
         assert.strictEqual(Object.prototype.toString.call(s), "[object String]");
     });
 

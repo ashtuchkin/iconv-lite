@@ -1,12 +1,12 @@
 "use strict";
 
-var assert = require("assert"),
+const assert = require("assert"),
     Buffer = require("buffer").Buffer,
     iconv = require("../"),
     Iconv = require("iconv").Iconv;
 
 // prettier-ignore
-var testStr = "1aя中文☃💩",
+const testStr = "1aя中文☃💩",
     testStr2 = "❝Stray high \uD977😱 and low\uDDDD☔ surrogate values.❞",
     utf32leBuf = Buffer.from([ 0x31, 0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x00, 0x4f, 0x04, 0x00, 0x00, 0x2d, 0x4e, 0x00, 0x00, 0x87, 0x65, 0x00, 0x00, 0x03, 0x26, 0x00, 0x00, 0xa9, 0xf4, 0x01, 0x00 ]),
     utf32beBuf = Buffer.from([ 0x00, 0x00, 0x00, 0x31, 0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x04, 0x4f, 0x00, 0x00, 0x4e, 0x2d, 0x00, 0x00, 0x65, 0x87, 0x00, 0x00, 0x26, 0x03, 0x00, 0x01, 0xf4, 0xa9 ]),
@@ -18,7 +18,7 @@ var testStr = "1aя中文☃💩",
     utf32beBufWithInvalidChar = Buffer.concat([utf32beBuf, Buffer.from([0x12, 0x34, 0x56, 0x78])]),
     sampleStr = '<?xml version="1.0" encoding="UTF-8"?>\n<俄语>данные</俄语>';
 
-var fromCodePoint = String.fromCodePoint;
+let fromCodePoint = String.fromCodePoint;
 
 if (!fromCodePoint) {
     fromCodePoint = function (cp) {
@@ -32,15 +32,15 @@ if (!fromCodePoint) {
     };
 }
 
-var allCharsStr = "";
-var allCharsLEBuf = Buffer.alloc(0x10f800 * 4);
-var allCharsBEBuf = Buffer.alloc(0x10f800 * 4);
-var skip = 0;
+let allCharsStr = "";
+const allCharsLEBuf = Buffer.alloc(0x10f800 * 4);
+const allCharsBEBuf = Buffer.alloc(0x10f800 * 4);
+let skip = 0;
 
-for (var i = 0; i <= 0x10f7ff; ++i) {
+for (let i = 0; i <= 0x10f7ff; ++i) {
     if (i === 0xd800) skip = 0x800;
 
-    var cp = i + skip;
+    const cp = i + skip;
     allCharsStr += fromCodePoint(cp);
     allCharsLEBuf.writeUInt32LE(cp, i * 4);
     allCharsBEBuf.writeUInt32BE(cp, i * 4);
@@ -60,7 +60,7 @@ describe("UTF-32LE codec", function () {
     });
 
     it("handles invalid surrogates gracefully", function () {
-        var encoded = iconv.encode(testStr2, "UTF32-LE");
+        const encoded = iconv.encode(testStr2, "UTF32-LE");
         assert.equal(escape(iconv.decode(encoded, "UTF32-LE")), escape(testStr2));
     });
 
@@ -70,15 +70,15 @@ describe("UTF-32LE codec", function () {
 
     it("handles encoding all valid codepoints", function () {
         assert.deepEqual(iconv.encode(allCharsStr, "utf-32le"), allCharsLEBuf);
-        var nodeIconv = new Iconv("UTF-8", "UTF-32LE");
-        var nodeBuf = nodeIconv.convert(allCharsStr);
+        const nodeIconv = new Iconv("UTF-8", "UTF-32LE");
+        const nodeBuf = nodeIconv.convert(allCharsStr);
         assert.deepEqual(nodeBuf, allCharsLEBuf);
     });
 
     it("handles decoding all valid codepoints", function () {
         assert.equal(iconv.decode(allCharsLEBuf, "utf-32le"), allCharsStr);
-        var nodeIconv = new Iconv("UTF-32LE", "UTF-8");
-        var nodeStr = nodeIconv.convert(allCharsLEBuf).toString("utf8");
+        const nodeIconv = new Iconv("UTF-32LE", "UTF-8");
+        const nodeStr = nodeIconv.convert(allCharsLEBuf).toString("utf8");
         assert.equal(nodeStr, allCharsStr);
     });
 });
@@ -97,7 +97,7 @@ describe("UTF-32BE codec", function () {
     });
 
     it("handles invalid surrogates gracefully", function () {
-        var encoded = iconv.encode(testStr2, "UTF32-BE");
+        const encoded = iconv.encode(testStr2, "UTF32-BE");
         assert.equal(escape(iconv.decode(encoded, "UTF32-BE")), escape(testStr2));
     });
 
@@ -107,15 +107,15 @@ describe("UTF-32BE codec", function () {
 
     it("handles encoding all valid codepoints", function () {
         assert.deepEqual(iconv.encode(allCharsStr, "utf-32be"), allCharsBEBuf);
-        var nodeIconv = new Iconv("UTF-8", "UTF-32BE");
-        var nodeBuf = nodeIconv.convert(allCharsStr);
+        const nodeIconv = new Iconv("UTF-8", "UTF-32BE");
+        const nodeBuf = nodeIconv.convert(allCharsStr);
         assert.deepEqual(nodeBuf, allCharsBEBuf);
     });
 
     it("handles decoding all valid codepoints", function () {
         assert.equal(iconv.decode(allCharsBEBuf, "utf-32be"), allCharsStr);
-        var nodeIconv = new Iconv("UTF-32BE", "UTF-8");
-        var nodeStr = nodeIconv.convert(allCharsBEBuf).toString("utf8");
+        const nodeIconv = new Iconv("UTF-32BE", "UTF-8");
+        const nodeStr = nodeIconv.convert(allCharsBEBuf).toString("utf8");
         assert.equal(nodeStr, allCharsStr);
     });
 });
@@ -159,16 +159,16 @@ describe("UTF-32 general codec", function () {
 
 // Utility function to make bad matches easier to visualize.
 function escape(s) {
-    var sb = [];
+    const sb = [];
 
-    for (var i = 0; i < s.length; ++i) {
-        var cc = s.charCodeAt(i);
+    for (let i = 0; i < s.length; ++i) {
+        const cc = s.charCodeAt(i);
 
         // prettier-ignore
         if ((32 <= cc && cc < 127) && cc !== 0x5c) {  
             sb.push(s.charAt(i));
         } else {
-            var h = s.charCodeAt(i).toString(16).toUpperCase();
+            let h = s.charCodeAt(i).toString(16).toUpperCase();
             while (h.length < 4) h = "0" + h;
 
             sb.push("\\u" + h);

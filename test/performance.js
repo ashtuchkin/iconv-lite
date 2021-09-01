@@ -5,23 +5,23 @@ if (module.parent)
     // Skip this file from testing.
     return;
 
-var iconv = require("iconv");
-var iconv_lite = require("../");
+const iconv = require("iconv");
+const iconv_lite = require("../");
 
-var encoding = process.argv[2] || "windows-1251";
-var convertTimes = 10000;
+const encoding = process.argv[2] || "windows-1251";
+const convertTimes = 10000;
 
-var encodingStrings = {
+const encodingStrings = {
     "windows-1251": "This is a test string 32 chars..",
     gbk: "这是中文字符测试。。！@￥%12",
     utf8: "这是中文字符测试。。！@￥%12This is a test string 48 chars..",
 };
 // Test encoding.
-var str = encodingStrings[encoding];
+let str = encodingStrings[encoding];
 if (!str) {
     throw new Error("Don't support " + encoding + " performance test.");
 }
-for (var i = 0; i < 13; i++) {
+for (let i = 0; i < 13; i++) {
     str = str + str;
 }
 

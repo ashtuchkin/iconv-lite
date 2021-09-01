@@ -1,10 +1,10 @@
 "use strict";
 
-var assert = require("assert"),
+const assert = require("assert"),
     utils = require("./utils"),
     iconv = utils.requireIconv();
 
-var baseStrings = {
+const baseStrings = {
     empty: "",
     hi: "Привет!",
     ascii:
@@ -17,7 +17,7 @@ var baseStrings = {
     untranslatable: "£Åçþÿ¿",
 };
 
-var encodings = [
+const encodings = [
     {
         name: "Win-1251",
         variations: ["win1251", "Windows-1251", "windows1251", "CP1251", 1251],
@@ -67,8 +67,8 @@ var encodings = [
 
 describe("Test Cyrillic encodings #node-web", function () {
     encodings.forEach(function (encoding) {
-        var enc = encoding.variations[0];
-        var key = "hi";
+        const enc = encoding.variations[0];
+        const key = "hi";
         describe(encoding.name + ":", function () {
             it("Convert from buffer", function () {
                 for (const key in encoding.encodedStrings)

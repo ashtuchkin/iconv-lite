@@ -1,16 +1,18 @@
 /* eslint no-console: "off" */
+// noinspection ExceptionCaughtLocallyJS
+
 "use strict";
 
-var fs = require("fs");
-var path = require("path");
-var Iconv = require("iconv").Iconv;
-var Buffer = require("buffer").Buffer;
+const fs = require("fs");
+const path = require("path");
+const Iconv = require("iconv").Iconv;
+const Buffer = require("buffer").Buffer;
 
 // Generate encoding families using original iconv.
-var destFileName = "encodings/sbcs-data-generated.js";
+const destFileName = "encodings/sbcs-data-generated.js";
 
 // prettier-ignore
-var encodingFamilies = [
+const encodingFamilies = [
     {
         // Windows code pages http://www.unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/ (+932, 936, 949, 950)
         encodings: [874, 1250, 1251, 1252, 1253, 1254, 1255, 1256, 1257, 1258],
@@ -57,15 +59,15 @@ var encodingFamilies = [
     },
 ];
 
-var encodings = {};
+const encodings = {};
 
 // Add all encodings from encodingFamilies.
 encodingFamilies.forEach(function (family) {
     family.encodings.forEach(function (encoding) {
         if (family.convert) encoding = family.convert(encoding);
 
-        var encodingIconvName = encoding.name ? encoding.name : encoding;
-        var encodingName = encodingIconvName.replace(/[-_]/g, "").toLowerCase();
+        const encodingIconvName = encoding.name ? encoding.name : encoding;
+        const encodingName = encodingIconvName.replace(/[-_]/g, "").toLowerCase();
 
         encodings[encodingName] = {
             type: "_sbcs",
@@ -89,12 +91,12 @@ fs.writeFileSync(
 
 function generateCharsString(encoding) {
     console.log("Generate encoding for " + encoding);
-    var iconvToUtf8 = new Iconv(encoding, "UTF-8");
-    var iconvFromUtf8 = new Iconv("UTF-8", encoding);
-    var chars = "",
-        containsDiacritics = [];
+    const iconvToUtf8 = new Iconv(encoding, "UTF-8");
+    const iconvFromUtf8 = new Iconv("UTF-8", encoding);
+    let chars = "";
+    const containsDiacritics = [];
 
-    for (var b = 0x0; b < 0x100; b++) {
+    for (let b = 0x0; b < 0x100; b++) {
         let convertedChar;
         try {
             convertedChar = iconvToUtf8.convert(Buffer.from([b])).toString();
@@ -134,7 +136,7 @@ function generateCharsString(encoding) {
 
     // Check if the first half is standard and cut it if it is.
     // prettier-ignore
-    var asciiString = '\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f'+
+    const asciiString = '\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f'+
                   ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\x7f';
     if (chars.slice(0, 0x80) === asciiString) chars = chars.slice(0x80);
 

@@ -1,5 +1,5 @@
 "use strict";
-var Buffer = require("buffer").Buffer;
+const Buffer = require("buffer").Buffer;
 
 // Multibyte codec. In this scheme, a character is represented by 1 or more bytes.
 // Our codec supports UTF-16 surrogates, extensions for GB18030 and unicode sequences.
@@ -296,7 +296,7 @@ DBCSCodec.prototype._fillEncodeTable = function (nodeIdx, prefix, skipEncodeChar
             const subNodeIdx = NODE_START - uCode;
             if (!subNodeEmpty[subNodeIdx]) {
                 // Skip empty subtrees (they are too large in gb18030).
-                var newPrefix = (mbCode << 8) >>> 0; // NOTE: '>>> 0' keeps 32-bit num positive.
+                const newPrefix = (mbCode << 8) >>> 0; // NOTE: '>>> 0' keeps 32-bit num positive.
                 if (this._fillEncodeTable(subNodeIdx, newPrefix, skipEncodeChars)) {
                     hasValues = true;
                 } else {

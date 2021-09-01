@@ -1,10 +1,10 @@
 "use strict";
 
-var assert = require("assert"),
+const assert = require("assert"),
     utils = require("./utils"),
     iconv = utils.requireIconv();
 
-var baseStrings = {
+const baseStrings = {
     empty: "",
     hi: "Γειά!",
     ascii:
@@ -14,7 +14,7 @@ var baseStrings = {
     untranslatable: "Åçþÿ¿",
 };
 
-var encodings = [
+const encodings = [
     {
         name: "windows1253",
         variations: ["windows-1253", "win-1253", "win1253", "cp1253", "cp-1253", 1253],
@@ -55,11 +55,11 @@ var encodings = [
 
 describe("Test Greek encodings #node-web", function () {
     encodings.forEach(function (encoding) {
-        var enc = encoding.variations[0];
-        var key = "hi";
+        const enc = encoding.variations[0];
+        const key = "hi";
         describe(encoding.name + ":", function () {
             it("Convert from buffer", function () {
-                for (var key in encoding.encodedStrings)
+                for (const key in encoding.encodedStrings)
                     assert.strictEqual(
                         iconv.decode(encoding.encodedStrings[key], enc),
                         baseStrings[key]
@@ -67,7 +67,7 @@ describe("Test Greek encodings #node-web", function () {
             });
 
             it("Convert to buffer", function () {
-                for (var key in encoding.encodedStrings)
+                for (const key in encoding.encodedStrings)
                     assert.strictEqual(
                         utils.hex(iconv.encode(baseStrings[key], enc)),
                         utils.hex(encoding.encodedStrings[key])

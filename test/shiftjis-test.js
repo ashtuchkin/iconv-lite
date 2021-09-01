@@ -1,12 +1,12 @@
 "use strict";
 
-var assert = require("assert"),
+const assert = require("assert"),
     Buffer = require("buffer").Buffer,
     iconv = require("../");
 
 describe("ShiftJIS tests", function () {
     it("ShiftJIS correctly encoded/decoded", function () {
-        var testString = "中文abc", //unicode contains ShiftJIS-code and ascii
+        const testString = "中文abc", //unicode contains ShiftJIS-code and ascii
             testStringBig5Buffer = Buffer.from([0x92, 0x86, 0x95, 0xb6, 0x61, 0x62, 0x63]),
             testString2 = "測試",
             testStringBig5Buffer2 = Buffer.from([0x91, 0xaa, 0x8e, 0x8e]);
@@ -24,7 +24,7 @@ describe("ShiftJIS tests", function () {
     });
 
     it("ShiftJIS extended chars are decoded, but not encoded", function () {
-        var buf = Buffer.from("ed40eefceeef", "hex"),
+        const buf = Buffer.from("ed40eefceeef", "hex"),
             str = "纊＂ⅰ",
             res = "fa5cfa57fa40", // repeated block (these same chars are repeated in the different place)
             buf2 = Buffer.from("f040f2fcf940", "hex"),

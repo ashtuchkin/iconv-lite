@@ -17,7 +17,7 @@ exports._sbcs = class SBCSCodec {
             );
 
         if (codecOptions.chars.length === 128) {
-            var asciiString = "";
+            let asciiString = "";
             for (let i = 0; i < 128; i++) {
                 asciiString += String.fromCharCode(i);
             }
