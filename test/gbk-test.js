@@ -1,9 +1,11 @@
-var fs      = require('fs'),
-    assert  = require('assert'),
-    Buffer  = require('safer-buffer').Buffer,
-    iconv   = require(__dirname+'/../');
+import fs from 'fs'
+import assert from 'assert'
+import pkg from 'safer-buffer'
+import {Iconv} from 'iconv'
+const {iconv} = await import('../lib/index.js')
+const { Buffer } = pkg
 
-var testString = "中国abc",//unicode contains GBK-code and ascii
+const testString = "中国abc",//unicode contains GBK-code and ascii
     testStringGBKBuffer = Buffer.from([0xd6,0xd0,0xb9,0xfa,0x61,0x62,0x63]);
 
 describe("GBK tests", function() {
@@ -18,9 +20,9 @@ describe("GBK tests", function() {
     });
 
     it("GBK file read decoded,compare with iconv result", function() {
-        var contentBuffer = fs.readFileSync(__dirname+"/gbkFile.txt");
+        var contentBuffer = fs.readFileSync("./test/gbkFile.txt");
         var str = iconv.decode(contentBuffer, "GBK");
-        var iconvc = new (require('iconv').Iconv)('GBK','utf8');
+        var iconvc = new Iconv('GBK','utf8');
         assert.strictEqual(iconvc.convert(contentBuffer).toString(), str);
     });
 

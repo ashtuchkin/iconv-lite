@@ -1,8 +1,9 @@
-var assert = require('assert'),
-    Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../');
-
-var sampleStr = '<?xml version="1.0" encoding="UTF-8"?>\n<俄语>данные</俄语>';
+import assert from 'assert'
+import pkg from 'safer-buffer'
+const { iconv } = await import('../lib/index.js')
+const { Buffer } = pkg
+    
+var sampleStr = '<?xml version="1.0" encoding="UTF-8"?>\n<俄语>данные</俄语>',
     strBOM = '\ufeff',
     utf8BOM = Buffer.from([0xEF, 0xBB, 0xBF]),
     utf16beBOM = Buffer.from([0xFE, 0xFF]),

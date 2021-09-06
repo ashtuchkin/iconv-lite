@@ -1,8 +1,9 @@
-var assert = require('assert'),
-    Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../');
+import assert from 'assert'
+import pkg from 'safer-buffer'
+const { iconv } = await import('../lib/index.js')
+const { Buffer } = pkg
 
-var testStr = "1aя中文☃💩";
+var testStr = "1aя中文☃💩",
     utf16beBuf = Buffer.from([0, 0x31, 0, 0x61, 0x04, 0x4f, 0x4e, 0x2d, 0x65, 0x87, 0x26, 0x03, 0xd8, 0x3d, 0xdc, 0xa9]),
     utf16leBuf = Buffer.from(testStr, 'ucs2'),
     utf16beBOM = Buffer.from([0xFE, 0xFF]),

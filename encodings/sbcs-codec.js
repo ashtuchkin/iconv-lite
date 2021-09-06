@@ -1,10 +1,11 @@
 "use strict";
-var Buffer = require("safer-buffer").Buffer;
+import pkg from 'safer-buffer'
+const { Buffer } = pkg
 
 // Single-byte codec. Needs a 'chars' string parameter that contains 256 or 128 chars that
 // correspond to encoded bytes (if 128 - then lower half is ASCII). 
 
-exports._sbcs = SBCSCodec;
+const _sbcs = SBCSCodec
 function SBCSCodec(codecOptions, iconv) {
     if (!codecOptions)
         throw new Error("SBCS codec is called without the data.")
@@ -70,3 +71,5 @@ SBCSDecoder.prototype.write = function(buf) {
 
 SBCSDecoder.prototype.end = function() {
 }
+
+export default { _sbcs }

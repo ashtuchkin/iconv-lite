@@ -1,10 +1,11 @@
 'use strict';
 
-var Buffer = require('safer-buffer').Buffer;
+import pkg from 'safer-buffer'
+const { Buffer } = pkg
 
 // == UTF32-LE/BE codec. ==========================================================
 
-exports._utf32 = Utf32Codec;
+const _utf32 = Utf32Codec
 
 function Utf32Codec(codecOptions, iconv) {
     this.iconv = iconv;
@@ -12,12 +13,12 @@ function Utf32Codec(codecOptions, iconv) {
     this.isLE = codecOptions.isLE;
 }
 
-exports.utf32le = { type: '_utf32', isLE: true };
-exports.utf32be = { type: '_utf32', isLE: false };
+const utf32le = { type: '_utf32', isLE: true }
+const utf32be = { type: '_utf32', isLE: false }
 
 // Aliases
-exports.ucs4le = 'utf32le';
-exports.ucs4be = 'utf32be';
+const ucs4le = 'utf32le'
+const ucs4be = 'utf32be'
 
 Utf32Codec.prototype.encoder = Utf32Encoder;
 Utf32Codec.prototype.decoder = Utf32Decoder;
@@ -189,8 +190,8 @@ Utf32Decoder.prototype.end = function() {
 
 // Encoder prepends BOM (which can be overridden with (addBOM: false}).
 
-exports.utf32 = Utf32AutoCodec;
-exports.ucs4 = 'utf32';
+const utf32 = Utf32AutoCodec
+const ucs4 = 'utf32'
 
 function Utf32AutoCodec(options, iconv) {
     this.iconv = iconv;
@@ -317,3 +318,5 @@ function detectEncoding(bufs, defaultEncoding) {
     // Couldn't decide (likely all zeros or not enough data).
     return defaultEncoding || 'utf-32le';
 }
+
+export default { _utf32, utf32le, utf32be, ucs4le, ucs4be, utf32, ucs4 }

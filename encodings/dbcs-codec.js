@@ -1,11 +1,12 @@
 "use strict";
-var Buffer = require("safer-buffer").Buffer;
+import pkg from 'safer-buffer'
+const { Buffer } = pkg
 
 // Multibyte codec. In this scheme, a character is represented by 1 or more bytes.
 // Our codec supports UTF-16 surrogates, extensions for GB18030 and unicode sequences.
 // To save memory and loading time, we read table files only when requested.
 
-exports._dbcs = DBCSCodec;
+const _dbcs = DBCSCodec;
 
 var UNASSIGNED = -1,
     GB18030_CODE = -2,
@@ -595,3 +596,4 @@ function findIdx(table, val) {
     return l;
 }
 
+export default { _dbcs }

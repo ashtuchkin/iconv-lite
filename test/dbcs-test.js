@@ -1,8 +1,8 @@
-var fs      = require('fs'),
-    assert  = require('assert'),
-    Buffer  = require('safer-buffer').Buffer,
-    iconv   = require(__dirname+'/../'),
-    Iconv   = require('iconv').Iconv;
+import assert from 'assert'
+import pkg from 'safer-buffer'
+import { Iconv } from 'iconv'
+const { iconv } = await import('../lib/index.js')
+const { Buffer } = pkg
 
 
 // Make all valid input combinations for a given encoding and call fn with it.

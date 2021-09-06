@@ -1,7 +1,8 @@
-var assert = require('assert'),
-    Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../');
-
+import assert from 'assert'
+import pkg from 'safer-buffer'
+const { iconv } = await import('../lib/index.js')
+const { Buffer } = pkg
+    
 var testString = "Hello123!";
 var testStringLatin1 = "Hello123!£Å÷×çþÿ¿®";
 var testStringBase64 = "SGVsbG8xMjMh";

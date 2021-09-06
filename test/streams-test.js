@@ -1,32 +1,19 @@
-var assert = require('assert'),
-    Buffer = require('safer-buffer').Buffer,
-    semver = require('semver'),
-    iconv = require(__dirname+'/../');
+import assert from 'assert'
+import semver from 'semver'
+import pkg from 'safer-buffer'
+import { Readable } from 'stream'
+const { iconv } = await import('../lib/index.js')
+const { Buffer } = pkg
 
-if (!iconv.supportsStreams)
-    return;
-
-var Readable = require('stream').Readable;
-
-// If surrogate pair, merge them
-function formatSurrogate(arr=[]) {
-  let h = arr[0],
-    l = arr[1]
-  if('\uD800' < h && h <= '\uDBFF' && '\uDC00' < l && l <= '\uDFFF'){
-    return [h+l]
-  }
-  return arr
-}
+if (!iconv.supportsStreams)    throw new Error('iconv.supportsStreams is null.')
 
 // Create a source stream that feeds given array of chunks.
 function feeder(chunks) {
     if (!Array.isArray(chunks))
         chunks = [chunks];
     var opts = {};
-    if (chunks.every(function(chunk) {return typeof chunk == 'string'})){
-      opts.encoding = 'utf8';
-      chunks = formatSurrogate(chunks)
-    }
+    if (chunks.every(function(chunk) {return typeof chunk == 'string'}))
+        opts.encoding = 'utf8';
 
     var stream = new Readable(opts);
     function writeChunk() {
@@ -147,12 +134,6 @@ function checkDecodeStream(opts) {
 }
 
 describe("Streaming mode", function() {
-    it("Encoding using internal modules: utf8 with surrogates in separate chunks", checkEncodeStream({
-      encoding: "utf8",
-      input: ["\uD83D", "\uDE3B"],
-      output: "f09f98bb",
-    }));
-    
     it("Feeder outputs strings", checkStreamOutput({
         createStream: function() { return feeder(["abc", "def"]); },
         outputType: 'string',

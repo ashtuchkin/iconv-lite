@@ -1,8 +1,9 @@
-var assert = require('assert'),
-    unorm = require('unorm'),
-    Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../'),
-    Iconv = require('iconv').Iconv;
+import assert from 'assert'
+import unorm from 'unorm'
+import pkg from 'safer-buffer'
+import {Iconv} from 'iconv'
+const { iconv } = await import('../lib/index.js')
+const { Buffer } = pkg
 
 function convertWithDefault(converter, buf, def) {
     var res = converter.convert(buf);

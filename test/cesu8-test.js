@@ -1,6 +1,7 @@
-var assert = require('assert'),
-    Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../');
+import assert from 'assert'
+import pkg from 'safer-buffer'
+const { iconv } = await import('../lib/index.js')
+const { Buffer } = pkg
 
 describe("CESU-8 codec", function() {
     it("encodes correctly", function() {

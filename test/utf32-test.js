@@ -1,7 +1,8 @@
-var assert = require('assert'),
-    Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../'),
-    Iconv = require('iconv').Iconv;
+import assert from 'assert'
+import pkg from 'safer-buffer'
+import { Iconv } from 'iconv'
+const { iconv } = await import('../lib/index.js')
+const { Buffer } = pkg
 
 var testStr = '1aя中文☃💩',
     testStr2 = '❝Stray high \uD977😱 and low\uDDDD☔ surrogate values.❞',
