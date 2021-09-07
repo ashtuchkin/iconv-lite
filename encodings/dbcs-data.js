@@ -5,6 +5,15 @@ import fs from 'fs';
 // Tables are not require()-d until they are needed to speed up library load.
 // require()-s are direct to support Browserify.
 
+/**
+ * 
+ * @param {String} url 
+ * @returns {Array} 
+ */
+function readJsonFile (url) {
+  return JSON.parse(fs.readFileSync(url, 'utf8'))
+}
+
 export default {
 
     // == Japanese/ShiftJIS ====================================================
@@ -41,7 +50,7 @@ export default {
 
     'shiftjis': {
         type: '_dbcs',
-        table: () => JSON.parse(fs.readFileSync('./encodings/tables/shiftjis.json', 'utf8')),
+        table: () => readJsonFile('./encodings/tables/shiftjis.json'),
         encodeAdd: {'\u00a5': 0x5C, '\u203E': 0x7E},
         encodeSkipVals: [{from: 0xED40, to: 0xF940}],
     },
@@ -58,7 +67,7 @@ export default {
 
     'eucjp': {
         type: '_dbcs',
-        table: () => JSON.parse(fs.readFileSync('./encodings/tables/eucjp.json', 'utf8')),
+        table: () => readJsonFile('./encodings/tables/eucjp.json'),
         encodeAdd: {'\u00a5': 0x5C, '\u203E': 0x7E},
     },
 
@@ -85,14 +94,13 @@ export default {
     '936': 'cp936',
     'cp936': {
         type: '_dbcs',
-        table: () => JSON.parse(fs.readFileSync('./encodings/tables/cp936.json', 'utf8'))
+        table: () => readJsonFile('./encodings/tables/cp936.json')
     },
 
     // GBK (~22000 chars) is an extension of CP936 that added user-mapped chars and some other.
     'gbk': {
         type: '_dbcs',
-        table: () => JSON.parse(fs.readFileSync('./encodings/tables/cp936.json', 'utf8'))
-          .concat(JSON.parse(fs.readFileSync('./encodings/tables/gbk-added.json', 'utf8')))
+        table: () => readJsonFile('./encodings/tables/cp936.json').concat(readJsonFile('./encodings/tables/gbk-added.json'))
     },
     'xgbk': 'gbk',
     'isoir58': 'gbk',
@@ -104,9 +112,8 @@ export default {
     // http://www.khngai.com/chinese/charmap/tblgbk.php?page=0
     'gb18030': {
         type: '_dbcs',
-        table: () => JSON.parse(fs.readFileSync('./encodings/tables/cp936.json', 'utf8'))
-          .concat(JSON.parse(fs.readFileSync('./encodings/tables/gbk-added.json', 'utf8'))),
-        gb18030: () => JSON.parse(fs.readFileSync('./encodings/tables/gb18030-ranges.json', 'utf8')),
+        table: () => readJsonFile('./encodings/tables/cp936.json').concat(readJsonFile('./encodings/tables/gbk-added.json')),
+        gb18030: () => readJsonFile('./encodings/tables/gb18030-ranges.json'),
         encodeSkipVals: [0x80],
         encodeAdd: {'€': 0xA2E3},
     },
@@ -121,7 +128,7 @@ export default {
     '949': 'cp949',
     'cp949': {
         type: '_dbcs',
-        table: () => JSON.parse(fs.readFileSync('./encodings/tables/cp949.json', 'utf8'))
+        table: () => readJsonFile('./encodings/tables/cp949.json')
     },
 
     'cseuckr': 'cp949',
@@ -162,15 +169,14 @@ export default {
     '950': 'cp950',
     'cp950': {
         type: '_dbcs',
-        table: () => JSON.parse(fs.readFileSync('./encodings/tables/cp950.json', 'utf8')),
+        table: () => readJsonFile('./encodings/tables/cp950.json'),
     },
 
     // Big5 has many variations and is an extension of cp950. We use Encoding Standard's as a consensus.
     'big5': 'big5hkscs',
     'big5hkscs': {
         type: '_dbcs',
-        table: () => JSON.parse(fs.readFileSync('./encodings/tables/cp950.json', 'utf8'))
-          .concat(JSON.parse(fs.readFileSync('./encodings/tables/big5-added.json', 'utf8'))),
+        table: () => readJsonFile('./encodings/tables/cp950.json').concat(readJsonFile('./encodings/tables/big5-added.json')),
         encodeSkipVals: [
             // Although Encoding Standard says we should avoid encoding to HKSCS area (See Step 1 of
             // https://encoding.spec.whatwg.org/#index-big5-pointer), we still do it to increase compatibility with ICU.
