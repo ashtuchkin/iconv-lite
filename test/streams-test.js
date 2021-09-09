@@ -10,7 +10,7 @@ var Readable = require('stream').Readable;
 
 // If surrogate pair, merge them
 function formatSurrogate(arr=[]) {
-  let h = arr[0],
+  var h = arr[0],
     l = arr[1]
   if('\uD800' < h && h <= '\uDBFF' && '\uDC00' < l && l <= '\uDFFF'){
     return [h+l]
