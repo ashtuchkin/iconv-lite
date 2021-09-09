@@ -9,11 +9,13 @@ if (!iconv.supportsStreams)
 var Readable = require('stream').Readable;
 
 // If surrogate pair, merge them
-function formatSurrogate(arr=[]) {
-  var h = arr[0],
-    l = arr[1]
-  if('\uD800' < h && h <= '\uDBFF' && '\uDC00' < l && l <= '\uDFFF'){
-    return [h+l]
+function formatSurrogate(arr) {
+  if(arr instanceof Array){
+    var h = arr[0],
+      l = arr[1]
+    if('\uD800' < h && h <= '\uDBFF' && '\uDC00' < l && l <= '\uDFFF'){
+      return [h+l]
+    }
   }
   return arr
 }
