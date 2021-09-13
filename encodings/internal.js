@@ -28,6 +28,8 @@ function InternalCodec(codecOptions, iconv) {
 
     if (this.enc === "base64")
         this.encoder = InternalEncoderBase64;
+    else if (this.enc === "utf8")
+        this.encoder = InternalEncoderUtf8;
     else if (this.enc === "cesu8") {
         this.enc = "utf8"; // Use utf8 for decoding.
         this.encoder = InternalEncoderCesu8;
@@ -195,4 +197,30 @@ InternalDecoderCesu8.prototype.end = function() {
     if (this.contBytes > 0)
         res += this.defaultCharUnicode;
     return res;
+}
+
+//------------------------------------------------------------------------------
+// check the chunk boundaries for surrogate pair
+
+function InternalEncoderUtf8(options, codec) {
+    this.lowSurrogate = '';
+}
+
+InternalEncoderUtf8.prototype.write = function(str) {
+    if (str.length === 1 && this.lowSurrogate && '\uDC00' < str && str <= '\uDFFF') {
+        // is Surrogate Pair
+        var buf = Buffer.from(this.lowSurrogate + str)
+        this.lowSurrogate = '';
+        return buf
+    }
+    if (str.length === 1 && '\uD800' < str && str <= '\uDBFF') {
+        // is Low-Surrogate Code Unit
+        this.lowSurrogate = str
+    } else {
+        this.lowSurrogate = '';
+        return Buffer.from(str, this.enc);
+    }
+}
+
+InternalEncoderUtf8.prototype.end = function() {
 }

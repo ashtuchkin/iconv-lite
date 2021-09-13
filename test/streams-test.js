@@ -135,6 +135,12 @@ function checkDecodeStream(opts) {
 }
 
 describe("Streaming mode", function() {
+  	it("Encoding using internal modules: utf8 with surrogates in separate chunks", checkEncodeStream({
+        encoding: "utf8",
+        input: ["\uD83D", "\uDE3B"],
+        output: "f09f98bb",
+    }));
+
     it("Feeder outputs strings", checkStreamOutput({
         createStream: function() { return feeder(["abc", "def"]); },
         outputType: 'string',
