@@ -135,12 +135,6 @@ function checkDecodeStream(opts) {
 }
 
 describe("Streaming mode", function() {
-  	it("Encoding using internal modules: utf8 with surrogates in separate chunks", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uD83D", "\uDE3B"],
-        output: "f09f98bb",
-    }));
-
     it("Feeder outputs strings", checkStreamOutput({
         createStream: function() { return feeder(["abc", "def"]); },
         outputType: 'string',
@@ -337,3 +331,46 @@ describe("Streaming sugar", function() {
     });
 });
 
+describe("Encoding using internal modules: with surrogates in separate chunks", function () {
+    it("normal", checkEncodeStream({
+        encoding: "utf8",
+        input: ["\uD83D", "\uDE3B"],
+        output: "f09f98bb",
+    }));
+
+    it("more than one character with left", checkEncodeStream({
+        encoding: "utf8",
+        input: ["abc\uD83D", "\uDE3B"],
+        output: "616263f09f98bb",
+    }));
+
+    it("more than one character with right", checkEncodeStream({
+        encoding: "utf8",
+        input: ["\uD83D", "\uDE3Befg"],
+        output: "f09f98bb656667",
+    }));
+
+    it("more than one character at both ends", checkEncodeStream({
+        encoding: "utf8",
+        input: ["abc\uD83D", "\uDE3Befg"],
+        output: "616263f09f98bb656667",
+    }));
+
+    it("surrogates pair be interrupted", checkEncodeStream({
+        encoding: "utf8",
+        input: ["abc\uD83D", "efg\uDE3B"],
+        output: "616263656667",
+    }));
+
+    it("a half of surrogates pair only left", checkEncodeStream({
+        encoding: "utf8",
+        input: ["abc\uD83D"],
+        output: "616263",
+    }));
+
+    it("a half of surrogates pair only right", checkEncodeStream({
+        encoding: "utf8",
+        input: ["\uDE3Befg"],
+        output: "656667",
+    }));
+});

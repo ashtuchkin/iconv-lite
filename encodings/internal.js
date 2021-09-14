@@ -204,22 +204,33 @@ InternalDecoderCesu8.prototype.end = function() {
 
 function InternalEncoderUtf8(options, codec) {
     this.lowSurrogate = '';
+    this.surrogatePair = '';
 }
 
 InternalEncoderUtf8.prototype.write = function(str) {
-    if (str.length === 1 && this.lowSurrogate && '\uDC00' < str && str <= '\uDFFF') {
-        // is Surrogate Pair
-        var buf = Buffer.from(this.lowSurrogate + str)
-        this.lowSurrogate = '';
-        return buf
+    var normalStr = '';
+    for (var i = 0; i < str.length; i++) {
+        if ('\uD800' < str[i] && str[i] <= '\uDBFF') {
+            // fingding Low-Surrogate Code Unit
+            this.lowSurrogate = str[i];
+        } else if ('\uDC00' < str[i] && str[i] <= '\uDFFF') {
+            if(this.lowSurrogate) {
+                // matching another partner of Surrogate pair
+                this.surrogatePair = this.lowSurrogate + str[i];
+                normalStr += this.surrogatePair;
+                // init
+                this.lowSurrogate = '';
+                this.surrogatePair = '';
+            }
+        } else {
+            // will be interrupted
+            if (this.lowSurrogate) {
+                this.lowSurrogate = '';
+            }
+            normalStr += str[i];
+        }
     }
-    if (str.length === 1 && '\uD800' < str && str <= '\uDBFF') {
-        // is Low-Surrogate Code Unit
-        this.lowSurrogate = str
-    } else {
-        this.lowSurrogate = '';
-        return Buffer.from(str, this.enc);
-    }
+    return Buffer.from(normalStr + this.surrogatePair, this.enc);
 }
 
 InternalEncoderUtf8.prototype.end = function() {
