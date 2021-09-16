@@ -327,70 +327,32 @@ describe("Streaming sugar", function() {
 });
 
 describe("Encoding using internal modules with surrogates in separate chunks:", function () {
-    // Generate the expected value of surrogates UT
-    function toBufForSurrgates(input) {
-        var str = input.join('')
-        var buf = Buffer.from(str, 'utf8')
-        return buf.toString('hex')
+    // Generate the expected object of surrogates UT,by input array
+    function generateObj(input) {
+        return {
+            encoding: "utf8",
+            input: input,
+            output: Buffer.from(input.join(''), 'utf8').toString('hex')
+        }
     }
 
-    it("a single string", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uD83D\uDE3B"],
-        output: toBufForSurrgates(["\uD83D\uDE3B"])
-    }));
+    it("a single string", checkEncodeStream(generateObj(["\uD83D\uDE3B"])))
 
-    it("normal", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uD83D", "\uDE3B"],
-        output: toBufForSurrgates(["\uD83D", "\uDE3B"])
-    }));
+    it("normal", checkEncodeStream(generateObj(["\uD83D", "\uDE3B"])))
 
-    it("reverse", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uDE3B", "\uD83D"],
-        output: toBufForSurrgates(["\uDE3B", "\uD83D"])
-    }));
+    it("reverse", checkEncodeStream(generateObj(["\uDE3B", "\uD83D"])))
 
-    it("multiple surrogates", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uD83D", "\uDE3B\uD83D", "\uDE3B"],
-        output: toBufForSurrgates(["\uD83D", "\uDE3B\uD83D", "\uDE3B"])
-    }));
+    it("multiple surrogates", checkEncodeStream(generateObj(["\uD83D", "\uDE3B\uD83D", "\uDE3B"])))
 
-    it("more than one character with left", checkEncodeStream({
-        encoding: "utf8",
-        input: ["abc\uD83D", "\uDE3B"],
-        output: toBufForSurrgates(["abc\uD83D", "\uDE3B"])
-    }));
+    it("more than one character with left", checkEncodeStream(generateObj(["abc\uD83D", "\uDE3B"])))
 
-    it("more than one character with right", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uD83D", "\uDE3Befg"],
-        output: toBufForSurrgates(["\uD83D", "\uDE3Befg"])
-    }));
+    it("more than one character with right", checkEncodeStream(generateObj(["\uD83D", "\uDE3Befg"])))
 
-    it("more than one character at both ends", checkEncodeStream({
-        encoding: "utf8",
-        input: ["abc\uD83D", "\uDE3Befg"],
-        output: toBufForSurrgates(["abc\uD83D", "\uDE3Befg"])
-    }));
+    it("more than one character at both ends", checkEncodeStream(generateObj(["abc\uD83D", "\uDE3Befg"])))
 
-    it("surrogates pair be interrupted", checkEncodeStream({
-        encoding: "utf8",
-        input: ["abc\uD83D", "efg\uDE3B"],
-        output: toBufForSurrgates(["abc\uD83D", "efg\uDE3B"])
-    }));
+    it("surrogates pair be interrupted", checkEncodeStream(generateObj(["abc\uD83D", "efg\uDE3B"])))
 
-    it("a half of surrogates pair only left", checkEncodeStream({
-        encoding: "utf8",
-        input: ["abc\uD83D"],
-        output: toBufForSurrgates(["abc\uD83D"])
-    }));
+    it("a half of surrogates pair only left", checkEncodeStream(generateObj(["abc\uD83D"])))
 
-    it("a half of surrogates pair only right", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uDE3Befg"],
-        output: toBufForSurrgates(["\uDE3Befg"])
-    }));
+    it("a half of surrogates pair only right", checkEncodeStream(generateObj(["\uDE3Befg"])))
 });

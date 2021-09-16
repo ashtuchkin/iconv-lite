@@ -203,25 +203,29 @@ InternalDecoderCesu8.prototype.end = function() {
 // check the chunk boundaries for surrogate pair
 
 function InternalEncoderUtf8(options, codec) {
-    this.surrogateLeftStr = '';
+    this.lowSurrogate = '';
 }
 
 InternalEncoderUtf8.prototype.write = function (str) {
     var lastr = str[str.length - 1]
     if ('\uD800' < lastr && lastr <= '\uDBFF') {
-        this.surrogateLeftStr += str
-        // do nothing
+        if (this.lowSurrogate) {
+            str = this.lowSurrogate + str
+        }
+        this.lowSurrogate = lastr
+        str = str.slice(0, str.length - 1)
+        return Buffer.from(str, this.enc);
     } else {
-        var buf = Buffer.from(this.surrogateLeftStr + str, this.enc);
-        this.surrogateLeftStr = ''
+        var buf = Buffer.from(this.lowSurrogate + str, this.enc);
+        this.lowSurrogate = ''
         return buf
     }
 }
 
 InternalEncoderUtf8.prototype.end = function () {
-    if (this.surrogateLeftStr) {
-        var buf = Buffer.from(this.surrogateLeftStr, this.enc);
-        this.surrogateLeftStr = ''
+    if (this.lowSurrogate) {
+        var buf = Buffer.from(this.lowSurrogate, this.enc);
+        this.lowSurrogate = ''
         return buf
     }
 }
