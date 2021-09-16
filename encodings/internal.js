@@ -208,11 +208,11 @@ function InternalEncoderUtf8(options, codec) {
 
 InternalEncoderUtf8.prototype.write = function (str) {
     var lastr = str[str.length - 1]
-    if (!this.surrogateLeftStr && '\uD800' < lastr && lastr <= '\uDBFF') {
-        this.surrogateLeftStr = str
+    if ('\uD800' < lastr && lastr <= '\uDBFF') {
+        this.surrogateLeftStr += str
         // do nothing
     } else {
-        var buf = Buffer.from(this.surrogateLeftStr + str)
+        var buf = Buffer.from(this.surrogateLeftStr + str, this.enc);
         this.surrogateLeftStr = ''
         return buf
     }

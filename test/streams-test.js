@@ -232,11 +232,6 @@ describe("Streaming mode", function() {
         output: "e4b882",
     }));
 
-    it("Encoding using internal modules: utf8 with surrogates", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uD83D\uDE3B"],
-        output: "f09f98bb",
-    }));
 
     it("Decoding of incomplete chars in DBCS (gbk)", checkDecodeStream({
         encoding: "gbk",
@@ -331,52 +326,71 @@ describe("Streaming sugar", function() {
     });
 });
 
-describe("Encoding using internal modules with surrogates in separate chunks:", function() {
+describe("Encoding using internal modules with surrogates in separate chunks:", function () {
+    // Generate the expected value of surrogates UT
+    function toBufForSurrgates(input) {
+        var str = input.join('')
+        var buf = Buffer.from(str, 'utf8')
+        return buf.toString('hex')
+    }
+
+    it("a single string", checkEncodeStream({
+        encoding: "utf8",
+        input: ["\uD83D\uDE3B"],
+        output: toBufForSurrgates(["\uD83D\uDE3B"])
+    }));
+
     it("normal", checkEncodeStream({
         encoding: "utf8",
         input: ["\uD83D", "\uDE3B"],
-        output: Buffer.from("\uD83D" + "\uDE3B", "utf8").toString("hex")
+        output: toBufForSurrgates(["\uD83D", "\uDE3B"])
     }));
 
     it("reverse", checkEncodeStream({
         encoding: "utf8",
         input: ["\uDE3B", "\uD83D"],
-        output: Buffer.from("\uDE3B" + "\uD83D" , "utf8").toString("hex")
+        output: toBufForSurrgates(["\uDE3B", "\uD83D"])
+    }));
+
+    it("multiple surrogates", checkEncodeStream({
+        encoding: "utf8",
+        input: ["\uD83D", "\uDE3B\uD83D", "\uDE3B"],
+        output: toBufForSurrgates(["\uD83D", "\uDE3B\uD83D", "\uDE3B"])
     }));
 
     it("more than one character with left", checkEncodeStream({
         encoding: "utf8",
         input: ["abc\uD83D", "\uDE3B"],
-        output: Buffer.from("abc\uD83D" + "\uDE3B", "utf8").toString("hex")
+        output: toBufForSurrgates(["abc\uD83D", "\uDE3B"])
     }));
 
     it("more than one character with right", checkEncodeStream({
         encoding: "utf8",
         input: ["\uD83D", "\uDE3Befg"],
-        output: Buffer.from("\uD83D" + "\uDE3Befg", "utf8").toString("hex")
+        output: toBufForSurrgates(["\uD83D", "\uDE3Befg"])
     }));
 
     it("more than one character at both ends", checkEncodeStream({
         encoding: "utf8",
         input: ["abc\uD83D", "\uDE3Befg"],
-        output: Buffer.from("abc\uD83D" + "\uDE3Befg", "utf8").toString("hex")
+        output: toBufForSurrgates(["abc\uD83D", "\uDE3Befg"])
     }));
 
     it("surrogates pair be interrupted", checkEncodeStream({
         encoding: "utf8",
         input: ["abc\uD83D", "efg\uDE3B"],
-        output: Buffer.from("abc\uD83D" + "efg\uDE3B", "utf8").toString("hex")
+        output: toBufForSurrgates(["abc\uD83D", "efg\uDE3B"])
     }));
 
     it("a half of surrogates pair only left", checkEncodeStream({
         encoding: "utf8",
         input: ["abc\uD83D"],
-        output: Buffer.from("abc\uD83D", "utf8").toString("hex")
+        output: toBufForSurrgates(["abc\uD83D"])
     }));
 
     it("a half of surrogates pair only right", checkEncodeStream({
         encoding: "utf8",
         input: ["\uDE3Befg"],
-        output: Buffer.from("\uDE3Befg", "utf8").toString("hex")
+        output: toBufForSurrgates(["\uDE3Befg"])
     }));
 });
