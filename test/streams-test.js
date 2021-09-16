@@ -331,46 +331,52 @@ describe("Streaming sugar", function() {
     });
 });
 
-describe("Encoding using internal modules: with surrogates in separate chunks", function () {
+describe("Encoding using internal modules with surrogates in separate chunks:", function() {
     it("normal", checkEncodeStream({
         encoding: "utf8",
         input: ["\uD83D", "\uDE3B"],
-        output: "f09f98bb",
+        output: Buffer.from("\uD83D" + "\uDE3B", "utf8").toString("hex")
+    }));
+
+    it("reverse", checkEncodeStream({
+        encoding: "utf8",
+        input: ["\uDE3B", "\uD83D"],
+        output: Buffer.from("\uDE3B" + "\uD83D" , "utf8").toString("hex")
     }));
 
     it("more than one character with left", checkEncodeStream({
         encoding: "utf8",
         input: ["abc\uD83D", "\uDE3B"],
-        output: "616263f09f98bb",
+        output: Buffer.from("abc\uD83D" + "\uDE3B", "utf8").toString("hex")
     }));
 
     it("more than one character with right", checkEncodeStream({
         encoding: "utf8",
         input: ["\uD83D", "\uDE3Befg"],
-        output: "f09f98bb656667",
+        output: Buffer.from("\uD83D" + "\uDE3Befg", "utf8").toString("hex")
     }));
 
     it("more than one character at both ends", checkEncodeStream({
         encoding: "utf8",
         input: ["abc\uD83D", "\uDE3Befg"],
-        output: "616263f09f98bb656667",
+        output: Buffer.from("abc\uD83D" + "\uDE3Befg", "utf8").toString("hex")
     }));
 
     it("surrogates pair be interrupted", checkEncodeStream({
         encoding: "utf8",
         input: ["abc\uD83D", "efg\uDE3B"],
-        output: "616263656667",
+        output: Buffer.from("abc\uD83D" + "efg\uDE3B", "utf8").toString("hex")
     }));
 
     it("a half of surrogates pair only left", checkEncodeStream({
         encoding: "utf8",
         input: ["abc\uD83D"],
-        output: "616263",
+        output: Buffer.from("abc\uD83D", "utf8").toString("hex")
     }));
 
     it("a half of surrogates pair only right", checkEncodeStream({
         encoding: "utf8",
         input: ["\uDE3Befg"],
-        output: "656667",
+        output: Buffer.from("\uDE3Befg", "utf8").toString("hex")
     }));
 });

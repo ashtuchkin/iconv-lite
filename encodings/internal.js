@@ -203,35 +203,25 @@ InternalDecoderCesu8.prototype.end = function() {
 // check the chunk boundaries for surrogate pair
 
 function InternalEncoderUtf8(options, codec) {
-    this.lowSurrogate = '';
-    this.surrogatePair = '';
+    this.surrogateLeftStr = '';
 }
 
-InternalEncoderUtf8.prototype.write = function(str) {
-    var normalStr = '';
-    for (var i = 0; i < str.length; i++) {
-        if ('\uD800' < str[i] && str[i] <= '\uDBFF') {
-            // fingding Low-Surrogate Code Unit
-            this.lowSurrogate = str[i];
-        } else if ('\uDC00' < str[i] && str[i] <= '\uDFFF') {
-            if(this.lowSurrogate) {
-                // matching another partner of Surrogate pair
-                this.surrogatePair = this.lowSurrogate + str[i];
-                normalStr += this.surrogatePair;
-                // init
-                this.lowSurrogate = '';
-                this.surrogatePair = '';
-            }
-        } else {
-            // will be interrupted
-            if (this.lowSurrogate) {
-                this.lowSurrogate = '';
-            }
-            normalStr += str[i];
-        }
+InternalEncoderUtf8.prototype.write = function (str) {
+    var lastr = str[str.length - 1]
+    if (!this.surrogateLeftStr && '\uD800' < lastr && lastr <= '\uDBFF') {
+        this.surrogateLeftStr = str
+        // do nothing
+    } else {
+        var buf = Buffer.from(this.surrogateLeftStr + str)
+        this.surrogateLeftStr = ''
+        return buf
     }
-    return Buffer.from(normalStr + this.surrogatePair, this.enc);
 }
 
-InternalEncoderUtf8.prototype.end = function() {
+InternalEncoderUtf8.prototype.end = function () {
+    if (this.surrogateLeftStr) {
+        var buf = Buffer.from(this.surrogateLeftStr, this.enc);
+        this.surrogateLeftStr = ''
+        return buf
+    }
 }
