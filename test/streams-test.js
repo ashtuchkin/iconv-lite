@@ -328,7 +328,7 @@ describe("Streaming sugar", function() {
 
 describe("Encoding using internal modules with surrogates in separate chunks:", function () {
     // Generate the expected object of surrogates UT,by input array
-    function generateObj(input) {
+    function generatesrgObj(input) {
         return {
             encoding: "utf8",
             input: input,
@@ -336,23 +336,23 @@ describe("Encoding using internal modules with surrogates in separate chunks:", 
         }
     }
 
-    it("a single string", checkEncodeStream(generateObj(["\uD83D\uDE3B"])))
+    it("a single string", checkEncodeStream(generatesrgObj(["\uD83D\uDE3B"])))
 
-    it("normal", checkEncodeStream(generateObj(["\uD83D", "\uDE3B"])))
+    it("normal", checkEncodeStream(generatesrgObj(["\uD83D", "\uDE3B"])))
 
-    it("reverse", checkEncodeStream(generateObj(["\uDE3B", "\uD83D"])))
+    it("reverse", checkEncodeStream(generatesrgObj(["\uDE3B", "\uD83D"])))
 
-    it("multiple surrogates", checkEncodeStream(generateObj(["\uD83D", "\uDE3B\uD83D", "\uDE3B"])))
+    it("multiple surrogates", checkEncodeStream(generatesrgObj(["\uD83D", "\uDE3B\uD83D", "\uDE3B"])))
 
-    it("more than one character with left", checkEncodeStream(generateObj(["abc\uD83D", "\uDE3B"])))
+    it("more than one character with left", checkEncodeStream(generatesrgObj(["abc\uD83D", "\uDE3B"])))
 
-    it("more than one character with right", checkEncodeStream(generateObj(["\uD83D", "\uDE3Befg"])))
+    it("more than one character with right", checkEncodeStream(generatesrgObj(["\uD83D", "\uDE3Befg"])))
 
-    it("more than one character at both ends", checkEncodeStream(generateObj(["abc\uD83D", "\uDE3Befg"])))
+    it("more than one character at both ends", checkEncodeStream(generatesrgObj(["abc\uD83D", "\uDE3Befg"])))
 
-    it("surrogates pair be interrupted", checkEncodeStream(generateObj(["abc\uD83D", "efg\uDE3B"])))
+    it("surrogates pair be interrupted", checkEncodeStream(generatesrgObj(["abc\uD83D", "efg\uDE3B"])))
 
-    it("a half of surrogates pair only left", checkEncodeStream(generateObj(["abc\uD83D"])))
+    it("a half of surrogates pair only left", checkEncodeStream(generatesrgObj(["abc\uD83D"])))
 
-    it("a half of surrogates pair only right", checkEncodeStream(generateObj(["\uDE3Befg"])))
+    it("a half of surrogates pair only right", checkEncodeStream(generatesrgObj(["\uDE3Befg"])))
 });
