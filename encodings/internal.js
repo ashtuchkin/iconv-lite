@@ -207,19 +207,19 @@ function InternalEncoderUtf8(options, codec) {
 }
 
 InternalEncoderUtf8.prototype.write = function (str) {
-    var lastr = str[str.length - 1]
-    if ('\uD800' < lastr && lastr <= '\uDBFF') {
+    var lastr = str[str.length - 1] || '',
+        charCode = lastr.charCodeAt(0)
+    if (55296 < charCode && charCode <= 56319) {
         if (this.lowSurrogate) {
             str = this.lowSurrogate + str
         }
         this.lowSurrogate = lastr
         str = str.slice(0, str.length - 1)
-        return Buffer.from(str, this.enc);
     } else {
-        var buf = Buffer.from(this.lowSurrogate + str, this.enc);
+        str = this.lowSurrogate + str
         this.lowSurrogate = ''
-        return buf
     }
+    return Buffer.from(str, this.enc);
 }
 
 InternalEncoderUtf8.prototype.end = function () {
