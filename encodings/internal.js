@@ -207,8 +207,8 @@ function InternalEncoderUtf8(options, codec) {
 }
 
 InternalEncoderUtf8.prototype.write = function (str) {
-    if (!str) return;
-    
+    if (!str) return Buffer.from('', this.enc);;
+
     if (this.lowSurrogate) {
         str = this.lowSurrogate + str;
         this.lowSurrogate = '';
