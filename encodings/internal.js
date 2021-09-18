@@ -203,30 +203,30 @@ InternalDecoderCesu8.prototype.end = function() {
 // check the chunk boundaries for surrogate pair
 
 function InternalEncoderUtf8(options, codec) {
-    this.lowSurrogate = '';
+    this.highSurrogate = '';
 }
 
 InternalEncoderUtf8.prototype.write = function (str) {
-    if (!str) return Buffer.from('', this.enc);;
-
-    if (this.lowSurrogate) {
-        str = this.lowSurrogate + str;
-        this.lowSurrogate = '';
+    if (this.highSurrogate) {
+        str = this.highSurrogate + str;
+        this.highSurrogate = '';
     }
 
-    var charCode = str.charCodeAt(str.length - 1);
-    if (55296 < charCode && charCode <= 56319) {
-        this.lowSurrogate = str[str.length - 1];
-        str = str.slice(0, str.length - 1);
+    if (str.length > 0) {
+        var charCode = str.charCodeAt(str.length - 1);
+        if (0xd800 <= charCode && charCode < 0xdc00) {
+            this.highSurrogate = str[str.length - 1];
+            str = str.slice(0, str.length - 1);
+        }
     }
 
     return Buffer.from(str, this.enc);
 }
 
 InternalEncoderUtf8.prototype.end = function () {
-    if (this.lowSurrogate) {
-        var buf = Buffer.from(this.lowSurrogate, this.enc);
-        this.lowSurrogate = ''
-        return buf
+    if (this.highSurrogate) {
+        var str = this.highSurrogate;
+        this.highSurrogate = '';
+        return Buffer.from(str, this.enc);
     }
 }
