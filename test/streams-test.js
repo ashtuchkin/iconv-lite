@@ -232,11 +232,6 @@ describe("Streaming mode", function() {
         output: "e4b882",
     }));
 
-    it("Encoding using internal modules: utf8 with surrogates", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uD83D\uDE3B"],
-        output: "f09f98bb",
-    }));
 
     it("Decoding of incomplete chars in DBCS (gbk)", checkDecodeStream({
         encoding: "gbk",
@@ -331,3 +326,32 @@ describe("Streaming sugar", function() {
     });
 });
 
+describe("Encoding using internal modules with surrogates in separate chunks:", function () {
+    function checkUtf8EncodeStream (input) {
+        return checkEncodeStream({
+            encoding: "utf8",
+            input: input,
+            output: Buffer.from(input.join(''), 'utf8').toString('hex')
+        })
+    }
+
+    it("a single string", checkUtf8EncodeStream(["\uD83D\uDE3B"]))
+
+    it("normal", checkUtf8EncodeStream(["\uD83D", "\uDE3B"]))
+
+    it("reverse", checkUtf8EncodeStream(["\uDE3B", "\uD83D"]))
+
+    it("multiple surrogates", checkUtf8EncodeStream(["\uD83D", "\uDE3B\uD83D", "\uDE3B"]))
+
+    it("more than one character with left", checkUtf8EncodeStream(["abc\uD83D", "\uDE3B"]))
+
+    it("more than one character with right", checkUtf8EncodeStream(["\uD83D", "\uDE3Befg"]))
+
+    it("more than one character at both ends", checkUtf8EncodeStream(["abc\uD83D", "\uDE3Befg"]))
+
+    it("surrogates pair be interrupted", checkUtf8EncodeStream(["abc\uD83D", "efg\uDE3B"]))
+
+    it("a half of surrogates pair only left", checkUtf8EncodeStream(["abc\uD83D"]))
+
+    it("a half of surrogates pair only right", checkUtf8EncodeStream(["\uDE3Befg"]))
+});
