@@ -207,18 +207,19 @@ function InternalEncoderUtf8(options, codec) {
 }
 
 InternalEncoderUtf8.prototype.write = function (str) {
-    var lastr = str[str.length - 1] || '',
-        charCode = lastr.charCodeAt(0)
-    if (55296 < charCode && charCode <= 56319) {
-        if (this.lowSurrogate) {
-            str = this.lowSurrogate + str
-        }
-        this.lowSurrogate = lastr
-        str = str.slice(0, str.length - 1)
-    } else {
-        str = this.lowSurrogate + str
-        this.lowSurrogate = ''
+    if (!str) return;
+    
+    if (this.lowSurrogate) {
+        str = this.lowSurrogate + str;
+        this.lowSurrogate = '';
     }
+
+    var charCode = str.charCodeAt(str.length - 1);
+    if (55296 < charCode && charCode <= 56319) {
+        this.lowSurrogate = str[str.length - 1];
+        str = str.slice(0, str.length - 1);
+    }
+
     return Buffer.from(str, this.enc);
 }
 

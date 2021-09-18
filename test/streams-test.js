@@ -110,9 +110,6 @@ function checkEncodeStream(opts) {
         return feeder(opts.input)
             .pipe(iconv.encodeStream(opts.encoding, opts.encodingOptions));
     };
-    if (opts.input instanceof Array && opts.encoding === 'utf8') {
-        opts.output = Buffer.from(opts.input.join(''), opts.encoding)
-    }
     if (opts.outputType == null) opts.outputType = 'buffer-hex';
     if (Buffer.isBuffer(opts.output) && opts.outputType == 'buffer-hex')
         opts.output = opts.output.toString('hex');
@@ -330,53 +327,31 @@ describe("Streaming sugar", function() {
 });
 
 describe("Encoding using internal modules with surrogates in separate chunks:", function () {
-    it("a single string", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uD83D\uDE3B"]
-    }))
+    function checkUtf8EncodeStream (input) {
+        return checkEncodeStream({
+            encoding: "utf8",
+            input: input,
+            output: Buffer.from(input.join(''), 'utf8').toString('hex')
+        })
+    }
 
-    it("normal", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uD83D", "\uDE3B"]
-    }))
+    it("a single string", checkUtf8EncodeStream(["\uD83D\uDE3B"]))
 
-    it("reverse", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uDE3B", "\uD83D"]
-    }))
+    it("normal", checkUtf8EncodeStream(["\uD83D", "\uDE3B"]))
 
-    it("multiple surrogates", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uD83D", "\uDE3B\uD83D", "\uDE3B"]
-    }))
+    it("reverse", checkUtf8EncodeStream(["\uDE3B", "\uD83D"]))
 
-    it("more than one character with left", checkEncodeStream({
-        encoding: "utf8",
-        input: ["abc\uD83D", "\uDE3B"]
-    }))
+    it("multiple surrogates", checkUtf8EncodeStream(["\uD83D", "\uDE3B\uD83D", "\uDE3B"]))
 
-    it("more than one character with right", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uD83D", "\uDE3Befg"]
-    }))
+    it("more than one character with left", checkUtf8EncodeStream(["abc\uD83D", "\uDE3B"]))
 
-    it("more than one character at both ends", checkEncodeStream({
-        encoding: "utf8",
-        input: ["abc\uD83D", "\uDE3Befg"]
-    }))
+    it("more than one character with right", checkUtf8EncodeStream(["\uD83D", "\uDE3Befg"]))
 
-    it("surrogates pair be interrupted", checkEncodeStream({
-        encoding: "utf8",
-        input: ["abc\uD83D", "efg\uDE3B"]
-    }))
+    it("more than one character at both ends", checkUtf8EncodeStream(["abc\uD83D", "\uDE3Befg"]))
 
-    it("a half of surrogates pair only left", checkEncodeStream({
-        encoding: "utf8",
-        input: ["abc\uD83D"]
-    }))
+    it("surrogates pair be interrupted", checkUtf8EncodeStream(["abc\uD83D", "efg\uDE3B"]))
 
-    it("a half of surrogates pair only right", checkEncodeStream({
-        encoding: "utf8",
-        input: ["\uDE3Befg"]
-    }))
+    it("a half of surrogates pair only left", checkUtf8EncodeStream(["abc\uD83D"]))
+
+    it("a half of surrogates pair only right", checkUtf8EncodeStream(["\uDE3Befg"]))
 });
