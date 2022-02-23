@@ -7,6 +7,20 @@ var testStringLatin1 = "Hello123!£Å÷×çþÿ¿®";
 var testStringBase64 = "SGVsbG8xMjMh";
 var testStringHex = "48656c6c6f31323321";
 
+describe("user callback", function () {
+    it("Return nothing for issue#210#83", function () {
+        // when bad characters, return nothing instead of the ?.
+        // Like these:
+        // iconv.decode(Buffer.from([128]), 'utf8')
+        // iconv.decode(iconv.encode('ça va','utf8'), 'utf7')
+        assert.strictEqual(iconv.decode(Buffer.from([128]), 'utf8', {
+            invalidCharHandler: function () {
+                return ''
+            }
+        }), '');
+    })
+})
+
 describe("Generic UTF8-UCS2 tests", function() {
     
     it("Return values are of correct types", function() {
