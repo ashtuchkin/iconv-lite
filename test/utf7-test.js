@@ -5,6 +5,10 @@ var assert = require('assert'),
 // These tests are mostly from https://github.com/kkaefer/utf7
 // In case of ambiguity, we do the same as iconv. For example, we encode "optional direct" characters, but leave spaces and \n\r\t as-is.
 
+// now,utf7 is a external encodingExists,we need add
+if (!iconv.encodingExists('utf7')) {
+  iconv.addEncoding('utf7',"../externalEcods/utf7")
+}
 describe("UTF-7 codec", function() {
     it("encodes correctly", function() {
         // Examples from RFC 2152.
