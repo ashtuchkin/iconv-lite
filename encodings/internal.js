@@ -5,16 +5,16 @@ var Buffer = require("safer-buffer").Buffer;
 
 module.exports = {
     // Encodings
-    utf8:   { type: "_internal", bomAware: true},
-    cesu8:  { type: "_internal", bomAware: true},
+    utf8: { type: "_internal", bomAware: true },
+    cesu8: { type: "_internal", bomAware: true },
     unicode11utf8: "utf8",
 
-    ucs2:   { type: "_internal", bomAware: true},
+    ucs2: { type: "_internal", bomAware: true },
     utf16le: "ucs2",
 
     binary: { type: "_internal" },
     base64: { type: "_internal" },
-    hex:    { type: "_internal" },
+    hex: { type: "_internal" },
 
     // Codec.
     _internal: InternalCodec,
@@ -47,27 +47,72 @@ InternalCodec.prototype.decoder = InternalDecoder;
 
 //------------------------------------------------------------------------------
 
-// We use node.js internal decoder. Its signature is the same as ours.
-var StringDecoder = require('string_decoder').StringDecoder;
+/** @type {typeof TextDecoder} */
+var _Decoder;
 
-if (!StringDecoder.prototype.end) // Node v0.8 doesn't have this method.
-    StringDecoder.prototype.end = function() {};
-
-
-function InternalDecoder(options, codec) {
-    this.decoder = new StringDecoder(codec.enc);
+if (typeof TextDecoder !== 'undefined') {
+    // TextDecoder available
+    _Decoder = TextDecoder;
+} else {
+    // We use node.js internal decoder. Its signature is the same as ours.
+    var StringDecoder = require('string_decoder').StringDecoder;
+    if (StringDecoder.prototype.end) {
+        StringDecoder.prototype.decode = function (buf) {
+            if (buf === undefined) return this.end();
+            else return this.write(buf);
+        }
+    } else {
+        StringDecoder.prototype.decode = function (buf) {
+            if (buf !== undefined) return this.write(buf);
+        }
+    }
+    _Decoder = StringDecoder;
 }
 
-InternalDecoder.prototype.write = function(buf) {
+function InternalDecoder(options, codec) {
+    switch (codec.enc) {
+        case 'hex':
+        case 'base64':
+        case 'binary': {
+            /** @type {TextDecoder} */
+            this.decoder = {
+                enc: codec.enc,
+                buffer: Buffer.from(""),
+                decode: function (buf) {
+                    if (buf === undefined) {
+                        var res = this.buffer;
+                        this.buffer = Buffer.from("");
+                        return res.toString(this.enc);
+                    } else {
+                        if (!Buffer.isBuffer(buf)) {
+                            buf = Buffer.from(buf);
+                        }
+                        this.buffer = Buffer.concat([this.buffer, buf]);
+                        return "";
+                    }
+                }
+            };
+            break;
+        }
+        case 'ucs2': {
+            this.decoder = new _Decoder('utf-16', { ignoreBOM: options?.stripBOM === false || typeof options?.stripBOM === 'function' });
+            break;
+        }
+        default: {
+            this.decoder = new _Decoder(codec.enc, { ignoreBOM: options?.stripBOM === false || typeof options?.stripBOM === 'function' });
+        }
+    }
+}
+
+InternalDecoder.prototype.write = function (buf) {
     if (!Buffer.isBuffer(buf)) {
         buf = Buffer.from(buf);
     }
-
-    return this.decoder.write(buf);
+    return this.decoder.decode(buf, { stream: true });
 }
 
-InternalDecoder.prototype.end = function() {
-    return this.decoder.end();
+InternalDecoder.prototype.end = function () {
+    return this.decoder.decode(undefined, { stream: true });
 }
 
 
@@ -78,11 +123,11 @@ function InternalEncoder(options, codec) {
     this.enc = codec.enc;
 }
 
-InternalEncoder.prototype.write = function(str) {
+InternalEncoder.prototype.write = function (str) {
     return Buffer.from(str, this.enc);
 }
 
-InternalEncoder.prototype.end = function() {
+InternalEncoder.prototype.end = function () {
 }
 
 
@@ -93,7 +138,7 @@ function InternalEncoderBase64(options, codec) {
     this.prevStr = '';
 }
 
-InternalEncoderBase64.prototype.write = function(str) {
+InternalEncoderBase64.prototype.write = function (str) {
     str = this.prevStr + str;
     var completeQuads = str.length - (str.length % 4);
     this.prevStr = str.slice(completeQuads);
@@ -102,7 +147,7 @@ InternalEncoderBase64.prototype.write = function(str) {
     return Buffer.from(str, "base64");
 }
 
-InternalEncoderBase64.prototype.end = function() {
+InternalEncoderBase64.prototype.end = function () {
     return Buffer.from(this.prevStr, "base64");
 }
 
@@ -113,7 +158,7 @@ InternalEncoderBase64.prototype.end = function() {
 function InternalEncoderCesu8(options, codec) {
 }
 
-InternalEncoderCesu8.prototype.write = function(str) {
+InternalEncoderCesu8.prototype.write = function (str) {
     var buf = Buffer.alloc(str.length * 3), bufIdx = 0;
     for (var i = 0; i < str.length; i++) {
         var charCode = str.charCodeAt(i);
@@ -134,7 +179,7 @@ InternalEncoderCesu8.prototype.write = function(str) {
     return buf.slice(0, bufIdx);
 }
 
-InternalEncoderCesu8.prototype.end = function() {
+InternalEncoderCesu8.prototype.end = function () {
 }
 
 //------------------------------------------------------------------------------
@@ -147,8 +192,8 @@ function InternalDecoderCesu8(options, codec) {
     this.defaultCharUnicode = codec.defaultCharUnicode;
 }
 
-InternalDecoderCesu8.prototype.write = function(buf) {
-    var acc = this.acc, contBytes = this.contBytes, accBytes = this.accBytes, 
+InternalDecoderCesu8.prototype.write = function (buf) {
+    var acc = this.acc, contBytes = this.contBytes, accBytes = this.accBytes,
         res = '';
     for (var i = 0; i < buf.length; i++) {
         var curByte = buf[i];
@@ -192,7 +237,7 @@ InternalDecoderCesu8.prototype.write = function(buf) {
     return res;
 }
 
-InternalDecoderCesu8.prototype.end = function() {
+InternalDecoderCesu8.prototype.end = function () {
     var res = 0;
     if (this.contBytes > 0)
         res += this.defaultCharUnicode;
