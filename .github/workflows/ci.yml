@@ -95,21 +95,21 @@ jobs:
 
           - node-version: "11"
             npm-i: "mocha@8.4.0"
-            python-v: '3.7'
+            npm-rm: 'iconv'
 
           - node-version: "12"
             npm-i: "mocha@9.2.2"
-            python-v: '3.7'
+            npm-rm: 'iconv'
 
           - node-version: "13"
             npm-i: "mocha@9.2.2"
-            python-v: '3.7'
+            npm-rm: 'iconv'
 
           - node-version: "14"
-            python-v: '3.7'
+            npm-rm: 'iconv'
 
           - node-version: "15"
-            python-v: '3.7'
+            npm-rm: 'iconv'
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -130,19 +130,6 @@ jobs:
         run: |
           npm config set loglevel error
         shell: bash
-
-      - name: Set up python version
-        if: ${{ matrix.python-v != '' }}
-        shell: bash -eo pipefail -l {0}
-        run: |
-          
-          sudo apt-get update
-          sudo apt-get install python3.6
-          PY36_PATH=$(which python3.6)
-          PY3_PATH=$(which python3)
-          PY_PATH=$(which python)
-          sudo ln -sf "$PY36_PATH" "$PY3_PATH"
-          sudo ln -sf "$PY36_PATH" "$PY_PATH"
 
       - name: Remove npm module(s) ${{ matrix.npm-rm }}
         run: npm rm --silent --save-dev ${{ matrix.npm-rm }}
