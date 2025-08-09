@@ -11,3 +11,5 @@ package-lock.json
 /coverage
 /benchmarks/node_envs
 /generation/source-data
+
+.nyc_output

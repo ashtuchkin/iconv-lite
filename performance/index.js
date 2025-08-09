@@ -1,9 +1,5 @@
-
-if (module.parent) // Skip this file from testing.
-    return;
-
 var iconv = require('iconv');
-var iconv_lite = require("../");
+var iconv_lite = require("../lib");
 
 var encoding = process.argv[2] || "windows-1251";
 var convertTimes = 10000;
@@ -30,6 +26,7 @@ var converter = new iconv.Iconv("utf8", encoding);
 for (var i = 0; i < convertTimes; i++) {
     var b = converter.convert(str);
 }
+
 var duration = Date.now() - start;
 var mbs = convertTimes*b.length/duration/1024;
 
