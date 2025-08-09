@@ -27,7 +27,7 @@
         "test:cov": "nyc --exclude test --reporter=html --reporter=text npm test",
         "test:performance": "node performance/index.js",
         "test:tap": "mocha --reporter tap --check-leaks --grep .",
-        "test:webpack": "npm pack && mv iconv-lite-*.tgz iconv-lite.tgz && cd test/webpack && npm install && npm run test && rm -r iconv-lite.tgz"
+        "test:webpack": "npm pack && mv iconv-lite-*.tgz test/webpack/iconv-lite.tgz && cd test/webpack && npm install && npm run test && rm iconv-lite.tgz"
     },
     "browser": {
         "stream": false

@@ -17,6 +17,6 @@
     "webpack": "^4.43.0"
   },
   "dependencies": {
-    "iconv-lite": "file:../../iconv-lite.tgz"
+    "iconv-lite": "file:iconv-lite.tgz"
   }
 }
