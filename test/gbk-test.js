@@ -18,6 +18,11 @@ describe("GBK tests", function() {
     });
 
     it("GBK file read decoded,compare with iconv result", function() {
+        try {
+            require('iconv');
+        } catch {
+            this.skip();
+        }
         var contentBuffer = fs.readFileSync(__dirname+"/gbkFile.txt");
         var str = iconv.decode(contentBuffer, "GBK");
         var iconvc = new (require('iconv').Iconv)('GBK','utf8');

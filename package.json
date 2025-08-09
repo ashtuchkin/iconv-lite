@@ -33,7 +33,7 @@
     "devDependencies": {
         "async": "^3.2.0",
         "errto": "^0.2.1",
-        "iconv": "^3.0.1",
+        "iconv": "^2.3.5",
         "mocha": "^6.2.2",
         "nyc": "^14.1.1",
         "request": "^2.88.2",

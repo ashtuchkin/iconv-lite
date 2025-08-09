@@ -1,7 +1,6 @@
 var assert = require('assert'),
     Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../'),
-    Iconv = require('iconv').Iconv;
+    iconv = require(__dirname+'/../');
 
 var testStr = '1aя中文☃💩',
     testStr2 = '❝Stray high \uD977😱 and low\uDDDD☔ surrogate values.❞',
@@ -47,6 +46,13 @@ for (var i = 0; i <= 0x10F7FF; ++i) {
 }
 
 describe('UTF-32LE codec', function() {
+    var Iconv;
+
+    try {
+        Iconv = require('iconv');
+    } catch {
+    }
+
     it('encodes basic strings correctly', function() {
         assert.equal(iconv.encode(testStr, 'UTF32-LE').toString('hex'), utf32leBuf.toString('hex'));
     });
@@ -69,6 +75,12 @@ describe('UTF-32LE codec', function() {
     });
 
     it('handles encoding all valid codepoints', function() {
+        try {
+            require('iconv');
+        } catch {
+            this.skip();
+        }
+
         assert.deepEqual(iconv.encode(allCharsStr, 'utf-32le'), allCharsLEBuf);
         var nodeIconv = new Iconv('UTF-8', 'UTF-32LE');
         var nodeBuf = nodeIconv.convert(allCharsStr);
@@ -76,6 +88,12 @@ describe('UTF-32LE codec', function() {
     });
 
     it('handles decoding all valid codepoints', function() {
+        try {
+            require('iconv');
+        } catch {
+            this.skip();
+        }
+
         assert.equal(iconv.decode(allCharsLEBuf, 'utf-32le'), allCharsStr);
         var nodeIconv = new Iconv('UTF-32LE', 'UTF-8');
         var nodeStr = nodeIconv.convert(allCharsLEBuf).toString('utf8');
@@ -106,6 +124,12 @@ describe('UTF-32BE codec', function() {
     });
 
     it('handles encoding all valid codepoints', function() {
+        try {
+            require('iconv');
+        } catch {
+            this.skip();
+        }
+
         assert.deepEqual(iconv.encode(allCharsStr, 'utf-32be'), allCharsBEBuf);
         var nodeIconv = new Iconv('UTF-8', 'UTF-32BE');
         var nodeBuf = nodeIconv.convert(allCharsStr);
@@ -113,6 +137,12 @@ describe('UTF-32BE codec', function() {
     });
 
     it('handles decoding all valid codepoints', function() {
+        try {
+            require('iconv');
+        } catch {
+            this.skip();
+        }
+
         assert.equal(iconv.decode(allCharsBEBuf, 'utf-32be'), allCharsStr);
         var nodeIconv = new Iconv('UTF-32BE', 'UTF-8');
         var nodeStr = nodeIconv.convert(allCharsBEBuf).toString('utf8');

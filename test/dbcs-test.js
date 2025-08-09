@@ -1,8 +1,7 @@
 var fs      = require('fs'),
     assert  = require('assert'),
     Buffer  = require('safer-buffer').Buffer,
-    iconv   = require(__dirname+'/../'),
-    Iconv   = require('iconv').Iconv;
+    iconv   = require(__dirname+'/../');
 
 
 // Make all valid input combinations for a given encoding and call fn with it.
@@ -156,11 +155,20 @@ iconv.encode('', 'utf8'); // Load all encodings.
 
 describe("Full DBCS encoding tests", function() {
     this.timeout(10000); // These tests are pretty slow.
+    var Iconv;
+    try {
+        Iconv = require('iconv');
+    } catch {
+    }
 
     for (var enc in iconv.encodings) {
         if (iconv.encodings[enc].type === '_dbcs') (function(enc) {
             // Create tests for this encoding.
             it("Decode DBCS encoding '" + enc + "'", function() {
+                if (!Iconv) {
+                    this.skip() // Skip if Iconv is available
+                }
+
                 var iconvChgs = iconvChanges[enc] || {};
                 var iconvCannotDecodeChars = iconvCannotDecode[enc] || {};
                 var converter = new Iconv(aliases[enc] || enc, "utf-8");
@@ -203,6 +211,10 @@ describe("Full DBCS encoding tests", function() {
             });
 
             it("Encode DBCS encoding '" + enc + "'", function() {
+                if (!Iconv) {
+                    this.skip() // Skip if Iconv is available
+                }
+
                 var iconvChgs = iconvChanges[enc] || {};
                 var iconvCannotDecodeChars = iconvCannotDecode[enc] || {};
                 var converter = new Iconv("utf-8", aliases[enc] || enc);
