@@ -5,8 +5,6 @@
   "scripts": {
     "!note1": "NOTE: We do `npm pack` of the main iconv-lite package followed by installing it to create a copy of the package (not symlink).",
     "!note2": "This is needed because webpack4/watchpack1.7 crashes when trying to enumerate circular symlink.",
-    "preinstall": "mv $(npm pack -pq ../../) iconv-lite.tgz",
-    "postinstall": "rm iconv-lite.tgz",
     "test": "karma start"
   },
   "devDependencies": {
@@ -19,6 +17,6 @@
     "webpack": "^4.43.0"
   },
   "dependencies": {
-    "iconv-lite": "file:iconv-lite.tgz"
+    "iconv-lite": "file:../../iconv-lite.tgz"
   }
 }
