@@ -69,3 +69,7 @@ jobs:
     - name: Run tests
       shell: bash
       run: npm run test
+
+    - name: Run webpack tests
+      shell: bash
+      run: npm run test:webpack

@@ -18,6 +18,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  performance:
+    name: Run performance test
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run performance test
+        run: npm run test:performance
+
   test:
     name: Run tests
     strategy:
@@ -157,7 +180,11 @@ jobs:
           name: coverage-node-${{ matrix.node-version }}-${{ matrix.os }}
           path: ./coverage/lcov.info
           retention-days: 1
-
+      
+      - name: Webpack test
+        shell: bash
+        run: |
+          npm run test:webpack
   coverage:
     needs: test
     runs-on: ubuntu-latest

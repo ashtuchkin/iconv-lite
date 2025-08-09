@@ -25,7 +25,9 @@
         "test": "mocha --reporter spec --check-leaks --grep .",
         "test:ci": "nyc --exclude test --reporter=lcovonly --reporter=text npm test",
         "test:cov": "nyc --exclude test --reporter=html --reporter=text npm test",
-        "test:tap": "mocha --reporter tap --check-leaks --grep ."
+        "test:performance": "node performance/index.js",
+        "test:tap": "mocha --reporter tap --check-leaks --grep .",
+        "test:webpack": "cd test/webpack && npm install && npm run test"
     },
     "browser": {
         "stream": false
