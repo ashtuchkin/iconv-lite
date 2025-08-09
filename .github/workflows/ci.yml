@@ -95,7 +95,6 @@ jobs:
 
           - node-version: "11"
             npm-i: "mocha@8.4.0"
-            npm-rm: 'iconv'
             python-v: '3.7'
 
           - node-version: "12"
@@ -137,8 +136,8 @@ jobs:
         shell: bash -eo pipefail -l {0}
         run: |
           sudo apt-get update
-          sudo apt-get install python3.7
-          alias python=python3.7
+          sudo apt-get install python3.6
+          alias python=python3.6
 
       - name: Remove npm module(s) ${{ matrix.npm-rm }}
         run: npm rm --silent --save-dev ${{ matrix.npm-rm }}
