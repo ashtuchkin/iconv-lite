@@ -158,8 +158,7 @@ describe("Full DBCS encoding tests", function() {
     var Iconv;
     try {
         Iconv = require('iconv').Iconv;
-    } catch {
-    }
+    } catch (_e) {}
 
     for (var enc in iconv.encodings) {
         if (iconv.encodings[enc].type === '_dbcs') (function(enc) {

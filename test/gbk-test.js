@@ -20,7 +20,7 @@ describe("GBK tests", function() {
     it("GBK file read decoded,compare with iconv result", function() {
         try {
             require('iconv');
-        } catch {
+        } catch (_e){
             this.skip();
         }
         var contentBuffer = fs.readFileSync(__dirname+"/gbkFile.txt");

@@ -49,9 +49,8 @@ describe('UTF-32LE codec', function() {
     var Iconv;
 
     try {
-        Iconv = require('iconv');
-    } catch {
-    }
+        Iconv = require('iconv').Iconv;
+    } catch (_e) {}
 
     it('encodes basic strings correctly', function() {
         assert.equal(iconv.encode(testStr, 'UTF32-LE').toString('hex'), utf32leBuf.toString('hex'));
@@ -75,11 +74,10 @@ describe('UTF-32LE codec', function() {
     });
 
     it('handles encoding all valid codepoints', function() {
-        try {
-            require('iconv');
-        } catch {
+        if (!Iconv) { 
             this.skip();
         }
+
 
         assert.deepEqual(iconv.encode(allCharsStr, 'utf-32le'), allCharsLEBuf);
         var nodeIconv = new Iconv('UTF-8', 'UTF-32LE');
@@ -88,9 +86,7 @@ describe('UTF-32LE codec', function() {
     });
 
     it('handles decoding all valid codepoints', function() {
-        try {
-            require('iconv');
-        } catch {
+        if (!Iconv) { 
             this.skip();
         }
 
@@ -102,6 +98,12 @@ describe('UTF-32LE codec', function() {
 });
 
 describe('UTF-32BE codec', function() {
+    var Iconv;
+
+    try {
+        Iconv = require('iconv').Iconv;
+    } catch (_e) {}
+
     it('encodes basic strings correctly', function() {
         assert.equal(iconv.encode(testStr, 'UTF32-BE').toString('hex'), utf32beBuf.toString('hex'));
     });
@@ -124,11 +126,10 @@ describe('UTF-32BE codec', function() {
     });
 
     it('handles encoding all valid codepoints', function() {
-        try {
-            require('iconv');
-        } catch {
+        if (!Iconv) { 
             this.skip();
         }
+
 
         assert.deepEqual(iconv.encode(allCharsStr, 'utf-32be'), allCharsBEBuf);
         var nodeIconv = new Iconv('UTF-8', 'UTF-32BE');
@@ -137,11 +138,10 @@ describe('UTF-32BE codec', function() {
     });
 
     it('handles decoding all valid codepoints', function() {
-        try {
-            require('iconv');
-        } catch {
+        if (!Iconv) { 
             this.skip();
         }
+
 
         assert.equal(iconv.decode(allCharsBEBuf, 'utf-32be'), allCharsStr);
         var nodeIconv = new Iconv('UTF-32BE', 'UTF-8');
