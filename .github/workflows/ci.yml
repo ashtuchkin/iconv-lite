@@ -110,7 +110,6 @@ jobs:
             npm-i: "mocha@9.2.2"
 
           - node-version: "15"
-            npm-i: "
 
     runs-on: ${{ matrix.os }}
     steps:
