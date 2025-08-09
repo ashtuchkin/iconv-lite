@@ -137,7 +137,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install python3.6
-          alias python=python3.6
+          sudo ln -sf /usr/bin/python3.6 /usr/bin/python3
 
       - name: Remove npm module(s) ${{ matrix.npm-rm }}
         run: npm rm --silent --save-dev ${{ matrix.npm-rm }}
