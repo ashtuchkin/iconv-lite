@@ -135,9 +135,14 @@ jobs:
         if: ${{ matrix.python-v != '' }}
         shell: bash -eo pipefail -l {0}
         run: |
+          
           sudo apt-get update
           sudo apt-get install python3.6
-          sudo ln -sf /usr/bin/python3.6 /usr/bin/python3
+          PY36_PATH=$(which python3.6)
+          PY3_PATH=$(which python3)
+          PY_PATH=$(which python)
+          sudo ln -sf "$PY36_PATH" "$PY3_PATH"
+          sudo ln -sf "$PY36_PATH" "$PY_PATH"
 
       - name: Remove npm module(s) ${{ matrix.npm-rm }}
         run: npm rm --silent --save-dev ${{ matrix.npm-rm }}
