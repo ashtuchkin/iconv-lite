@@ -22,18 +22,20 @@
         "node": ">=0.10.0"
     },
     "scripts": {
-        "coverage": "c8 _mocha --grep .",
-        "test": "mocha --reporter spec --grep ."
+        "test": "mocha --reporter spec --check-leaks --grep .",
+        "test:ci": "nyc --exclude test --reporter=lcovonly --reporter=text npm test",
+        "test:cov": "nyc --exclude test --reporter=html --reporter=text npm test",
+        "test:tap": "mocha --reporter tap --check-leaks --grep ."
     },
     "browser": {
         "stream": false
     },
     "devDependencies": {
         "async": "^3.2.0",
-        "c8": "^7.2.0",
         "errto": "^0.2.1",
         "iconv": "^2.3.5",
-        "mocha": "^3.5.3",
+        "mocha": "^6.2.2",
+        "nyc": "^14.1.1",
         "request": "^2.88.2",
         "semver": "^6.3.0",
         "unorm": "^1.6.0"
