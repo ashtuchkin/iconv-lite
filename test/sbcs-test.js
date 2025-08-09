@@ -55,7 +55,7 @@ describe("Full SBCS encoding tests", function() {
 
     var Iconv;
     try {
-        Iconv = require('iconv');
+        Iconv = require('iconv').Iconv;
     } catch {
     }
 

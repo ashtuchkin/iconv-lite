@@ -96,21 +96,21 @@ jobs:
           - node-version: "11"
             npm-i: "mocha@8.4.0"
             npm-rm: 'iconv'
-            python-v: '3.7'
+            python-v: '3.7.1'
 
           - node-version: "12"
             npm-i: "mocha@9.2.2"
-            python-v: '3.7'
+            python-v: '3.7.1'
 
           - node-version: "13"
             npm-i: "mocha@9.2.2"
-            python-v: '3.7'
+            python-v: '3.7.1'
 
           - node-version: "14"
-            python-v: '3.7'
+            python-v: '3.7.1'
 
           - node-version: "15"
-            python-v: '3.7'
+            python-v: '3.7.1'
 
     runs-on: ${{ matrix.os }}
     steps:

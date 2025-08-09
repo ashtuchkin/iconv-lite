@@ -157,7 +157,7 @@ describe("Full DBCS encoding tests", function() {
     this.timeout(10000); // These tests are pretty slow.
     var Iconv;
     try {
-        Iconv = require('iconv');
+        Iconv = require('iconv').Iconv;
     } catch {
     }
 
