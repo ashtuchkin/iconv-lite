@@ -96,21 +96,21 @@ jobs:
           - node-version: "11"
             npm-i: "mocha@8.4.0"
             npm-rm: 'iconv'
-            python-v: '3.7.1'
+            python-v: '3.7'
 
           - node-version: "12"
             npm-i: "mocha@9.2.2"
-            python-v: '3.7.1'
+            python-v: '3.7'
 
           - node-version: "13"
             npm-i: "mocha@9.2.2"
-            python-v: '3.7.1'
+            python-v: '3.7'
 
           - node-version: "14"
-            python-v: '3.7.1'
+            python-v: '3.7'
 
           - node-version: "15"
-            python-v: '3.7.1'
+            python-v: '3.7'
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -134,9 +134,10 @@ jobs:
 
       - name: Set up python version
         if: ${{ matrix.python-v != '' }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-v }}
+        shell: bash -eo pipefail -l {0}
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3.7
 
       - name: Remove npm module(s) ${{ matrix.npm-rm }}
         run: npm rm --silent --save-dev ${{ matrix.npm-rm }}
