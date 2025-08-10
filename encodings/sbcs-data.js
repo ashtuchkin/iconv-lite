@@ -94,6 +94,16 @@ module.exports = {
 
     "cp819": "iso88591",
     "ibm819": "iso88591",
+    "ibm1111": "iso88592",
+    "ibm913": "iso88593",
+    "ibm914": "iso88594",
+    "ibm813": "iso88597",
+    "ibm916": "iso88598",
+    "ibm920": "iso88599",
+    "ibm919": "iso885910",
+    "ibm874": "iso885911",
+    "ibm921": "iso885913",
+    "ibm923": "iso885915",
 
     "cyrillic": "iso88595",
 
