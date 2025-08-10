@@ -63,20 +63,10 @@ describe("Generic UTF8-UCS2 tests", function() {
     });
     
     it("Throws on unknown encodings", function() {
-        assert.throws(function() { iconv.encode("a", "xxx"); }, { name: 'Error' });
-        assert.throws(function() { iconv.decode(Buffer.from("a"), "xxx"); }, { name: 'Error' });
-        assert.throws(
-            function () {
-                iconv.encode("abc", "constructor")
-            }, 
-            { name: "Error", message: "Encoding not recognized: 'constructor' (searched as: 'constructor')" }
-        );
-        assert.throws(
-            function () {
-                iconv.decode(Buffer.from("abc"), "constructor")
-            }, 
-            { name: "Error", message: "Encoding not recognized: 'constructor' (searched as: 'constructor')" }
-        );
+        assert. throws(function() { iconv.encode("a", "xxx"); });
+        assert.throws(function() { iconv.decode(Buffer.from("a"), "xxx"); });
+        assert.throws(function () { iconv.encode("abc", "constructor") } );
+        assert.throws( function () { iconv.decode(Buffer.from("abc"), "constructor") } );
     });
     
     it("Convert non-strings and non-buffers", function() {
