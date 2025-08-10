@@ -43,7 +43,7 @@
         "unorm": "^1.6.0"
     },
     "dependencies": {
-        "object-assign": "^4.1.1",
+        "object-assign": ">= 4.1.1 < 5.0.0",
         "safer-buffer": ">= 2.1.2 < 3.0.0"
     }
 }
