@@ -62,8 +62,9 @@ function generateTypingsFile() {
   const allEncodings = collectAllEncodings();
   const supportedEncodingType = allEncodings.map((name) => `  | "${name}"`).join("\n");
 
-  const templatePath = path.join(__dirname, "template-index.d.ts");
+  const templatePath = path.join(__dirname, "..", "lib", "index-template.d.ts");
   const iconvLiteTypedefsTemplate = fs.readFileSync(templatePath, "utf8");
+
   const iconvLiteTypedefs = iconvLiteTypedefsTemplate.replace(
     "// --SUPPORTED-ENCODINGS-PLACEHOLDER--",
     `export type SupportedEncoding =\n${supportedEncodingType}\n  | (string & {});`

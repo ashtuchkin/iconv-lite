@@ -28,7 +28,7 @@
         "test:performance": "node performance/index.js",
         "test:tap": "mocha --reporter tap --check-leaks --grep .",
         "test:webpack": "npm pack && mv iconv-lite-*.tgz test/webpack/iconv-lite.tgz && cd test/webpack && npm install && npm run test && rm iconv-lite.tgz",
-        "typegen": "node scripts/generate-typings.js"
+        "typegen": "node generation/gen-typings.js"
     },
     "browser": {
         "stream": false
