@@ -1,0 +1,77 @@
+const fs = require("fs");
+const path = require("path");
+
+function getEncodingData(fileName) {
+  try {
+    const encodingsDir = path.join(__dirname, "..", "encodings");
+    return require(path.join(encodingsDir, fileName));
+  } catch (e) {
+    console.error(`Error reading ${fileName}:`, e);
+    return {};
+  }
+}
+
+function collectAllEncodings() {
+  const allNames = new Set();
+  const canonicalize = (name) =>
+    String(name)
+      .toLowerCase()
+      .replace(/[^0-9a-z]/g, "");
+
+  // Add a list of internal keys to ignore
+  const ignoredKeys = new Set(["_internal"]);
+
+  const processEncodingObject = (obj) => {
+    for (const key in obj) {
+      // Skip the internal keys
+      if (ignoredKeys.has(key)) {
+        continue;
+      }
+
+      const value = obj[key];
+      allNames.add(key); // Add the alias itself
+
+      if (typeof value === "string") {
+        allNames.add(value); // Add the canonical name it points to
+      } else if (typeof value === "object" && value.name) {
+        allNames.add(value.name); // Add the name from the object
+      }
+    }
+  };
+
+  // Process all relevant files
+  processEncodingObject(getEncodingData("internal.js"));
+  processEncodingObject(getEncodingData("sbcs-data.js"));
+  processEncodingObject(getEncodingData("sbcs-data-generated.js"));
+  processEncodingObject(getEncodingData("dbcs-data.js"));
+
+  // Add the canonicalized (lowercase, alphanumeric) versions
+  const finalNames = new Set();
+  allNames.forEach((name) => {
+    finalNames.add(name);
+    const canon = canonicalize(name);
+    if (canon) {
+      finalNames.add(canon);
+    }
+  });
+
+  return Array.from(finalNames).sort();
+}
+
+function generateTypingsFile() {
+  const allEncodings = collectAllEncodings();
+  const supportedEncodingType = allEncodings.map((name) => `  | "${name}"`).join("\n");
+
+  const templatePath = path.join(__dirname, "template-index.d.ts");
+  const iconvLiteTypedefsTemplate = fs.readFileSync(templatePath, "utf8");
+  const iconvLiteTypedefs = iconvLiteTypedefsTemplate.replace(
+    "// --SUPPORTED-ENCODINGS-PLACEHOLDER--",
+    `export type SupportedEncoding =\n${supportedEncodingType}\n  | (string & {});`
+  );
+
+  const outputPath = path.join(__dirname, "..", "lib", "index.d.ts");
+  fs.writeFileSync(outputPath, iconvLiteTypedefs, "utf8");
+}
+
+// Run the script
+generateTypingsFile();
