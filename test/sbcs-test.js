@@ -1,8 +1,7 @@
 var assert = require('assert'),
     unorm = require('unorm'),
     Buffer = require('safer-buffer').Buffer,
-    iconv = require(__dirname+'/../'),
-    Iconv = require('iconv').Iconv;
+    iconv = require(__dirname+'/../');
 
 function convertWithDefault(converter, buf, def) {
     var res = converter.convert(buf);
@@ -54,12 +53,18 @@ var sbcsEncodingTests = {};
 describe("Full SBCS encoding tests", function() {
     this.timeout(10000);
 
+    var Iconv;
+    try {
+        Iconv = require('iconv').Iconv;
+    } catch (_e) {}
+
     for (var enc in iconv.encodings)
         if (iconv.encodings[enc].type === '_sbcs') (function(enc) {
             var iconvName = iconvAlias(enc),
                 testEncName = enc + ((enc !== iconvName) ? " (" + iconvName + ")" : "");
 
             it("Decode SBCS encoding " + testEncName, function() {
+                if (!Iconv) this.skip();
                 try {
                     var conv = new Iconv(iconvName, "utf-8//IGNORE");
                 } catch (e) {
