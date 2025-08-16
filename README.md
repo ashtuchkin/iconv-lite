@@ -121,10 +121,10 @@ npm install
 npm test
     
 # To view performance:
-node test/performance.js
+npm run test:performance
 
 # To view test coverage: 
-npm run test:coverage
+npm run test:cov
 open coverage/index.html
 ```
 
