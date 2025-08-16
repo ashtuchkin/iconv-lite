@@ -11,9 +11,7 @@
  *
  * Install with `npm install @types/node --save-dev`
  *
- * This file provides detailed typings for all encodings supported by iconv-lite,
- * based on the official wiki and source code:
- * https://github.com/ashtuchkin/iconv-lite/wiki/Supported-Encodings
+ * This file provides detailed typings for all encodings supported by iconv-lite.
  *--------------------------------------------------------------------------------------------*/
 
 /** A union of all supported encoding strings in `iconv-lite`. */
