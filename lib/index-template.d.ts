@@ -116,6 +116,9 @@ declare const iconv: {
 
   /** The character used for untranslatable `single-byte` characters. @default "?" */
   defaultCharSingleByte: string;
+
+  /** @readonly Whether or not, Streaming API is enabled. */
+  readonly supportsStreams: boolean;
 };
 
 export default iconv;
