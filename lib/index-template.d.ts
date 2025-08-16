@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------------------------
  * REQUIREMENT: This definition is dependent on the @types/node definition.
  *
- * `npm install --save-dev @types/node`
+ * Install with `npm install @types/node --save-dev`
  *
  * This file provides detailed typings for all encodings supported by iconv-lite,
  * based on the official wiki and source code:
