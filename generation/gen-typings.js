@@ -63,8 +63,8 @@ function generateTypingsFile() {
   const typedefsTemplate = fs.readFileSync(templatePath, "utf8");
 
   const typedefs = typedefsTemplate.replace(
-    "// --SUPPORTED-ENCODINGS-PLACEHOLDER--",
-    `export type SupportedEncoding =\n${supportedEncodingType}\n  | (string & {});`
+    "export type SupportedEncoding = string",
+    `export type SupportedEncoding =\n${supportedEncodingType}\n  | (string & {})`
   );
 
   const generatedHeader = `/*

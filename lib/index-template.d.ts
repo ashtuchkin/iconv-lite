@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 /** A union of all supported encoding strings in `iconv-lite`. */
-// --SUPPORTED-ENCODINGS-PLACEHOLDER--
+export type SupportedEncoding = string;
 
 // --- Options ---
 
