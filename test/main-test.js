@@ -7,8 +7,26 @@ var testStringLatin1 = "Hello123!£Å÷×çþÿ¿®";
 var testStringBase64 = "SGVsbG8xMjMh";
 var testStringHex = "48656c6c6f31323321";
 
+
+describe("Encoding Existence - Prototype Properties", function() {
+    it("should not detect prototype properties as encodings", function () {
+        assert.equal(iconv.encodingExists("__proto__"), false);
+        assert.equal(iconv.encodingExists("constructor"), false);
+    });
+
+    it("should detect encodings", function () {
+        assert.equal(iconv.encodingExists("utf8"), true);
+    })
+});
+
+describe("Encoding Existence - Codec Data Cache", function () {
+    it("should not detect 'constructor' as encoding when _codecDataCache is defined", function () {
+        assert.equal(iconv.encodingExists("__proto__"), false);
+        assert.equal(iconv.encodingExists("constructor"), false);
+    });
+});
+
 describe("Generic UTF8-UCS2 tests", function() {
-    
     it("Return values are of correct types", function() {
         assert.ok(Buffer.isBuffer(iconv.encode(testString, "utf8")));
         
@@ -45,8 +63,10 @@ describe("Generic UTF8-UCS2 tests", function() {
     });
     
     it("Throws on unknown encodings", function() {
-        assert.throws(function() { iconv.encode("a", "xxx"); });
+        assert. throws(function() { iconv.encode("a", "xxx"); });
         assert.throws(function() { iconv.decode(Buffer.from("a"), "xxx"); });
+        assert.throws(function () { iconv.encode("abc", "constructor") } );
+        assert.throws( function () { iconv.decode(Buffer.from("abc"), "constructor") } );
     });
     
     it("Convert non-strings and non-buffers", function() {
@@ -64,7 +84,7 @@ describe("Generic UTF8-UCS2 tests", function() {
         Object.prototype.permits = function() {};
         Array.prototype.sample2 = function() {};
 
-        iconv._codecDataCache = {}; // Clean up cache so that all encodings are loaded.
+        iconv._codecDataCache = Object.create(null); // Clean up cache so that all encodings are loaded.
 
         assert.strictEqual(iconv.decode(Buffer.from("abc"), "gbk"), "abc");
         assert.strictEqual(iconv.decode(Buffer.from("abc"), "win1251"), "abc");
