@@ -1,6 +1,8 @@
 /*---------------------------------------------------------------------------------------------
  * REQUIREMENT: This definition is dependent on the @types/node definition.
  *
+ * `npm install --save-dev @types/node`
+ *
  * This file provides detailed typings for all encodings supported by iconv-lite,
  * based on the official wiki and source code:
  * https://github.com/ashtuchkin/iconv-lite/wiki/Supported-Encodings
@@ -9,34 +11,32 @@
 /** A union of all supported encoding strings in `iconv-lite`. */
 // --SUPPORTED-ENCODINGS-PLACEHOLDER--
 
-declare module "iconv-lite" {
-  //   --- Basic API ---
+//   --- Basic API ---
 
-  /** Decodes a `Buffer` into a `string`, using the provided `encoding`. */
-  export function decode(buffer: Buffer | Uint8Array, encoding: SupportedEncoding, options?: DecodeOptions): string;
+/** Decodes a `Buffer` into a `string`, using the provided `encoding`. */
+export function decode(buffer: Buffer | Uint8Array, encoding: SupportedEncoding, options?: DecodeOptions): string;
 
-  /** Encodes a `string` into a `Buffer`, using the provided `encoding`. */
-  export function encode(content: string, encoding: SupportedEncoding, options?: EncodeOptions): Buffer;
+/** Encodes a `string` into a `Buffer`, using the provided `encoding`. */
+export function encode(content: string, encoding: SupportedEncoding, options?: EncodeOptions): Buffer;
 
-  /** Checks if a given encoding is supported by `iconv-lite`. */
-  export function encodingExists(encoding: string): encoding is SupportedEncoding;
+/** Checks if a given encoding is supported by `iconv-lite`. */
+export function encodingExists(encoding: string): encoding is SupportedEncoding;
 
-  //   --- Stream API ---
+//   --- Stream API ---
 
-  /** Creates a stream that decodes binary data from a given `encoding` into strings. */
-  export function decodeStream(encoding: SupportedEncoding, options?: DecodeOptions): NodeJS.ReadWriteStream;
+/** Creates a stream that decodes binary data from a given `encoding` into strings. */
+export function decodeStream(encoding: SupportedEncoding, options?: DecodeOptions): NodeJS.ReadWriteStream;
 
-  /** Creates a stream that encodes strings into binary data in a given `encoding`. */
-  export function encodeStream(encoding: SupportedEncoding, options?: EncodeOptions): NodeJS.ReadWriteStream;
+/** Creates a stream that encodes strings into binary data in a given `encoding`. */
+export function encodeStream(encoding: SupportedEncoding, options?: EncodeOptions): NodeJS.ReadWriteStream;
 
-  //   --- Low-level stream APIs ---
+//   --- Low-level stream APIs ---
 
-  /** Creates and returns a low-level encoder stream. */
-  export function getEncoder(encoding: SupportedEncoding, options?: EncodeOptions): EncoderStream;
+/** Creates and returns a low-level encoder stream. */
+export function getEncoder(encoding: SupportedEncoding, options?: EncodeOptions): EncoderStream;
 
-  /** Creates and returns a low-level decoder stream. */
-  export function getDecoder(encoding: SupportedEncoding, options?: DecodeOptions): DecoderStream;
-}
+/** Creates and returns a low-level decoder stream. */
+export function getDecoder(encoding: SupportedEncoding, options?: DecodeOptions): DecoderStream;
 
 export interface DecodeOptions {
   /** Strips the byte order mark (BOM) from the input, when decoding. @default true */
