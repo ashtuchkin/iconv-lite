@@ -480,7 +480,10 @@ declare const iconv: {
 
   // --- Legacy aliases ---
 
+  /** Legacy alias for {@link iconv.encode}. */
   toEncoding: typeof iconv.encode;
+
+  /** Legacy alias for {@link iconv.decode}. */
   fromEncoding: typeof iconv.decode;
 
   // --- Stream API ---
