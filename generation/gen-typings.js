@@ -13,10 +13,7 @@ function getEncodingData(fileName) {
 
 function collectAllEncodings() {
   const allNames = new Set();
-  const canonicalize = (name) =>
-    String(name)
-      .toLowerCase()
-      .replace(/[^0-9a-z]/g, "");
+  const canonicalize = (name) => ("" + name).toLowerCase().replace(/:\d{4}$|[^0-9a-z]/g, "");
 
   const processEncodingObject = (obj) => {
     for (const key in obj) {
