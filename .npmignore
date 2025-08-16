@@ -7,4 +7,3 @@ coverage
 .github
 .idea
 performance
-lib/index-template.d.ts
