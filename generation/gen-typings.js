@@ -42,7 +42,7 @@ function collectAllEncodings() {
   processEncodingObject(getEncodingData("dbcs-codec.js"));
   processEncodingObject(getEncodingData("dbcs-data.js"));
 
-  // Add the canonicalized (lowercase, alphanumeric) versions
+  // Add the canonicalized (lowercase, alphanumeric, no appended year) versions
   const finalNames = new Set();
   allNames.forEach((name) => {
     finalNames.add(name);

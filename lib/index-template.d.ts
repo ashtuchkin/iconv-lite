@@ -12,16 +12,16 @@ export type SupportedEncoding = string;
 // --- Options ---
 
 export interface DecodeOptions {
-  /** Strips the byte order mark (BOM) from the input, when decoding. @default true */
+  /** Strip the byte order mark (BOM) from the input, when decoding. @default true */
   stripBOM?: boolean;
-  /** Overrides the default endianness for `UTF-16` and `UTF-32` decodings. */
+  /** Override the default endianness for `UTF-16` and `UTF-32` decodings. */
   defaultEncoding?: "utf16be" | "utf32be";
 }
 
 export interface EncodeOptions {
-  /** Adds a byte order mark (BOM) to the output, when encoding. @default false */
+  /** Add a byte order mark (BOM) to the output, when encoding. @default false */
   addBOM?: boolean;
-  /** Overrides the default endianness for `UTF-32` encoding. */
+  /** Override the default endianness for `UTF-32` encoding. */
   defaultEncoding?: "utf32be";
 }
 
@@ -90,7 +90,7 @@ declare const iconv: {
 
   /**
    * Returns a codec object for the given `encoding`.
-   * @throws If the passed in encoding is not recognized.
+   * @throws If the `encoding` is not recognized.
    */
   getCodec(encoding: SupportedEncoding): Codec;
 
