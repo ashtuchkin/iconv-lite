@@ -20,7 +20,7 @@ function collectAllEncodings() {
 
   const processEncodingObject = (obj) => {
     for (const key in obj) {
-      // Skip internal keys
+      // Skip codecs
       if (key.startsWith("_")) continue;
 
       const value = obj[key];
@@ -63,9 +63,9 @@ function generateTypingsFile() {
   const supportedEncodingType = allEncodings.map((name) => `  | "${name}"`).join("\n");
 
   const templatePath = path.join(__dirname, "..", "lib", "index-template.d.ts");
-  const iconvLiteTypedefsTemplate = fs.readFileSync(templatePath, "utf8");
+  const typedefsTemplate = fs.readFileSync(templatePath, "utf8");
 
-  const iconvLiteTypedefs = iconvLiteTypedefsTemplate.replace(
+  const typedefs = typedefsTemplate.replace(
     "// --SUPPORTED-ENCODINGS-PLACEHOLDER--",
     `export type SupportedEncoding =\n${supportedEncodingType}\n  | (string & {});`
   );
@@ -79,7 +79,7 @@ function generateTypingsFile() {
  */\n\n`;
 
   const outputPath = path.join(__dirname, "..", "lib", "index.d.ts");
-  fs.writeFileSync(outputPath, `${generatedHeader}${iconvLiteTypedefs}`, "utf8");
+  fs.writeFileSync(outputPath, `${generatedHeader}${typedefs}`, "utf8");
 }
 
 // Run the script
