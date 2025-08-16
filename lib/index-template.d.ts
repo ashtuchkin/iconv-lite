@@ -11,6 +11,8 @@
 /** A union of all supported encoding strings in `iconv-lite`. */
 // --SUPPORTED-ENCODINGS-PLACEHOLDER--
 
+// --- Options ---
+
 export interface DecodeOptions {
   /** Strips the byte order mark (BOM) from the input, when decoding. @default true */
   stripBOM?: boolean;
@@ -25,6 +27,8 @@ export interface EncodeOptions {
   defaultEncoding?: "utf32be";
 }
 
+// --- Return values ---
+
 export interface EncoderStream {
   write(str: string): Buffer;
   end(): Buffer | undefined;
@@ -35,19 +39,30 @@ export interface DecoderStream {
   end(): string | undefined;
 }
 
-declare const iconv: {
-  //   --- Basic API ---
+export interface Codec {
+  encoder: new (options?: EncodeOptions, codec?: any) => EncoderStream;
+  decoder: new (options?: DecodeOptions, codec?: any) => DecoderStream;
+  [key: string]: any;
+}
 
-  /** Decodes a `Buffer` into a `string`, using the provided `encoding`. */
-  decode(buffer: Buffer | Uint8Array, encoding: SupportedEncoding, options?: DecodeOptions): string;
+declare const iconv: {
+  // --- Basic API ---
 
   /** Encodes a `string` into a `Buffer`, using the provided `encoding`. */
   encode(content: string, encoding: SupportedEncoding, options?: EncodeOptions): Buffer;
 
+  /** Decodes a `Buffer` into a `string`, using the provided `encoding`. */
+  decode(buffer: Buffer | Uint8Array, encoding: SupportedEncoding, options?: DecodeOptions): string;
+
   /** Checks if a given encoding is supported by `iconv-lite`. */
   encodingExists(encoding: string): encoding is SupportedEncoding;
 
-  //   --- Stream API ---
+  // --- Legacy aliases ---
+
+  toEncoding: typeof iconv.encode;
+  fromEncoding: typeof iconv.decode;
+
+  // --- Stream API ---
 
   /** Creates a stream that decodes binary data from a given `encoding` into strings. */
   decodeStream(encoding: SupportedEncoding, options?: DecodeOptions): NodeJS.ReadWriteStream;
@@ -55,13 +70,52 @@ declare const iconv: {
   /** Creates a stream that encodes strings into binary data in a given `encoding`. */
   encodeStream(encoding: SupportedEncoding, options?: EncodeOptions): NodeJS.ReadWriteStream;
 
-  //   --- Low-level stream APIs ---
+  /**
+   * Explicitly enable Streaming API in browser environments by passing in:
+   * ```js
+   * require('stream')
+   * ```
+   * @example iconv.enableStreamingAPI(require('stream'));
+   */
+  enableStreamingAPI(stream_module: any): void;
+
+  // --- Low-level stream APIs ---
 
   /** Creates and returns a low-level encoder stream. */
   getEncoder(encoding: SupportedEncoding, options?: EncodeOptions): EncoderStream;
 
   /** Creates and returns a low-level decoder stream. */
   getDecoder(encoding: SupportedEncoding, options?: DecodeOptions): DecoderStream;
+
+  /**
+   * Returns a codec object for the given `encoding`.
+   * @throws If the passed in encoding is not recognized.
+   */
+  getCodec(encoding: SupportedEncoding): Codec;
+
+  /** Strips all non-alphanumeric characters and appended year from `encoding`. */
+  _canonicalizeEncoding(encoding: SupportedEncoding): string;
+
+  // --- Properties ---
+
+  /** A cache of all loaded encoding definitions. */
+  encodings: Record<
+    SupportedEncoding,
+    | string
+    | {
+        type: string;
+        [key: string]: any;
+      }
+  > | null;
+
+  /** A cache of initialized codec objects. */
+  _codecDataCache: Record<string, Codec>;
+
+  /** The character used for untranslatable `Unicode` characters. @default "�" */
+  defaultCharUnicode: string;
+
+  /** The character used for untranslatable `single-byte` characters. @default "?" */
+  defaultCharSingleByte: string;
 };
 
 export default iconv;
