@@ -50,10 +50,6 @@ InternalCodec.prototype.decoder = InternalDecoder;
 // We use node.js internal decoder. Its signature is the same as ours.
 var StringDecoder = require('string_decoder').StringDecoder;
 
-if (!StringDecoder.prototype.end) // Node v0.8 doesn't have this method.
-    StringDecoder.prototype.end = function() {};
-
-
 function InternalDecoder(options, codec) {
     this.decoder = new StringDecoder(codec.enc);
 }
