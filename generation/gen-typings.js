@@ -18,15 +18,10 @@ function collectAllEncodings() {
       .toLowerCase()
       .replace(/[^0-9a-z]/g, "");
 
-  // Add a list of internal keys to ignore
-  const ignoredKeys = new Set(["_internal"]);
-
   const processEncodingObject = (obj) => {
     for (const key in obj) {
-      // Skip the internal keys
-      if (ignoredKeys.has(key)) {
-        continue;
-      }
+      // Skip internal keys
+      if (key.startsWith("_")) continue;
 
       const value = obj[key];
       allNames.add(key); // Add the alias itself
@@ -41,8 +36,13 @@ function collectAllEncodings() {
 
   // Process all relevant files
   processEncodingObject(getEncodingData("internal.js"));
+  processEncodingObject(getEncodingData("utf32.js"));
+  processEncodingObject(getEncodingData("utf16.js"));
+  processEncodingObject(getEncodingData("utf7.js"));
+  processEncodingObject(getEncodingData("sbcs-codec.js"));
   processEncodingObject(getEncodingData("sbcs-data.js"));
   processEncodingObject(getEncodingData("sbcs-data-generated.js"));
+  processEncodingObject(getEncodingData("dbcs-codec.js"));
   processEncodingObject(getEncodingData("dbcs-data.js"));
 
   // Add the canonicalized (lowercase, alphanumeric) versions
