@@ -22,11 +22,11 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@4
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@4
+        uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
 
@@ -180,6 +180,18 @@ jobs:
         if: ${{ matrix.npm-i != '' }}
         run: npm install --save-dev ${{ matrix.npm-i }}
 
+      - name: Remove eslint for node < 15
+        shell: bash
+        run: |
+          # eslint for linting
+          # - remove on Node.js < 15
+          if [[ "$(cut -d. -f1 <<< "${{ matrix.node-version }}")" -lt 15 ]]; then
+            node -pe 'Object.keys(require("./package").devDependencies).join("\n")' | \
+              grep -E 'eslint(-|$)|neostandard' | \
+              sort -r | \
+              xargs -n1 npm rm --silent --save-dev
+          fi
+
       - name: Install dependencies
         run: npm install
 
@@ -244,6 +256,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Remove eslint for node < 15
+        shell: bash
+        run: |
+          # eslint for linting
+          # - remove on Node.js < 15
+          if [[ "$(cut -d. -f1 <<< "${{ matrix.node-version }}")" -lt 15 ]]; then
+            node -pe 'Object.keys(require("./package").devDependencies).join("\n")' | \
+              grep -E 'eslint(-|$)|neostandard' | \
+              sort -r | \
+              xargs -n1 npm rm --silent --save-dev
+          fi
       
       - name: Webpack test
         shell: bash
