@@ -124,5 +124,5 @@ declare const iconv: {
 
 export default iconv
 
-// @ts-expect-error Allow CJS imports from node10
+// @ts-expect-error Correct CJS imports in node10
 export = iconv
