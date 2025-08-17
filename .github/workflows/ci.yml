@@ -110,6 +110,8 @@ jobs:
 
           - node-version: "5"
             npm-i: "mocha@5.2.0 nyc@11.9.0"
+            # fixes https://github.com/npm/cli/issues/681
+            npm-version: npm@2.15.11
             npm-rm: 'iconv'
 
           - node-version: "6"
