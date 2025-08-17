@@ -7,3 +7,6 @@ coverage
 .github
 .idea
 performance
+.nyc_output
+eslint.config.js
+*.tgz

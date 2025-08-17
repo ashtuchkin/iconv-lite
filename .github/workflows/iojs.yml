@@ -43,16 +43,14 @@ jobs:
       run: |
         npm config set loglevel error
         npm config set shrinkwrap false
+
     - name: Remove npm module(s) ${{ matrix.npm-rm }}
-      run: npm rm --silent --save-dev ${{ matrix.npm-rm }}
+      run: npm rm --silent --save-dev ${{ matrix.npm-rm }} neostandard @stylistic/eslint-plugin-js @stylistic/eslint-plugin eslint
       if: matrix.npm-rm != ''
 
     - name: Install npm module(s) ${{ matrix.npm-i }}
       run: npm install --save-dev ${{ matrix.npm-i }}
       if: matrix.npm-i != ''
-
-    - name: Remove non-test dependencies
-      run: npm rm --silent --save-dev connect-redis
 
     - name: Install Node.js dependencies
       run: npm install
