@@ -7,6 +7,7 @@
  *-------------------------------------------------------------------------------------------- */
 
 import type { Encoding } from "../types/encodings";
+export type { Encoding } from "../types/encodings";
 
 // --- Options ---
 
