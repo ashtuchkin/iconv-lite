@@ -560,7 +560,7 @@ describe("Full DBCS encoding tests", function () {
               { return }
             }
 
-            errors.push({ input: inp.toString("hex"), strExpected, strActual })
+            errors.push({ input: inp.toString("hex"), strExpected: strExpected, strActual: strActual })
           })
 
           if (errors.length > 0) {
@@ -606,7 +606,7 @@ describe("Full DBCS encoding tests", function () {
 
             if (iconvChgs[str] == str1) { continue } // Skip iconv changes.
 
-            errors.push({ input: strToHex(str), inputChar: str, strExpected, strActual })
+            errors.push({ input: strToHex(str), inputChar: str, strExpected: strExpected, strActual: strActual })
           }
 
           if (errors.length > 0) {

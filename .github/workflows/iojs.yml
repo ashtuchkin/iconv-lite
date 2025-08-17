@@ -44,6 +44,10 @@ jobs:
         npm config set loglevel error
         npm config set shrinkwrap false
 
+    - name: Remove npm module(s) ${{ matrix.npm-rm }}
+      run: npm rm --silent --save-dev 
+      if: matrix.npm-rm != ''
+
     - name: Remove eslint for node < 15
       shell: bash
       run: |
@@ -53,8 +57,8 @@ jobs:
           node -pe 'Object.keys(require("./package").devDependencies).join("\n")' | \
             grep -E 'eslint(-|$)|neostandard' | \
             sort -r | \
-            xargs -n1 npm rm --silent --save-dev ${{ matrix.npm-rm }}
-        fi
+            xargs -n1 npm rm --silent --save-dev 
+        fi  
 
     - name: Install npm module(s) ${{ matrix.npm-i }}
       run: npm install --save-dev ${{ matrix.npm-i }}

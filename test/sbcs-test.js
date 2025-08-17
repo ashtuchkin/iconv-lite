@@ -75,7 +75,7 @@ describe("Full SBCS encoding tests", function () {
             var strActual = iconv.decode(buf, enc)
             var strExpected = convertWithDefault(conv, buf, iconv.defaultCharUnicode).toString()
 
-            if (strActual != strExpected) { errors.push({ input: buf.toString("hex"), strExpected, strActual }) }
+            if (strActual != strExpected) { errors.push({ input: buf.toString("hex"), strExpected: strExpected, strActual: strActual }) }
           }
           if (errors.length > 0) {
             assert.fail(null, null, "Decoding mismatch: <input> | <expected> | <actual> | <expected char> | <actual char>\n" +
@@ -133,7 +133,7 @@ describe("Full SBCS encoding tests", function () {
             if (iconvEquivChars[enc] && iconvEquivChars[enc][str] &&
                         strExpected == iconv.encode(iconvEquivChars[enc][str], enc).toString("hex")) { continue }
 
-            errors.push({ input: strToHex(str), inputChar: str, strExpected, strActual })
+            errors.push({ input: strToHex(str), inputChar: str, strExpected: strExpected, strActual: strActual })
           }
 
           if (errors.length > 0) {

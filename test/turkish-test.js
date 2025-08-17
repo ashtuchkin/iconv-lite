@@ -11,7 +11,7 @@ var encodings = [{
   variations: ["windows-1254", "win-1254", "win1254", "cp1254", "cp-1254", 1254],
   strings: {
     empty: "",
-    ascii,
+    ascii: ascii,
     turkish: "€‚ƒ„…†‡ˆ‰Š‹Œ‘’“”•–—˜™š›œŸ¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõö÷øùúûüışÿ",
     untranslatable: "\x81\x8d\x8e\x8f\x90\x9d\x9e"
   },
@@ -34,7 +34,7 @@ var encodings = [{
   variations: ["iso-8859-9", "turkish", "turkish8", "cp28599", "cp-28599", 28599],
   strings: {
     empty: "",
-    ascii,
+    ascii: ascii,
     turkish: "\xa0¡¢£¤¥¦§¨©ª«¬\xad®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõö÷øùúûüışÿ",
     untranslatable: ""
   },

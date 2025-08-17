@@ -12,7 +12,8 @@ module.exports = [
   }),
   {
     rules: {
-      "@stylistic/quotes": [2, "double"],
+      "object-shorthand": ["off"], // Compatibility with older code
+      "@stylistic/quotes": [2, "double"], // Prevent many change of code
       "new-cap": ["off"], // We need improve this
       "no-labels": ["off"], // Can remove the labels?
       eqeqeq: ["off"], // We need investigate why some conditions are not using strict equality

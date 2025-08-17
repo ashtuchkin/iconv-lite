@@ -172,6 +172,10 @@ jobs:
           npm config set loglevel error
         shell: bash
 
+      - name: Remove npm module(s) ${{ matrix.npm-rm }}
+        run: npm rm --silent --save-dev ${{ matrix.npm-rm }}
+        if: matrix.npm-rm != ''
+
       - name: Remove eslint for node < 15
         shell: bash
         run: |
@@ -187,7 +191,7 @@ jobs:
       - name: Install Node version specific dev deps
         if: ${{ matrix.npm-i != '' }}
         run: npm install --save-dev ${{ matrix.npm-i }}
-    
+
       - name: Install dependencies
         run: npm install
 
