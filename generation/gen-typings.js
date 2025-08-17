@@ -69,7 +69,7 @@ function generateTypingsFile() {
 
   const fileContent = `${generatedHeader}\n
 /** A union of all supported encoding strings in \`iconv-lite\`. */
-export type Encodings =\n${supportedEncodingType}\n  | (string & {})
+export type Encoding =\n${supportedEncodingType}\n  | (string & {})
 `;
 
   const outputPath = path.join(__dirname, "..", "types", "encodings.d.ts");

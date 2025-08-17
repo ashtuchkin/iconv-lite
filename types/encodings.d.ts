@@ -7,7 +7,7 @@
  */
 
 /** A union of all supported encoding strings in `iconv-lite`. */
-export type Encodings =
+export type Encoding =
   | "10000"
   | "10006"
   | "10007"
