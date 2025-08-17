@@ -173,20 +173,8 @@ jobs:
         shell: bash
 
       - name: Remove npm module(s) ${{ matrix.npm-rm }}
-        run: npm rm --silent --save-dev ${{ matrix.npm-rm }}
+        run: npm rm --silent --save-dev ${{ matrix.npm-rm }} neostandard @stylistic/eslint-plugin-js @stylistic/eslint-plugin eslint
         if: matrix.npm-rm != ''
-
-      - name: Remove eslint for node < 15
-        shell: bash
-        run: |
-          # eslint for linting
-          # - remove on Node.js < 15
-          if [[ "$(cut -d. -f1 <<< "${{ matrix.node-version }}")" -lt 15 ]]; then
-            node -pe 'Object.keys(require("./package").devDependencies).join("\n")' | \
-              grep -E 'eslint(-|$)|neostandard' | \
-              sort -r | \
-              xargs -n1 npm rm --silent --save-dev ${{ matrix.npm-rm }}
-          fi
 
       - name: Install Node version specific dev deps
         if: ${{ matrix.npm-i != '' }}
