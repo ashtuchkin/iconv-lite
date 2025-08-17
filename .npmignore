@@ -10,3 +10,4 @@ performance
 .nyc_output
 eslint.config.js
 *.tgz
+.git-blame-ignore-revs
