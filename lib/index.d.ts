@@ -6,8 +6,8 @@
  * This file provides detailed typings for the public API of iconv-lite
  *-------------------------------------------------------------------------------------------- */
 
-import type { Encoding } from "../types/encodings";
-export type { Encoding } from "../types/encodings";
+import type { Encoding } from "../types/encodings"
+export type { Encoding } from "../types/encodings"
 
 // --- Options ---
 
@@ -104,9 +104,9 @@ declare const iconv: {
     Encoding,
     | string
     | {
-        type: string;
-        [key: string]: any;
-      }
+      type: string;
+      [key: string]: any;
+    }
   > | null;
 
   /** A cache of initialized codec objects. */
@@ -120,6 +120,6 @@ declare const iconv: {
 
   /** @readonly Whether or not, Streaming API is enabled. */
   readonly supportsStreams: boolean;
-};
+}
 
-export default iconv;
+export default iconv
