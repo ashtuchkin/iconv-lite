@@ -1,23 +1,23 @@
 ## iconv-lite: Pure JS character encoding conversion
 
- * No need for native code compilation. Quick to install, works on Windows, Web, and in sandboxed environments.
- * Used in popular projects like [Express.js (body_parser)](https://github.com/expressjs/body-parser), 
-   [Grunt](http://gruntjs.com/), [Nodemailer](http://www.nodemailer.com/), [Yeoman](http://yeoman.io/) and others.
- * Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
- * Intuitive encode/decode API, including Streaming support.
- * In-browser usage via [browserify](https://github.com/substack/node-browserify) or [webpack](https://webpack.js.org/) (~180kb gzip compressed with Buffer shim included).
- * Typescript [type definition file](https://github.com/ashtuchkin/iconv-lite/blob/master/lib/index.d.ts) included.
- * React Native is supported (need to install `stream` module to enable Streaming API).
- * License: MIT.
+[![NPM Version][npm-version-image]][npm-url]
+[![NPM Downloads][npm-downloads-image]][npm-downloads-url]
+[![License][license-image]][license-url]
+[![NPM Install Size][npm-install-size-image]][npm-install-size-url]
 
-[![NPM Stats](https://nodei.co/npm/iconv-lite.png)](https://npmjs.org/package/iconv-lite/)  
-[![Build Status](https://travis-ci.org/ashtuchkin/iconv-lite.svg?branch=master)](https://travis-ci.org/ashtuchkin/iconv-lite)
-[![npm](https://img.shields.io/npm/v/iconv-lite.svg)](https://npmjs.org/package/iconv-lite/)
-[![npm downloads](https://img.shields.io/npm/dm/iconv-lite.svg)](https://npmjs.org/package/iconv-lite/)
-[![npm bundle size](https://img.shields.io/bundlephobia/min/iconv-lite.svg)](https://npmjs.org/package/iconv-lite/)
+* No need for native code compilation. Quick to install, works on Windows, Web, and in sandboxed environments.
+* Used in popular projects like [Express.js (body_parser)](https://github.com/expressjs/body-parser), 
+  [Grunt](http://gruntjs.com/), [Nodemailer](http://www.nodemailer.com/), [Yeoman](http://yeoman.io/) and others.
+* Faster than [node-iconv](https://github.com/bnoordhuis/node-iconv) (see below for performance comparison).
+* Intuitive encode/decode API, including Streaming support.
+* In-browser usage via [browserify](https://github.com/substack/node-browserify) or [webpack](https://webpack.js.org/) (~180kb gzip compressed with Buffer shim included).
+* Typescript [type definition file](https://github.com/ashtuchkin/iconv-lite/blob/master/lib/index.d.ts) included.
+* React Native is supported (need to install `stream` module to enable Streaming API).
 
 ## Usage
+
 ### Basic API
+
 ```javascript
 var iconv = require('iconv-lite');
 
@@ -32,8 +32,8 @@ iconv.encodingExists("us-ascii")
 ```
 
 ### Streaming API
-```javascript
 
+```javascript
 // Decode stream (from binary data stream to js strings)
 http.createServer(function(req, res) {
     var converterStream = iconv.decodeStream('win1251');
@@ -74,7 +74,6 @@ Most singlebyte encodings are generated automatically from [node-iconv](https://
 
 Multibyte encodings are generated from [Unicode.org mappings](http://www.unicode.org/Public/MAPPINGS/) and [WHATWG Encoding Standard mappings](http://encoding.spec.whatwg.org/). Thank you, respective authors!
 
-
 ## Encoding/decoding speed
 
 Comparison with node-iconv module (1000x256kb, on MacBook Pro, Core i5/2.6 GHz, Node v0.12.0). 
@@ -111,20 +110,29 @@ This library supports UTF-32LE, UTF-32BE and UTF-32 encodings. Like the UTF-16 e
 
 When decoding, be sure to supply a Buffer to decode() method, otherwise [bad things usually happen](https://github.com/ashtuchkin/iconv-lite/wiki/Use-Buffers-when-decoding).  
 Untranslatable characters are set to � or ?. No transliteration is currently supported.  
-Node versions 0.10.31 and 0.11.13 are buggy, don't use them (see #65, #77).  
+Node versions 0.10.31 and 0.11.13 are buggy, don't use them (see [#65](https://github.com/ashtuchkin/iconv-lite/issues/65), [#77](https://github.com/ashtuchkin/iconv-lite/issues/77)).  
 
 ## Testing
 
-```bash
-$ git clone git@github.com:ashtuchkin/iconv-lite.git
-$ cd iconv-lite
-$ npm install
-$ npm test
+```sh
+git clone git@github.com:ashtuchkin/iconv-lite.git
+cd iconv-lite
+npm install
+npm test
     
-$ # To view performance:
-$ node test/performance.js
+# To view performance:
+npm run test:performance
 
-$ # To view test coverage:
-$ npm run coverage
-$ open coverage/lcov-report/index.html
+# To view test coverage: 
+npm run test:cov
+open coverage/index.html
 ```
+
+[npm-downloads-image]: https://badgen.net/npm/dm/iconv-lite
+[npm-downloads-url]: https://npmcharts.com/compare/iconv-lite?minimal=true
+[npm-url]: https://npmjs.org/package/iconv-lite
+[npm-version-image]: https://badgen.net/npm/v/iconv-lite
+[npm-install-size-image]: https://badgen.net/packagephobia/install/iconv-lite
+[npm-install-size-url]: https://packagephobia.com/result?p=iconv-lite
+[license-image]: https://img.shields.io/npm/l/iconv-lite.svg
+[license-url]: https://github.com/ashtuchkin/iconv-lite/blob/HEAD/LICENSE

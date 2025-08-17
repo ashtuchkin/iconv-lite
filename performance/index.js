@@ -1,67 +1,41 @@
-var iconv = require('iconv');
-var iconv_lite = require("../lib");
+const iconv = require("iconv")
+const iconvLite = require("../lib")
+const { Suite } = require("bench-node")
 
-var encoding = process.argv[2] || "windows-1251";
-var convertTimes = 10000;
+const suite = new Suite({
+  pretty: true,
+  reporterOptions: {
+    printHeader: true // Set to false to hide system info header
+  }
+})
 
-var encodingStrings = {
-    'windows-1251': 'This is a test string 32 chars..',
-    'gbk':          '这是中文字符测试。。！@￥%12',
-    'utf8': '这是中文字符测试。。！@￥%12This is a test string 48 chars..',
-};
-// Test encoding.
-var str = encodingStrings[encoding];
-if (!str) {
-    throw new Error('Don\'t support ' + encoding + ' performance test.');
-}
-for (var i = 0; i < 13; i++) {
-    str = str + str;
+const encodingStrings = {
+  "windows-1251": "This is a test string 32 chars..",
+  gbk: "这是中文字符测试。。！@￥%12",
+  utf8: "这是中文字符测试。。！@￥%12This is a test string 48 chars.."
 }
 
-console.log('\n' + encoding + ' charset performance test:');
-console.log("\nEncoding "+str.length+" chars "+convertTimes+" times:");
-
-var start = Date.now();
-var converter = new iconv.Iconv("utf8", encoding);
-for (var i = 0; i < convertTimes; i++) {
-    var b = converter.convert(str);
+for (const [encoding, string] of Object.entries(encodingStrings)) {
+  suite.add(`${encoding}/encode/iconv-lite`, function () {
+    iconvLite.encode(string, encoding)
+  })
+  suite.add(`${encoding}/encode/iconv`, function () {
+    const converter = new iconv.Iconv("utf8", encoding)
+    converter.convert(string)
+  })
+  suite.add(`${encoding}/decode/iconv-lite`, function (timer) {
+    const buffer = iconvLite.encode(string, encoding)
+    timer.start()
+    iconvLite.decode(buffer, encoding)
+    timer.end()
+  })
+  suite.add(`${encoding}/decode/iconv`, function (timer) {
+    const buffer = iconvLite.encode(string, encoding)
+    timer.start()
+    const converter = new iconv.Iconv(encoding, "utf8")
+    converter.convert(buffer).toString()
+    timer.end()
+  })
 }
 
-var duration = Date.now() - start;
-var mbs = convertTimes*b.length/duration/1024;
-
-console.log("iconv: "+duration+"ms, "+mbs.toFixed(2)+" Mb/s.");
-
-var start = Date.now();
-for (var i = 0; i < convertTimes; i++) {
-    var b = iconv_lite.encode(str, encoding);
-}
-var duration = Date.now() - start;
-var mbs = convertTimes*b.length/duration/1024;
-
-console.log("iconv-lite: "+duration+"ms, "+mbs.toFixed(2)+" Mb/s.");
-
-
-// Test decoding.
-var buf = iconv_lite.encode(str, encoding);
-console.log("\nDecoding "+buf.length+" bytes "+convertTimes+" times:");
-
-var start = Date.now();
-var converter = new iconv.Iconv(encoding, "utf8");
-for (var i = 0; i < convertTimes; i++) {
-    var s = converter.convert(buf).toString();
-}
-var duration = Date.now() - start;
-var mbs = convertTimes*buf.length/duration/1024;
-
-console.log("iconv: "+duration+"ms, "+mbs.toFixed(2)+" Mb/s.");
-
-var start = Date.now();
-for (var i = 0; i < convertTimes; i++) {
-    var s = iconv_lite.decode(buf, encoding);
-}
-var duration = Date.now() - start;
-var mbs = convertTimes*buf.length/duration/1024;
-
-console.log("iconv-lite: "+duration+"ms, "+mbs.toFixed(2)+" Mb/s.");
-
+suite.run()

@@ -18,6 +18,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --include=dev
+
+      - name: Run lint
+        run: npm run lint
+
   performance:
     name: Run performance test
     strategy:
@@ -93,19 +111,22 @@ jobs:
           - node-version: "5"
             npm-i: "mocha@5.2.0 nyc@11.9.0"
             # fixes https://github.com/npm/cli/issues/681
-            npm-version: "npm@3.10.10"
+            npm-version: npm@2.15.11
             npm-rm: 'iconv'
 
           - node-version: "6"
             npm-i: "mocha@6.2.2 nyc@14.1.1"
+            npm-version: npm@6.13.4
             npm-rm: 'iconv'
 
           - node-version: "7"
             npm-i: "mocha@6.2.2 nyc@14.1.1"
+            npm-version: npm@6.13.4
             npm-rm: 'iconv'
 
           - node-version: "8"
             npm-i: "mocha@7.2.0 nyc@14.1.1"
+            npm-version: npm@6.13.4
             npm-rm: 'iconv'
 
           - node-version: "9"
@@ -155,7 +176,7 @@ jobs:
         shell: bash
 
       - name: Remove npm module(s) ${{ matrix.npm-rm }}
-        run: npm rm --silent --save-dev ${{ matrix.npm-rm }}
+        run: npm rm --silent --save-dev ${{ matrix.npm-rm }} neostandard @stylistic/eslint-plugin-js @stylistic/eslint-plugin eslint
         if: matrix.npm-rm != ''
 
       - name: Install Node version specific dev deps
@@ -195,7 +216,7 @@ jobs:
         run: sudo apt-get -y install lcov
 
       - name: Collect coverage reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ./coverage
           pattern: coverage-node-*
@@ -226,7 +247,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      
+
+      - name: Remove npm module(s) iconv, eslint, neostandard, @stylistic/eslint-plugin-js, @stylistic/eslint-plugin
+        run: npm rm --silent --save-dev iconv neostandard @stylistic/eslint-plugin-js @stylistic/eslint-plugin eslint
+
       - name: Webpack test
         shell: bash
         run: |

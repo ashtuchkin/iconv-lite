@@ -22,10 +22,12 @@
         "node": ">=0.10.0"
     },
     "scripts": {
+        "lint": "eslint",
+        "lint:fix": "eslint --fix",
         "test": "mocha --reporter spec --check-leaks --grep .",
         "test:ci": "nyc --exclude test --reporter=lcovonly --reporter=text npm test",
         "test:cov": "nyc --exclude test --reporter=html --reporter=text npm test",
-        "test:performance": "node performance/index.js",
+        "test:performance": "node --allow-natives-syntax performance/index.js",
         "test:tap": "mocha --reporter tap --check-leaks --grep .",
         "test:webpack": "npm pack && mv iconv-lite-*.tgz test/webpack/iconv-lite.tgz && cd test/webpack && npm install && npm run test && rm iconv-lite.tgz",
         "typegen": "node generation/gen-typings.js"
@@ -34,16 +36,22 @@
         "stream": false
     },
     "devDependencies": {
+        "@stylistic/eslint-plugin": "^5.1.0",
+        "@stylistic/eslint-plugin-js": "^4.1.0",
         "async": "^3.2.0",
+        "bench-node": "^0.10.0",
+        "eslint": "^9.0.0",
         "errto": "^0.2.1",
         "iconv": "^2.3.5",
         "mocha": "^6.2.2",
+        "neostandard": "^0.12.0",    
         "nyc": "^14.1.1",
         "request": "^2.88.2",
         "semver": "^6.3.0",
         "unorm": "^1.6.0"
     },
     "dependencies": {
+        "object-assign": ">= 4.1.1 < 5.0.0",
         "safer-buffer": ">= 2.1.2 < 3.0.0"
     }
 }
