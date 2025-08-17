@@ -1,4 +1,3 @@
-var { describe, it } = require("mocha")
 var assert = require("assert").strict
 
 describe("iconv-lite", function () {

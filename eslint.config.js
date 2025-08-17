@@ -3,6 +3,7 @@ const neostandard = require("neostandard")
 
 module.exports = [
   ...neostandard({
+    env: ["mocha"],
     ignores: [
       "encodings/sbcs-data-generated.js", // This a generate file
       // We need work on this

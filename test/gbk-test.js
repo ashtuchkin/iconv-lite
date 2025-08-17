@@ -1,4 +1,3 @@
-var { describe, it } = require("mocha")
 var fs = require("fs")
 var assert = require("assert")
 var Buffer = require("safer-buffer").Buffer
