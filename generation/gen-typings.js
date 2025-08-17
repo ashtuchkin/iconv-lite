@@ -69,10 +69,10 @@ function generateTypingsFile() {
 
   const fileContent = `${generatedHeader}\n
 /** A union of all supported encoding strings in \`iconv-lite\`. */
-export type SupportedEncoding =\n${supportedEncodingType}\n  | (string & {});
+export type Encodings =\n${supportedEncodingType}\n  | (string & {})
 `;
 
-  const outputPath = path.join(__dirname, "..", "lib", "encodings.d.ts");
+  const outputPath = path.join(__dirname, "..", "types", "encodings.d.ts");
   fs.writeFileSync(outputPath, fileContent, "utf8");
 }
 

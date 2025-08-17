@@ -7,7 +7,7 @@
  */
 
 /** A union of all supported encoding strings in `iconv-lite`. */
-export type SupportedEncoding =
+export type Encodings =
   | "10000"
   | "10006"
   | "10007"
@@ -420,4 +420,4 @@ export type SupportedEncoding =
   | "xroman8"
   | "xsjis"
   | "xxbig5"
-  | (string & {});
+  | (string & {})

@@ -1,124 +1,131 @@
-/*---------------------------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------------------------
  * REQUIREMENT: This definition is dependent on the @types/node definition.
  *
  * Install with `npm install @types/node --save-dev`
  *
  * This file provides detailed typings for the public API of iconv-lite
- *--------------------------------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------------------------- */
 
-import type { SupportedEncoding } from "./encodings";
+import type { Encodings } from "../types/encodings"
 
 // --- Options ---
 
-export interface DecodeOptions {
-  /** Strip the byte order mark (BOM) from the input, when decoding. @default true */
-  stripBOM?: boolean;
-  /** Override the default endianness for `UTF-16` and `UTF-32` decodings. */
-  defaultEncoding?: "utf16be" | "utf32be";
-}
+declare namespace iconv {
+  export interface DecodeOptions {
+    /** Strip the byte order mark (BOM) from the input, when decoding. @default true */
+    stripBOM?: boolean;
+    /** Override the default endianness for `UTF-16` and `UTF-32` decodings. */
+    defaultEncoding?: "utf16be" | "utf32be";
+  }
 
-export interface EncodeOptions {
-  /** Add a byte order mark (BOM) to the output, when encoding. @default false */
-  addBOM?: boolean;
-  /** Override the default endianness for `UTF-32` encoding. */
-  defaultEncoding?: "utf32be";
-}
+  export interface EncodeOptions {
+    /** Add a byte order mark (BOM) to the output, when encoding. @default false */
+    addBOM?: boolean;
+    /** Override the default endianness for `UTF-32` encoding. */
+    defaultEncoding?: "utf32be";
+  }
 
-// --- Return values ---
+  // --- Return values ---
 
-export interface EncoderStream {
-  write(str: string): Buffer;
-  end(): Buffer | undefined;
-}
+  export interface EncoderStream {
+    write(str: string): Buffer;
+    end(): Buffer | undefined;
+  }
 
-export interface DecoderStream {
-  write(buf: Buffer): string;
-  end(): string | undefined;
-}
+  export interface DecoderStream {
+    write(buf: Buffer): string;
+    end(): string | undefined;
+  }
 
-export interface Codec {
-  encoder: new (options?: EncodeOptions, codec?: any) => EncoderStream;
-  decoder: new (options?: DecodeOptions, codec?: any) => DecoderStream;
-  [key: string]: any;
-}
+  export interface Codec {
+    encoder: new (options?: EncodeOptions, codec?: any) => EncoderStream;
+    decoder: new (options?: DecodeOptions, codec?: any) => DecoderStream;
+    [key: string]: any;
+  }
 
-declare const iconv: {
-  // --- Basic API ---
+  const iconv: {
+    // --- Basic API ---
 
-  /** Encodes a `string` into a `Buffer`, using the provided `encoding`. */
-  encode(content: string, encoding: SupportedEncoding, options?: EncodeOptions): Buffer;
+    /** Encodes a `string` into a `Buffer`, using the provided `encoding`. */
+    encode(content: string, encoding: Encodings, options?: EncodeOptions): Buffer;
 
-  /** Decodes a `Buffer` into a `string`, using the provided `encoding`. */
-  decode(buffer: Buffer | Uint8Array, encoding: SupportedEncoding, options?: DecodeOptions): string;
+    /** Decodes a `Buffer` into a `string`, using the provided `encoding`. */
+    decode(buffer: Buffer | Uint8Array, encoding: Encodings, options?: DecodeOptions): string;
 
-  /** Checks if a given encoding is supported by `iconv-lite`. */
-  encodingExists(encoding: string): encoding is SupportedEncoding;
+    /** Checks if a given encoding is supported by `iconv-lite`. */
+    encodingExists(encoding: string): encoding is Encodings;
 
-  // --- Legacy aliases ---
+    // --- Legacy aliases ---
 
-  /** Legacy alias for {@link iconv.encode}. */
-  toEncoding: typeof iconv.encode;
+    /** Legacy alias for {@link iconv.encode}. */
+    toEncoding: typeof iconv.encode;
 
-  /** Legacy alias for {@link iconv.decode}. */
-  fromEncoding: typeof iconv.decode;
+    /** Legacy alias for {@link iconv.decode}. */
+    fromEncoding: typeof iconv.decode;
 
-  // --- Stream API ---
+    // --- Stream API ---
 
-  /** Creates a stream that decodes binary data from a given `encoding` into strings. */
-  decodeStream(encoding: SupportedEncoding, options?: DecodeOptions): NodeJS.ReadWriteStream;
+    /** Creates a stream that decodes binary data from a given `encoding` into strings. */
+    decodeStream(encoding: Encodings, options?: DecodeOptions): NodeJS.ReadWriteStream;
 
-  /** Creates a stream that encodes strings into binary data in a given `encoding`. */
-  encodeStream(encoding: SupportedEncoding, options?: EncodeOptions): NodeJS.ReadWriteStream;
+    /** Creates a stream that encodes strings into binary data in a given `encoding`. */
+    encodeStream(encoding: Encodings, options?: EncodeOptions): NodeJS.ReadWriteStream;
 
-  /**
-   * Explicitly enable Streaming API in browser environments by passing in:
-   * ```js
-   * require('stream')
-   * ```
-   * @example iconv.enableStreamingAPI(require('stream'));
-   */
-  enableStreamingAPI(stream_module: any): void;
+    /**
+     * Explicitly enable Streaming API in browser environments by passing in:
+     * ```js
+     * require('stream')
+     * ```
+     * @example iconv.enableStreamingAPI(require('stream'));
+     */
+    enableStreamingAPI(stream_module: any): void;
 
-  // --- Low-level stream APIs ---
+    // --- Low-level stream APIs ---
 
-  /** Creates and returns a low-level encoder stream. */
-  getEncoder(encoding: SupportedEncoding, options?: EncodeOptions): EncoderStream;
+    /** Creates and returns a low-level encoder stream. */
+    getEncoder(encoding: Encodings, options?: EncodeOptions): EncoderStream;
 
-  /** Creates and returns a low-level decoder stream. */
-  getDecoder(encoding: SupportedEncoding, options?: DecodeOptions): DecoderStream;
+    /** Creates and returns a low-level decoder stream. */
+    getDecoder(encoding: Encodings, options?: DecodeOptions): DecoderStream;
 
-  /**
-   * Returns a codec object for the given `encoding`.
-   * @throws If the `encoding` is not recognized.
-   */
-  getCodec(encoding: SupportedEncoding): Codec;
+    /**
+     * Returns a codec object for the given `encoding`.
+     * @throws If the `encoding` is not recognized.
+     */
+    getCodec(encoding: Encodings): Codec;
 
-  /** Strips all non-alphanumeric characters and appended year from `encoding`. */
-  _canonicalizeEncoding(encoding: SupportedEncoding): string;
+    /** Strips all non-alphanumeric characters and appended year from `encoding`. */
+    _canonicalizeEncoding(encoding: Encodings): string;
 
-  // --- Properties ---
+    // --- Properties ---
 
-  /** A cache of all loaded encoding definitions. */
-  encodings: Record<
-    SupportedEncoding,
-    | string
-    | {
+    /** A cache of all loaded encoding definitions. */
+    encodings: Record<
+      Encodings,
+      | string
+      | {
         type: string;
         [key: string]: any;
       }
-  > | null;
+    > | null;
 
-  /** A cache of initialized codec objects. */
-  _codecDataCache: Record<string, Codec>;
+    /** A cache of initialized codec objects. */
+    _codecDataCache: Record<string, Codec>;
 
-  /** The character used for untranslatable `Unicode` characters. @default "�" */
-  defaultCharUnicode: string;
+    /** The character used for untranslatable `Unicode` characters. @default "�" */
+    defaultCharUnicode: string;
 
-  /** The character used for untranslatable `single-byte` characters. @default "?" */
-  defaultCharSingleByte: string;
+    /** The character used for untranslatable `single-byte` characters. @default "?" */
+    defaultCharSingleByte: string;
 
-  /** @readonly Whether or not, Streaming API is enabled. */
-  readonly supportsStreams: boolean;
-};
+    /** @readonly Whether or not, Streaming API is enabled. */
+    readonly supportsStreams: boolean;
+  }
 
-export default iconv;
+  export type {
+    iconv,
+    Encodings
+  }
+  export { iconv as default }
+}
+export = iconv
