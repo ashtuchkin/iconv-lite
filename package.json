@@ -40,6 +40,7 @@
         "@arethetypeswrong/cli": "^0.17.4",
         "@stylistic/eslint-plugin": "^5.1.0",
         "@stylistic/eslint-plugin-js": "^4.1.0",
+        "@types/node": "^24.0.12",
         "async": "^3.2.0",
         "bench-node": "^0.10.0",
         "eslint": "^9.0.0",
