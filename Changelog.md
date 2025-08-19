@@ -1,5 +1,11 @@
 ## 0.7.0
 
+### ⚠️ Breaking changes
+
+* Remove support for Node.js <6 and safe-buffer dependency - by [@bjohansebas](https://github.com/bjohansebas) in [#335](https://github.com/ashtuchkin/iconv-lite/pull/335)
+
+  Support for Node versions <6 is removed to eliminate the safe-buffer dependency, now using Node.js's native Buffer since it no longer relies on an unsafe version of Node.js's native Buffer.
+
 ### 🐞 Bug fixes
 
 * Handle split surrogate pairs when encoding utf8 - by [@yosion-p](https://github.com/yosion-p) and [@ashtuchkin](https://github.com/ashtuchkin) in [#282](https://github.com/ashtuchkin/iconv-lite/pull/282):
