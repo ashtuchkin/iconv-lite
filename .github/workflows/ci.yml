@@ -37,9 +37,6 @@ jobs:
         run: npm run lint
 
   performance:
-    needs:
-      - lint
-      - coverage
     name: Run performance test
     strategy:
       fail-fast: false
@@ -67,8 +64,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         node-version:
+          - "0.10"
+          - "0.12"
+          - "4"
+          - "5"
           - "6"
           - "7"
           - "8"
@@ -91,6 +92,28 @@ jobs:
         # Use supported versions of our testing tools under older versions of Node
         # Install npm in some specific cases where we need to
         include:
+          - node-version: "0.10"
+            npm-i: "mocha@3.5.3 nyc@10.3.2 supertest@2.0.0"
+            # Npm isn't being installed on windows w/ setup-node for
+            # 0.10 and 0.12, which will end up choking when npm uses es6
+            npm-version: "npm@2.15.1"
+            npm-rm: 'iconv'
+
+          - node-version: "0.12"
+            npm-i: "mocha@3.5.3 nyc@10.3.2"
+            npm-version: "npm@2.15.11"
+            npm-rm: 'iconv'
+
+          - node-version: "4"
+            npm-i: "mocha@5.2.0 nyc@11.9.0"
+            npm-rm: 'iconv'
+
+          - node-version: "5"
+            npm-i: "mocha@5.2.0 nyc@11.9.0"
+            # fixes https://github.com/npm/cli/issues/681
+            npm-version: npm@2.15.11
+            npm-rm: 'iconv'
+
           - node-version: "6"
             npm-i: "mocha@6.2.2 nyc@14.1.1"
             npm-version: npm@6.13.4

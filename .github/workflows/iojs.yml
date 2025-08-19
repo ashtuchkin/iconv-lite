@@ -1,0 +1,70 @@
+name: iojs-ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: "${{ github.workflow }} iojs ✨ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["1.8", "2.5", "3.3"]
+        include:
+          - node-version: "1.8"
+            npm-i: "mocha@3.5.3 nyc@10.3.2"
+            npm-rm: 'iconv'
+          - node-version: "2.5"
+            npm-i: "mocha@3.5.3 nyc@10.3.2"
+            npm-rm: 'iconv'
+          - node-version: "3.3"
+            npm-i: "mocha@3.5.3 nyc@10.3.2"
+            npm-rm: 'iconv'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install iojs ${{ matrix.node-version }}
+      shell: bash -eo pipefail -l {0}
+      run: |
+        nvm install --default ${{ matrix.node-version }}
+        dirname "$(nvm which ${{ matrix.node-version }})" >> "$GITHUB_PATH"
+
+    - name: Configure npm
+      run: |
+        npm config set loglevel error
+        npm config set shrinkwrap false
+
+    - name: Remove npm module(s) ${{ matrix.npm-rm }}
+      run: npm rm --silent --save-dev ${{ matrix.npm-rm }} neostandard @stylistic/eslint-plugin-js @stylistic/eslint-plugin eslint
+      if: matrix.npm-rm != ''
+
+    - name: Install npm module(s) ${{ matrix.npm-i }}
+      run: npm install --save-dev ${{ matrix.npm-i }}
+      if: matrix.npm-i != ''
+
+    - name: Install Node.js dependencies
+      run: npm install
+
+    - name: List environment
+      id: list_env
+      shell: bash
+      run: |
+        echo "node@$(node -v)"
+        echo "npm@$(npm -v)"
+        npm -s ls ||:
+        (npm -s ls --depth=0 ||:) | awk -F'[ @]' 'NR>1 && $2 { print $2 "=" $3 }' >> "$GITHUB_OUTPUT"
+
+    - name: Run tests
+      shell: bash
+      run: npm run test
+ 
