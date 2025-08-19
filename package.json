@@ -12,8 +12,12 @@
     "author": "Alexander Shtuchkin <ashtuchkin@gmail.com>",
     "main": "./lib/index.js",
     "typings": "./lib/index.d.ts",
-    "homepage": "https://github.com/ashtuchkin/iconv-lite",
-    "bugs": "https://github.com/ashtuchkin/iconv-lite/issues",
+    "homepage": "https://github.com/pillarjs/iconv-lite",
+    "bugs": "https://github.com/pillarjs/iconv-lite/issues",
+    "funding": {
+      "type": "opencollective",
+      "url": "https://opencollective.com/express"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/pillarjs/iconv-lite.git"
