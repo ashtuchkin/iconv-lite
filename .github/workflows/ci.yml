@@ -37,6 +37,9 @@ jobs:
         run: npm run lint
 
   performance:
+    needs:
+      - lint
+      - coverage
     name: Run performance test
     strategy:
       fail-fast: false
@@ -64,7 +67,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         node-version:
           - "6"
           - "7"
