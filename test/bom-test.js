@@ -71,13 +71,13 @@ describe("BOM Handling", function () {
     var stripBOM = function () { bomStripped = true }
 
     var body = Buffer.concat([utf8BOM, Buffer.from(sampleStr)])
-    assert.equal(iconv.decode(body, "utf8", { stripBOM: stripBOM }), sampleStr)
+    assert.equal(iconv.decode(body, "utf8", { stripBOM }), sampleStr)
     assert(bomStripped)
 
     bomStripped = false
 
     body = Buffer.from(sampleStr)
-    assert.equal(iconv.decode(body, "utf8", { stripBOM: stripBOM }), sampleStr)
+    assert.equal(iconv.decode(body, "utf8", { stripBOM }), sampleStr)
     assert(!bomStripped)
   })
 })
