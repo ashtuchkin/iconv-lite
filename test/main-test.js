@@ -17,6 +17,10 @@ describe("Encoding Existence - Prototype Properties", function () {
   it("should detect encodings", function () {
     assert.equal(iconv.encodingExists("utf8"), true)
   })
+
+  it("should detect all available encodings", function () {
+    assert.strictEqual(Object.keys(iconv.encodings).length, 416)
+  })
 })
 
 describe("Encoding Existence - Codec Data Cache", function () {
