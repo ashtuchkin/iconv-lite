@@ -66,8 +66,6 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         node-version:
-          - "4"
-          - "5"
           - "6"
           - "7"
           - "8"
@@ -90,16 +88,6 @@ jobs:
         # Use supported versions of our testing tools under older versions of Node
         # Install npm in some specific cases where we need to
         include:
-          - node-version: "4"
-            npm-i: "mocha@5.2.0 nyc@11.9.0"
-            npm-rm: 'iconv'
-
-          - node-version: "5"
-            npm-i: "mocha@5.2.0 nyc@11.9.0"
-            # fixes https://github.com/npm/cli/issues/681
-            npm-version: npm@2.15.11
-            npm-rm: 'iconv'
-
           - node-version: "6"
             npm-i: "mocha@6.2.2 nyc@14.1.1"
             npm-version: npm@6.13.4
