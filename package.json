@@ -29,7 +29,9 @@
         "test:cov": "nyc --exclude test --reporter=html --reporter=text npm test",
         "test:performance": "node --allow-natives-syntax performance/index.js",
         "test:tap": "mocha --reporter tap --check-leaks --grep .",
-        "test:webpack": "npm pack && mv iconv-lite-*.tgz test/webpack/iconv-lite.tgz && cd test/webpack && npm install && npm run test && rm iconv-lite.tgz"
+        "webpack:4": "npm pack && mv iconv-lite-*.tgz test/webpack-4/iconv-lite.tgz && cd test/webpack-4 && npm install && npm run test && rm iconv-lite.tgz",
+        "webpack:5": "npm pack && mv iconv-lite-*.tgz test/webpack-5/iconv-lite.tgz && cd test/webpack-5 && npm install && npm run test && rm iconv-lite.tgz",
+        "test:webpack": "npm run webpack:4 && npm run webpack:5"
     },
     "browser": {
         "stream": false
