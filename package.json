@@ -16,7 +16,7 @@
     "bugs": "https://github.com/ashtuchkin/iconv-lite/issues",
     "repository": {
         "type": "git",
-        "url": "https://github.com/ashtuchkin/iconv-lite.git"
+        "url": "https://github.com/pillarjs/iconv-lite.git"
     },
     "engines": {
         "node": ">=0.10.0"
