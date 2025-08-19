@@ -1,5 +1,5 @@
 var assert = require("assert")
-var Buffer = require("safer-buffer").Buffer
+var Buffer = require("buffer").Buffer
 var join = require("path").join
 var iconv = require(join(__dirname, "/../"))
 
@@ -560,7 +560,7 @@ describe("Full DBCS encoding tests", function () {
               { return }
             }
 
-            errors.push({ input: inp.toString("hex"), strExpected: strExpected, strActual: strActual })
+            errors.push({ input: inp.toString("hex"), strExpected, strActual })
           })
 
           if (errors.length > 0) {
@@ -606,7 +606,7 @@ describe("Full DBCS encoding tests", function () {
 
             if (iconvChgs[str] == str1) { continue } // Skip iconv changes.
 
-            errors.push({ input: strToHex(str), inputChar: str, strExpected: strExpected, strActual: strActual })
+            errors.push({ input: strToHex(str), inputChar: str, strExpected, strActual })
           }
 
           if (errors.length > 0) {
