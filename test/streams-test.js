@@ -1,7 +1,7 @@
 var mocha = require("mocha")
 var describeMocha = mocha.describe
 var assert = require("assert")
-var Buffer = require("buffer").Buffer
+var Buffer = require("safer-buffer").Buffer
 var semver = require("semver")
 var join = require("path").join
 var iconv = require(join(__dirname, "/../"))
@@ -327,7 +327,7 @@ describe("Encoding using internal modules with surrogates in separate chunks:", 
   function checkUtf8EncodeStream (input) {
     return checkEncodeStream({
       encoding: "utf8",
-      input,
+      input: input,
       output: Buffer.from(input.join(""), "utf8").toString("hex")
     })
   }

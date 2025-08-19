@@ -5,7 +5,7 @@
 
 var iconv = require('iconv'),
     crypto = require('crypto');
-var Buffer = require("buffer").Buffer;
+var Buffer = require("safer-buffer").Buffer;
 
 
 var skipEncodings = {};

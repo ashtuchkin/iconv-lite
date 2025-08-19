@@ -1,5 +1,5 @@
 var assert = require("assert")
-var Buffer = require("buffer").Buffer
+var Buffer = require("safer-buffer").Buffer
 var join = require("path").join
 var iconv = require(join(__dirname, "/../"))
 
@@ -71,13 +71,13 @@ describe("BOM Handling", function () {
     var stripBOM = function () { bomStripped = true }
 
     var body = Buffer.concat([utf8BOM, Buffer.from(sampleStr)])
-    assert.equal(iconv.decode(body, "utf8", { stripBOM }), sampleStr)
+    assert.equal(iconv.decode(body, "utf8", { stripBOM: stripBOM }), sampleStr)
     assert(bomStripped)
 
     bomStripped = false
 
     body = Buffer.from(sampleStr)
-    assert.equal(iconv.decode(body, "utf8", { stripBOM }), sampleStr)
+    assert.equal(iconv.decode(body, "utf8", { stripBOM: stripBOM }), sampleStr)
     assert(!bomStripped)
   })
 })

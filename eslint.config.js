@@ -12,6 +12,7 @@ module.exports = [
   }),
   {
     rules: {
+      "object-shorthand": ["off"], // Compatibility with older code
       "@stylistic/quotes": [2, "double"], // Prevent many change of code
       "new-cap": ["off"], // We need improve this
       "no-labels": ["off"], // Can remove the labels?
