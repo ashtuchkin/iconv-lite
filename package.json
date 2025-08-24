@@ -23,7 +23,7 @@
         "url": "https://github.com/pillarjs/iconv-lite.git"
     },
     "engines": {
-        "node": ">=4.5.0 <5.0.0 || >=5.10.0"
+        "node": ">=18"
     },
     "scripts": {
         "lint": "eslint",
@@ -31,7 +31,7 @@
         "test": "mocha --reporter spec --check-leaks --grep .",
         "test:ci": "nyc --exclude test --reporter=lcovonly --reporter=text npm test",
         "test:cov": "nyc --exclude test --reporter=html --reporter=text npm test",
-        "test:node-web": "ICONV_BACKEND=web mocha --grep '#node-web'",
+        "test:node-web": "mocha --grep '#node-web'",
         "test:performance": "node --allow-natives-syntax performance/index.js",
         "test:tap": "mocha --reporter tap --check-leaks --grep .",
         "test:webpack": "npm pack && mv iconv-lite-*.tgz test/webpack/iconv-lite.tgz && cd test/webpack && npm install && npm run test && rm iconv-lite.tgz"

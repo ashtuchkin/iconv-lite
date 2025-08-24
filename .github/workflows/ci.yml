@@ -67,81 +67,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node-version:
-          - "4"
-          - "5"
-          - "6"
-          - "7"
-          - "8"
-          - "9"
-          - "10"
-          - "11"
-          - "12"
-          - "13"
-          - "14"
-          - "15"
-          - "16"
-          - "17"
-          - "18"
-          - "19"
-          - "20"
-          - "21"
-          - "22"
-          - "23"
-          - "24"
-        # Use supported versions of our testing tools under older versions of Node
-        # Install npm in some specific cases where we need to
-        include:
-          - node-version: "4.5"
-            npm-i: "mocha@5.2.0 nyc@11.9.0"
-            npm-rm: 'iconv'
-
-          - node-version: "5.10"
-            npm-i: "mocha@5.2.0 nyc@11.9.0"
-            # fixes https://github.com/npm/cli/issues/681
-            npm-version: npm@2.15.11
-            npm-rm: 'iconv'
-
-          - node-version: "6"
-            npm-i: "mocha@6.2.2 nyc@14.1.1"
-            npm-version: npm@6.13.4
-            npm-rm: 'iconv'
-
-          - node-version: "7"
-            npm-i: "mocha@6.2.2 nyc@14.1.1"
-            npm-version: npm@6.13.4
-            npm-rm: 'iconv'
-
-          - node-version: "8"
-            npm-i: "mocha@7.2.0 nyc@14.1.1"
-            npm-version: npm@6.13.4
-            npm-rm: 'iconv'
-
-          - node-version: "9"
-            npm-i: "mocha@7.2.0 nyc@14.1.1"
-            npm-rm: 'iconv'
-
-          - node-version: "10"
-            npm-i: "mocha@8.4.0"
-            npm-rm: 'iconv'
-
-          - node-version: "11"
-            npm-i: "mocha@8.4.0"
-            npm-rm: 'iconv'
-
-          - node-version: "12"
-            npm-i: "mocha@9.2.2"
-            npm-rm: 'iconv'
-
-          - node-version: "13"
-            npm-i: "mocha@9.2.2"
-            npm-rm: 'iconv'
-
-          - node-version: "14"
-            npm-rm: 'iconv'
-
-          - node-version: "15"
-            npm-rm: 'iconv'
+        node-version: ["18.0.0", "18", "19", "20", "21", "22", "23", "24"]
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -162,14 +88,6 @@ jobs:
         run: |
           npm config set loglevel error
         shell: bash
-
-      - name: Remove npm module(s) ${{ matrix.npm-rm }}
-        run: npm rm --silent --save-dev ${{ matrix.npm-rm }} neostandard @stylistic/eslint-plugin-js @stylistic/eslint-plugin eslint
-        if: matrix.npm-rm != ''
-
-      - name: Install Node version specific dev deps
-        if: ${{ matrix.npm-i != '' }}
-        run: npm install --save-dev ${{ matrix.npm-i }}
 
       - name: Install dependencies
         run: npm install
@@ -227,7 +145,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ["12", "*"]
+        node-version: ["18", "*"]
 
     runs-on: ubuntu-latest
     steps:
@@ -240,8 +158,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Remove npm module(s) iconv, eslint, neostandard, @stylistic/eslint-plugin-js, @stylistic/eslint-plugin
-        run: npm rm --silent --save-dev iconv neostandard @stylistic/eslint-plugin-js @stylistic/eslint-plugin eslint
+      - name: Install dependencies
+        run: npm install
 
       - name: Webpack test
         shell: bash
